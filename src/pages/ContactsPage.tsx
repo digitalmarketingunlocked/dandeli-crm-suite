@@ -670,11 +670,10 @@ export default function ContactsPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <Label className="text-xs text-muted-foreground uppercase tracking-wider">Check-in</Label>
-                        <Input
-                          type="date"
+                        <DateInput
                           value={editForm.check_in_date as string || ""}
-                          onChange={(e) => setEditForm({ ...editForm, check_in_date: e.target.value })}
-                          className="w-[150px] h-8 text-xs rounded-lg"
+                          onChange={(v) => setEditForm({ ...editForm, check_in_date: v })}
+                          className="w-[160px] h-8 text-xs rounded-lg"
                         />
                       </div>
                       <div className="flex items-center justify-between">
