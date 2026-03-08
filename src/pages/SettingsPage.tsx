@@ -1,12 +1,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Palette, Bell, User, Tag, Settings as SettingsIcon } from "lucide-react";
+import { Palette, Bell, User, Tag, Settings as SettingsIcon, Users, CreditCard } from "lucide-react";
 import AppearanceSettings from "@/components/settings/AppearanceSettings";
 import NotificationSettings from "@/components/settings/NotificationSettings";
 import AccountSettings from "@/components/settings/AccountSettings";
 import LeadStatusSettings from "@/components/settings/LeadStatusSettings";
 import CRMSettings from "@/components/settings/CRMSettings";
-import TeamInviteSection from "@/components/settings/TeamInviteSection";
+import TeamManagementSettings from "@/components/settings/TeamManagementSettings";
+import SubscriptionSettings from "@/components/settings/SubscriptionSettings";
 
 export default function SettingsPage() {
   return (
@@ -19,14 +20,17 @@ export default function SettingsPage() {
       <Tabs defaultValue="appearance" className="w-full">
         <ScrollArea className="w-full whitespace-nowrap">
           <TabsList className="w-max justify-start gap-1 bg-transparent p-0 border-b border-border/50 rounded-none h-auto pb-0">
-            <TabsTrigger value="notifications" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
-              <Bell className="w-4 h-4" /> Notifications
-            </TabsTrigger>
             <TabsTrigger value="appearance" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
               <Palette className="w-4 h-4" /> Appearance
             </TabsTrigger>
+            <TabsTrigger value="notifications" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
+              <Bell className="w-4 h-4" /> Notifications
+            </TabsTrigger>
             <TabsTrigger value="account" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
               <User className="w-4 h-4" /> Account
+            </TabsTrigger>
+            <TabsTrigger value="team" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
+              <Users className="w-4 h-4" /> Team
             </TabsTrigger>
             <TabsTrigger value="lead-statuses" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
               <Tag className="w-4 h-4" /> Lead Statuses
@@ -34,28 +38,34 @@ export default function SettingsPage() {
             <TabsTrigger value="crm" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
               <SettingsIcon className="w-4 h-4" /> CRM Config
             </TabsTrigger>
+            <TabsTrigger value="subscription" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
+              <CreditCard className="w-4 h-4" /> Subscription
+            </TabsTrigger>
           </TabsList>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
 
         <div className="pt-6">
-          <TabsContent value="notifications">
-            <NotificationSettings />
-          </TabsContent>
           <TabsContent value="appearance">
             <AppearanceSettings />
           </TabsContent>
+          <TabsContent value="notifications">
+            <NotificationSettings />
+          </TabsContent>
           <TabsContent value="account">
             <AccountSettings />
-            <div className="mt-6">
-              <TeamInviteSection />
-            </div>
+          </TabsContent>
+          <TabsContent value="team">
+            <TeamManagementSettings />
           </TabsContent>
           <TabsContent value="lead-statuses">
             <LeadStatusSettings />
           </TabsContent>
           <TabsContent value="crm">
             <CRMSettings />
+          </TabsContent>
+          <TabsContent value="subscription">
+            <SubscriptionSettings />
           </TabsContent>
         </div>
       </Tabs>
