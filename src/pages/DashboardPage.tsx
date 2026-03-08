@@ -86,19 +86,57 @@ export default function DashboardPage() {
 
 
 
-  const totalContacts = contacts?.length ?? 0;
-  const hotLeads = contacts?.filter((c) => {
-    const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
-    return days <= 3;
-  }).length ?? 0;
-  const bookedLeads = contacts?.filter((c) => c.type === "booked").length ?? 0;
-  const conversionRate = totalContacts > 0 ? Math.round((bookedLeads / totalContacts) * 100) : 0;
-  const pendingFollowups = contacts?.filter((c) => ["follow-up", "lead", "interested", "negotiation"].includes(c.type)).length ?? 0;
+  const filteredContacts = useMemo(() => {
+    if (!contacts) return [];
+    const now = new Date();
+    return contacts.filter((c) => {
+      const created = new Date(c.created_at);
+      switch (period) {
+        case "today": {
+          const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          return created >= start;
+        }
+        case "this-week": {
+          const day = now.getDay();
+          const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (day === 0 ? 6 : day - 1));
+          return created >= start;
+        }
+        case "this-month": {
+          const start = new Date(now.getFullYear(), now.getMonth(), 1);
+          return created >= start;
+        }
+        case "this-year": {
+          const start = new Date(now.getFullYear(), 0, 1);
+          return created >= start;
+        }
+        case "custom": {
+          if (customFrom && created < new Date(customFrom)) return false;
+          if (customTo) {
+            const end = new Date(customTo);
+            end.setHours(23, 59, 59, 999);
+            if (created > end) return false;
+          }
+          return true;
+        }
+        default:
+          return true;
+      }
+    });
+  }, [contacts, period, customFrom, customTo]);
 
-  const recentHotLeads = contacts?.filter((c) => {
+  const totalContacts = filteredContacts.length;
+  const hotLeads = filteredContacts.filter((c) => {
     const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
     return days <= 3;
-  }).slice(0, 5) ?? [];
+  }).length;
+  const bookedLeads = filteredContacts.filter((c) => c.type === "booked").length;
+  const conversionRate = totalContacts > 0 ? Math.round((bookedLeads / totalContacts) * 100) : 0;
+  const pendingFollowups = filteredContacts.filter((c) => ["follow-up", "lead", "interested", "negotiation"].includes(c.type)).length;
+
+  const recentHotLeads = filteredContacts.filter((c) => {
+    const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
+    return days <= 3;
+  }).slice(0, 5);
 
   // Lead funnel data
   const LEAD_STAGES = [
