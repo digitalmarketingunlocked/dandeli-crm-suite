@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Users, LogOut, Menu, X, Sparkles, Moon, Sun, Clock, Settings, Snowflake, CalendarCheck } from "lucide-react";
 import { useState } from "react";
+import { useFollowUpNotifications } from "@/hooks/useFollowUpNotifications";
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -18,6 +19,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { signOut, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const notificationsEnabled = localStorage.getItem("followup_notifications") !== "false";
+  useFollowUpNotifications(notificationsEnabled);
 
   return (
     <div className="min-h-screen flex">

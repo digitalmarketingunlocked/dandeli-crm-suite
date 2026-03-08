@@ -53,7 +53,17 @@ export default function SettingsPage() {
   const [fullName, setFullName] = useState("");
   const [resortName, setResortName] = useState("");
   const [resortLocation, setResortLocation] = useState("");
-  const [pushNotifications, setPushNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(() => {
+    return localStorage.getItem("followup_notifications") !== "false";
+  });
+
+  const handleNotificationToggle = async (checked: boolean) => {
+    setPushNotifications(checked);
+    localStorage.setItem("followup_notifications", checked ? "true" : "false");
+    if (checked && "Notification" in window && Notification.permission === "default") {
+      await Notification.requestPermission();
+    }
+  };
 
   // Sync state when data loads
   useState(() => {
@@ -121,7 +131,7 @@ export default function SettingsPage() {
               <p className="text-sm font-medium">Follow-up Reminders</p>
               <p className="text-xs text-muted-foreground">Receive push notifications & alarms for scheduled follow-ups only.</p>
             </div>
-            <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
+            <Switch checked={pushNotifications} onCheckedChange={handleNotificationToggle} />
           </div>
         </div>
 
