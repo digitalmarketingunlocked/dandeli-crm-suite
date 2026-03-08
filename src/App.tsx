@@ -15,6 +15,7 @@ import ColdFollowUpPage from "@/pages/ColdFollowUpPage";
 import BookingsPage from "@/pages/BookingsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
+import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
