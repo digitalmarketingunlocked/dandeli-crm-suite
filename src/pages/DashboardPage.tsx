@@ -90,40 +90,38 @@ export default function DashboardPage() {
   });
 
   const totalContacts = contacts?.length ?? 0;
-  const totalDeals = deals?.length ?? 0;
-  const activeDeals = deals?.filter((d) => !["completed", "lost"].includes(d.stage)).length ?? 0;
-  const bookedDeals = deals?.filter((d) => d.stage === "booked" || d.stage === "completed").length ?? 0;
-  const conversionRate = totalDeals > 0 ? Math.round((bookedDeals / totalDeals) * 100) : 0;
-  const pendingFollowups = deals?.filter((d) => d.stage === "inquiry" || d.stage === "proposal").length ?? 0;
+  const hotLeads = contacts?.filter((c) => {
+    const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
+    return days <= 3;
+  }).length ?? 0;
+  const bookedLeads = contacts?.filter((c) => c.type === "booked").length ?? 0;
+  const conversionRate = totalContacts > 0 ? Math.round((bookedLeads / totalContacts) * 100) : 0;
+  const pendingFollowups = contacts?.filter((c) => c.type === "follow-up").length ?? 0;
 
-  const recentContacts = contacts?.slice(0, 5) ?? [];
+  const recentHotLeads = contacts?.filter((c) => {
+    const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
+    return days <= 3;
+  }).slice(0, 5) ?? [];
 
-  // Deal funnel data
-  const stageCounts = deals
-    ? ["inquiry", "proposal", "negotiation", "booked", "completed", "lost"].map((stage) => ({
-        stage,
-        label: STAGE_LABELS[stage],
-        count: deals.filter((d) => d.stage === stage).length,
-      }))
-    : [];
-  const maxCount = Math.max(...stageCounts.map((s) => s.count), 1);
-
-  // Chart data
-  const packageData = deals
-    ? Object.entries(
-        deals.reduce((acc, d) => {
-          const pkg = d.package_type || "unspecified";
-          acc[pkg] = (acc[pkg] || 0) + (d.value ?? 0);
-          return acc;
-        }, {} as Record<string, number>)
-      ).map(([name, value]) => ({ name, value }))
-    : [];
+  // Lead funnel data
+  const LEAD_STAGES = [
+    { key: "lead", label: "New Leads", color: "hsl(210, 70%, 52%)" },
+    { key: "interested", label: "Interested", color: "hsl(162, 60%, 38%)" },
+    { key: "negotiation", label: "Need Discount", color: "hsl(38, 92%, 50%)" },
+    { key: "booked", label: "Booked", color: "hsl(162, 60%, 28%)" },
+    { key: "lost", label: "Lost", color: "hsl(0, 72%, 51%)" },
+  ];
+  const leadStageCounts = LEAD_STAGES.map((s) => ({
+    ...s,
+    count: contacts?.filter((c) => c.type === s.key).length ?? 0,
+  }));
+  const maxLeadCount = Math.max(...leadStageCounts.map((s) => s.count), 1);
 
   const stats = [
-    { label: "TOTAL CONTACTS", value: totalContacts, icon: Users, color: "text-secondary" },
-    { label: "ACTIVE DEALS", value: activeDeals, icon: TrendingUp, color: "text-accent" },
-    { label: "CONVERSION RATE", value: `${conversionRate}%`, icon: Target, color: "text-primary" },
-    { label: "PENDING FOLLOW-UPS", value: pendingFollowups, icon: Clock, color: "text-info" },
+    { label: "TOTAL LEADS", value: totalContacts, icon: Users, color: "text-secondary", link: "/contacts" },
+    { label: "HOT LEADS", value: hotLeads, icon: Flame, color: "text-accent", link: "/contacts" },
+    { label: "CONVERSION RATE", value: `${conversionRate}%`, icon: Target, color: "text-primary", link: "/contacts" },
+    { label: "PENDING FOLLOW-UPS", value: pendingFollowups, icon: Clock, color: "text-info", link: "/follow-ups" },
   ];
 
   const getTimeAgo = (date: string) => {
