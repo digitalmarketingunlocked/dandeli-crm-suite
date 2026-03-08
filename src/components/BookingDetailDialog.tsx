@@ -61,6 +61,8 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
       setPropertyName(booking.property_name || "");
       setRoomType(booking.room_type || "");
       setPricing(booking.pricing?.toString() || "");
+      setPricingTotal(booking.pricing_total?.toString() || "");
+      setTransport(booking.transport || "");
       setActivities(booking.activities || "");
       setNotes(booking.notes || "");
     }
