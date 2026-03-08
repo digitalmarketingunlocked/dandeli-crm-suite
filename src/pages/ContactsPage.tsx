@@ -112,6 +112,8 @@ export default function ContactsPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Contact>>({});
   const [newNote, setNewNote] = useState("");
+  const [newCallNote, setNewCallNote] = useState("");
+  const [callSortBy, setCallSortBy] = useState<"date" | "duration">("date");
 
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["contacts", tenantId],
