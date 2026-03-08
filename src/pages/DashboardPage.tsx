@@ -351,21 +351,22 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{contact.name}</p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                       {contact.phone && <span>{contact.phone}</span>}
-                      <span>{(contact.adults_count || 0) + (contact.kids_count || 0)} People</span>
-                      <span className="flex items-center gap-1">⏱ {getTimeAgo(contact.created_at)}</span>
+                      <span className="flex items-center gap-1"><Users className="w-3 h-3" />{(contact.adults_count || 0) + (contact.kids_count || 0)} People</span>
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{getTimeAgo(contact.created_at)}</span>
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <span className={`text-xs font-medium px-2 py-1 rounded-lg ${
-                      contact.type === "interested" ? "bg-primary/15 text-primary" :
+                  <div className="text-right shrink-0 flex flex-col items-end gap-1">
+                    <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-lg ${
+                      contact.type === "booked" ? "bg-primary/15 text-primary" :
+                      contact.type === "interested" ? "bg-accent/15 text-accent" :
                       contact.type === "follow-up" ? "bg-accent/15 text-accent" :
                       "bg-secondary/15 text-secondary"
                     }`}>
-                      {contact.type === "lead" ? "New Lead" : contact.type.charAt(0).toUpperCase() + contact.type.slice(1).replace("-", " ")}
+                      {contact.type === "lead" ? "New Lead" : contact.type === "booked" ? "Booked" : contact.type.charAt(0).toUpperCase() + contact.type.slice(1).replace("-", " ")}
                     </span>
-                    <p className="text-[10px] text-muted-foreground mt-1">Last: {new Date(contact.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-[10px] text-muted-foreground">Last: {new Date(contact.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
                   </div>
                 </div>
               ))
