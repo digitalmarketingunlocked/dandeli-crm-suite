@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import PlanGate from "@/components/PlanGate";
 import AppLayout from "@/components/AppLayout";
 import AuthPage from "@/pages/AuthPage";
