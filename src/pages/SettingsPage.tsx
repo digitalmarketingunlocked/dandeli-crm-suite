@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLeadStatuses, STAGE_COLOR_MAP, COLOR_OPTIONS } from "@/hooks/useLeadStatuses";
 import { Moon, Sun, User, Building2, Bell, Settings as SettingsIcon, MapPin, Plus, Trash2, Pencil, Tag } from "lucide-react";
+import ChangePasswordDialog from "@/components/settings/ChangePasswordDialog";
+import TeamInviteSection from "@/components/settings/TeamInviteSection";
 
 export default function SettingsPage() {
   const { user, tenantId } = useAuth();
