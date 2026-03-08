@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -70,37 +69,37 @@ export default function ContactsPage() {
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2"><Plus className="w-4 h-4" /> Add Contact</Button>
+            <Button className="gap-2 rounded-xl shadow-lg"><Plus className="w-4 h-4" /> Add Contact</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="glass-strong bg-card rounded-2xl">
             <DialogHeader>
               <DialogTitle className="font-heading">New Contact</DialogTitle>
             </DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); createContact.mutate(); }} className="space-y-4">
               <div className="space-y-2">
                 <Label>Name *</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="rounded-xl" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Email</Label>
-                  <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                  <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="rounded-xl" />
                 </div>
                 <div className="space-y-2">
                   <Label>Phone</Label>
-                  <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                  <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="rounded-xl" />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Company</Label>
-                <Input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} />
+                <Input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} className="rounded-xl" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Type</Label>
                   <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent className="glass-strong bg-card rounded-xl">
                       <SelectItem value="lead">Lead</SelectItem>
                       <SelectItem value="customer">Customer</SelectItem>
                       <SelectItem value="partner">Partner</SelectItem>
@@ -110,8 +109,8 @@ export default function ContactsPage() {
                 <div className="space-y-2">
                   <Label>Source</Label>
                   <Select value={form.source} onValueChange={(v) => setForm({ ...form, source: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent className="glass-strong bg-card rounded-xl">
                       <SelectItem value="website">Website</SelectItem>
                       <SelectItem value="referral">Referral</SelectItem>
                       <SelectItem value="social">Social Media</SelectItem>
@@ -123,7 +122,7 @@ export default function ContactsPage() {
                   </Select>
                 </div>
               </div>
-              <Button type="submit" className="w-full" disabled={createContact.isPending}>
+              <Button type="submit" className="w-full rounded-xl" disabled={createContact.isPending}>
                 {createContact.isPending ? "Creating..." : "Create Contact"}
               </Button>
             </form>
@@ -138,49 +137,47 @@ export default function ContactsPage() {
           placeholder="Search contacts..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
+          className="pl-10 rounded-xl"
         />
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead className="hidden sm:table-cell">Contact</TableHead>
-                <TableHead className="hidden md:table-cell">Company</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead className="hidden lg:table-cell">Source</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-              ) : filtered && filtered.length > 0 ? (
-                filtered.map((contact) => (
-                  <TableRow key={contact.id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">{contact.name}</TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                        {contact.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{contact.email}</span>}
-                        {contact.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{contact.phone}</span>}
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell text-muted-foreground">{contact.company || "—"}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={TYPE_STYLES[contact.type] || ""}>{contact.type}</Badge>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell text-muted-foreground capitalize">{contact.source || "—"}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No contacts yet. Add your first contact!</TableCell></TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <div className="glass-card bg-card overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b border-border">
+              <TableHead>Name</TableHead>
+              <TableHead className="hidden sm:table-cell">Contact</TableHead>
+              <TableHead className="hidden md:table-cell">Company</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead className="hidden lg:table-cell">Source</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+            ) : filtered && filtered.length > 0 ? (
+              filtered.map((contact) => (
+                <TableRow key={contact.id} className="hover:bg-muted/30 transition-colors">
+                  <TableCell className="font-medium">{contact.name}</TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                      {contact.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{contact.email}</span>}
+                      {contact.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{contact.phone}</span>}
+                    </div>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell text-muted-foreground">{contact.company || "—"}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={`${TYPE_STYLES[contact.type] || ""} rounded-lg`}>{contact.type}</Badge>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell text-muted-foreground capitalize">{contact.source || "—"}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No contacts yet. Add your first contact!</TableCell></TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
