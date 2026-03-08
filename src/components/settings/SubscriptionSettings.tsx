@@ -12,17 +12,26 @@ const PLANS = [
     current: true,
   },
   {
-    name: "Pro",
+    name: "Startup",
+    subtitle: "For solo founders",
     price: "₹999",
     period: "/month",
     features: ["Unlimited leads", "5 team members", "Advanced analytics", "Priority support", "Custom lead statuses", "Export data"],
     recommended: true,
   },
   {
+    name: "Business",
+    subtitle: "For growing business with sales team",
+    price: "₹1,999",
+    period: "/month",
+    features: ["Everything in Startup", "15 team members", "API access", "Priority support", "Custom integrations", "Advanced reporting"],
+  },
+  {
     name: "Enterprise",
+    subtitle: "For large organizations",
     price: "₹2,999",
     period: "/month",
-    features: ["Everything in Pro", "Unlimited team members", "API access", "Dedicated support", "Custom integrations", "White-label options"],
+    features: ["Everything in Business", "Unlimited team members", "Dedicated support", "White-label options", "SLA guarantee", "Custom onboarding"],
   },
 ];
 
@@ -84,7 +93,7 @@ export default function SubscriptionSettings() {
         <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
           <Crown className="w-4 h-4" /> Available Plans
         </h4>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {PLANS.map((plan) => (
             <div
               key={plan.name}
@@ -99,6 +108,9 @@ export default function SubscriptionSettings() {
               )}
               <div>
                 <h5 className="font-semibold">{plan.name}</h5>
+                {plan.subtitle && (
+                  <p className="text-xs text-muted-foreground mt-0.5">{plan.subtitle}</p>
+                )}
                 <div className="flex items-baseline gap-1 mt-1">
                   <span className="text-2xl font-bold">{plan.price}</span>
                   <span className="text-xs text-muted-foreground">{plan.period}</span>
