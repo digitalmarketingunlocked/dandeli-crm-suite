@@ -110,6 +110,57 @@ export default function ContactsPage() {
   const [newCallNote, setNewCallNote] = useState("");
   const [callSortBy, setCallSortBy] = useState<"date" | "duration">("date");
 
+  // Export dialog
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportFromDate, setExportFromDate] = useState<Date | undefined>();
+  const [exportToDate, setExportToDate] = useState<Date | undefined>();
+
+  const applyExportPreset = (preset: string) => {
+    const now = new Date();
+    switch (preset) {
+      case "today":
+        setExportFromDate(startOfDay(now));
+        setExportToDate(endOfDay(now));
+        break;
+      case "this-week":
+        setExportFromDate(startOfWeek(now, { weekStartsOn: 1 }));
+        setExportToDate(endOfWeek(now, { weekStartsOn: 1 }));
+        break;
+      case "this-month":
+        setExportFromDate(startOfMonth(now));
+        setExportToDate(endOfMonth(now));
+        break;
+      case "all":
+        setExportFromDate(undefined);
+        setExportToDate(undefined);
+        break;
+    }
+  };
+
+  const handleExport = () => {
+    if (!contacts || contacts.length === 0) {
+      toast({ title: "No data to export", variant: "destructive" });
+      return;
+    }
+    let toExport = contacts;
+    if (exportFromDate || exportToDate) {
+      toExport = contacts.filter((c) => {
+        const d = new Date(c.created_at);
+        if (exportFromDate && d < startOfDay(exportFromDate)) return false;
+        if (exportToDate && d > endOfDay(exportToDate)) return false;
+        return true;
+      });
+    }
+    if (toExport.length === 0) {
+      toast({ title: "No leads in selected date range", variant: "destructive" });
+      return;
+    }
+    const statusMap = leadStatuses.map(s => ({ value: s.value, label: s.label, color: s.color }));
+    exportContactsToXls(toExport, statusMap);
+    toast({ title: `Exported ${toExport.length} leads!` });
+    setExportDialogOpen(false);
+  };
+
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["contacts", tenantId],
     queryFn: async () => {
