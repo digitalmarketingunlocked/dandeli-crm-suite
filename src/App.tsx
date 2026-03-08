@@ -12,6 +12,7 @@ import ContactsPage from "@/pages/ContactsPage";
 
 import FollowUpsPage from "@/pages/FollowUpsPage";
 import ColdFollowUpPage from "@/pages/ColdFollowUpPage";
+import BookingsPage from "@/pages/BookingsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
