@@ -10,25 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Users, Target, Clock, Plus, CalendarDays, Phone, ChevronRight, User, MapPin, Share2, Flame } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
-const STAGE_COLORS: Record<string, string> = {
-  inquiry: "hsl(210, 70%, 52%)",
-  proposal: "hsl(38, 92%, 50%)",
-  negotiation: "hsl(28, 88%, 58%)",
-  booked: "hsl(162, 60%, 38%)",
-  completed: "hsl(162, 60%, 28%)",
-  lost: "hsl(0, 72%, 51%)",
-};
 
-const STAGE_LABELS: Record<string, string> = {
-  inquiry: "Inquiry",
-  proposal: "Proposal",
-  negotiation: "Negotiation",
-  booked: "Booked",
-  completed: "Completed",
-  lost: "Lost",
-};
 
 export default function DashboardPage() {
   const { tenantId, user } = useAuth();
