@@ -1,7 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/components/ThemeProvider";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Users, Target, LogOut, Menu, X, Sparkles } from "lucide-react";
+import { LayoutDashboard, Users, Target, LogOut, Menu, X, Sparkles, Moon, Sun } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
@@ -12,6 +13,7 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { signOut, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -49,7 +51,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </NavLink>
             ))}
           </nav>
-          <div className="p-4 border-t border-sidebar-border">
+          <div className="p-4 border-t border-sidebar-border space-y-1">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-xl"
+              onClick={toggleTheme}
+            >
+              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            </Button>
             <Button
               variant="ghost"
               className="w-full justify-start gap-3 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-xl"
