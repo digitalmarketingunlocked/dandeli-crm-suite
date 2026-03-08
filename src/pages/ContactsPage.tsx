@@ -5,17 +5,62 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Mail, Phone } from "lucide-react";
+import {
+  Plus, Search, Phone, CalendarDays, Users, MapPin, Clock, Share2, User,
+  Filter, FileSpreadsheet, MessageCircle, Flame, Snowflake, ChevronRight, StickyNote
+} from "lucide-react";
 
-const TYPE_STYLES: Record<string, string> = {
-  lead: "bg-secondary/20 text-secondary border-secondary/30",
-  customer: "bg-primary/20 text-primary border-primary/30",
-  partner: "bg-accent/20 text-accent border-accent/30",
+type Contact = {
+  id: string;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  check_in_date: string | null;
+  check_out_date: string | null;
+  adults_count: number | null;
+  kids_count: number | null;
+  guests_count: number | null;
+  city: string | null;
+  lead_time: string | null;
+  source: string | null;
+  type: string;
+  notes: string | null;
+  company: string | null;
+  tenant_id: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+const STAGE_OPTIONS = [
+  { value: "lead", label: "NEW LEAD" },
+  { value: "interested", label: "INTERESTED" },
+  { value: "follow-up", label: "FOLLOW UP" },
+  { value: "negotiation", label: "NEGOTIATION" },
+  { value: "booked", label: "BOOKED" },
+  { value: "lost", label: "LOST" },
+];
+
+const STAGE_STYLES: Record<string, string> = {
+  lead: "bg-secondary/15 text-secondary border-secondary/30",
+  interested: "bg-primary/15 text-primary border-primary/30",
+  "follow-up": "bg-accent/15 text-accent border-accent/30",
+  negotiation: "bg-warning/15 text-warning border-warning/30",
+  booked: "bg-primary/20 text-primary border-primary/40",
+  lost: "bg-destructive/15 text-destructive border-destructive/30",
+};
+
+const SOURCE_LABELS: Record<string, string> = {
+  organic: "Organic",
+  "google-ads": "Google Ads",
+  "meta-ads": "Meta Ads",
+  "offline-marketing": "Offline Marketing",
+  referral: "Referral",
 };
 
 export default function ContactsPage() {
@@ -23,23 +68,46 @@ export default function ContactsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", company: "", type: "lead", source: "website" });
+  const [showFilters, setShowFilters] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+
+  // Add lead dialog
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [leadForm, setLeadForm] = useState({
+    name: "", phone: "", check_in_date: "", check_out_date: "",
+    adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic",
+  });
+
+  // Lead detail dialog
+  const [selectedLead, setSelectedLead] = useState<Contact | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [editForm, setEditForm] = useState<Partial<Contact>>({});
+  const [newNote, setNewNote] = useState("");
 
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["contacts", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase.from("contacts").select("*").order("created_at", { ascending: false });
       if (error) throw error;
-      return data;
+      return data as Contact[];
     },
     enabled: !!tenantId,
   });
 
-  const createContact = useMutation({
+  const createLead = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("contacts").insert({
-        ...form,
+        name: leadForm.name.trim(),
+        phone: leadForm.phone.trim(),
+        check_in_date: leadForm.check_in_date || null,
+        check_out_date: leadForm.check_out_date || null,
+        adults_count: parseInt(leadForm.adults_count) || 2,
+        kids_count: parseInt(leadForm.kids_count) || 0,
+        city: leadForm.city.trim() || null,
+        lead_time: leadForm.lead_time.trim() || null,
+        source: leadForm.source,
+        type: "lead",
         tenant_id: tenantId!,
         created_by: user!.id,
       });
@@ -47,137 +115,503 @@ export default function ContactsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
-      setDialogOpen(false);
-      setForm({ name: "", email: "", phone: "", company: "", type: "lead", source: "website" });
-      toast({ title: "Contact created!" });
+      setAddDialogOpen(false);
+      setLeadForm({ name: "", phone: "", check_in_date: "", check_out_date: "", adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic" });
+      toast({ title: "Lead added!" });
     },
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
-  const filtered = contacts?.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    (c.email?.toLowerCase().includes(search.toLowerCase())) ||
-    (c.company?.toLowerCase().includes(search.toLowerCase()))
-  );
+  const updateContact = useMutation({
+    mutationFn: async (updates: Partial<Contact> & { id: string }) => {
+      const { id, ...rest } = updates;
+      const { error } = await supabase.from("contacts").update(rest).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      toast({ title: "Lead updated!" });
+    },
+    onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
+  const addNote = () => {
+    if (!selectedLead || !newNote.trim()) return;
+    const existingNotes = selectedLead.notes || "";
+    const timestamp = new Date().toLocaleString();
+    const updatedNotes = existingNotes ? `${existingNotes}\n[${timestamp}] ${newNote.trim()}` : `[${timestamp}] ${newNote.trim()}`;
+    updateContact.mutate({ id: selectedLead.id, notes: updatedNotes });
+    setSelectedLead({ ...selectedLead, notes: updatedNotes });
+    setNewNote("");
+  };
+
+  const openDetail = (contact: Contact) => {
+    setSelectedLead(contact);
+    setEditForm({
+      type: contact.type,
+      check_in_date: contact.check_in_date || "",
+      check_out_date: contact.check_out_date || "",
+      adults_count: contact.adults_count,
+      kids_count: contact.kids_count,
+      city: contact.city || "",
+      lead_time: contact.lead_time || "",
+      source: contact.source || "",
+    });
+    setDetailOpen(true);
+  };
+
+  const saveDetail = () => {
+    if (!selectedLead) return;
+    updateContact.mutate({
+      id: selectedLead.id,
+      type: editForm.type,
+      check_in_date: editForm.check_in_date || null,
+      check_out_date: editForm.check_out_date || null,
+      adults_count: editForm.adults_count,
+      kids_count: editForm.kids_count,
+      city: editForm.city || null,
+      lead_time: editForm.lead_time || null,
+      source: editForm.source || null,
+    });
+    setDetailOpen(false);
+  };
+
+  const getLeadAge = (createdAt: string) => {
+    const diff = Date.now() - new Date(createdAt).getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    return days;
+  };
+
+  const isHot = (contact: Contact) => getLeadAge(contact.created_at) <= 3;
+
+  const filtered = contacts?.filter((c) => {
+    const matchesSearch =
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      (c.phone?.includes(search));
+    const matchesSource = sourceFilter === "all" || c.source === sourceFilter;
+    const matchesType = typeFilter === "all" || c.type === typeFilter;
+    return matchesSearch && matchesSource && matchesType;
+  });
+
+  const totalPeople = (c: Contact) => (c.adults_count || 0) + (c.kids_count || 0);
+
+  const noteLines = selectedLead?.notes?.split("\n").filter(Boolean) || [];
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold">Contacts</h1>
-          <p className="text-muted-foreground mt-1">Manage your leads and customers</p>
+          <h1 className="text-3xl font-heading font-bold">Leads Management</h1>
+          <p className="text-muted-foreground mt-1">Track and manage your resort inquiries</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl shadow-lg"><Plus className="w-4 h-4" /> Add Contact</Button>
-          </DialogTrigger>
-          <DialogContent className="glass-strong bg-card rounded-2xl">
-            <DialogHeader>
-              <DialogTitle className="font-heading">New Contact</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); createContact.mutate(); }} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Name *</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="rounded-xl" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="rounded-xl" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Phone</Label>
-                  <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="rounded-xl" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Company</Label>
-                <Input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} className="rounded-xl" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Type</Label>
-                  <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
-                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
-                    <SelectContent className="glass-strong bg-card rounded-xl">
-                      <SelectItem value="lead">Lead</SelectItem>
-                      <SelectItem value="customer">Customer</SelectItem>
-                      <SelectItem value="partner">Partner</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Source</Label>
-                  <Select value={form.source} onValueChange={(v) => setForm({ ...form, source: v })}>
-                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
-                    <SelectContent className="glass-strong bg-card rounded-xl">
-                      <SelectItem value="website">Website</SelectItem>
-                      <SelectItem value="referral">Referral</SelectItem>
-                      <SelectItem value="social">Social Media</SelectItem>
-                      <SelectItem value="walk-in">Walk-in</SelectItem>
-                      <SelectItem value="phone">Phone</SelectItem>
-                      <SelectItem value="email">Email</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <Button type="submit" className="w-full rounded-xl" disabled={createContact.isPending}>
-                {createContact.isPending ? "Creating..." : "Create Contact"}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-3">
+          <Button variant="outline" className="gap-2 rounded-xl">
+            <FileSpreadsheet className="w-4 h-4" /> Export XLS
+          </Button>
+          <Button className="gap-2 rounded-xl shadow-lg" onClick={() => setAddDialogOpen(true)}>
+            <Plus className="w-4 h-4" /> Add Lead
+          </Button>
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Search contacts..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 rounded-xl"
-        />
+      {/* Search & Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search leads by name or phone..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 rounded-xl"
+          />
+        </div>
+        <Button
+          variant="outline"
+          className="gap-2 rounded-xl"
+          onClick={() => setShowFilters(!showFilters)}
+        >
+          <Filter className="w-4 h-4" /> Show Filters
+        </Button>
       </div>
 
-      <div className="glass-card bg-card overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b border-border">
-              <TableHead>Name</TableHead>
-              <TableHead className="hidden sm:table-cell">Contact</TableHead>
-              <TableHead className="hidden md:table-cell">Company</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead className="hidden lg:table-cell">Source</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-            ) : filtered && filtered.length > 0 ? (
-              filtered.map((contact) => (
-                <TableRow key={contact.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-medium">{contact.name}</TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                      {contact.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{contact.email}</span>}
-                      {contact.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{contact.phone}</span>}
+      {showFilters && (
+        <div className="flex gap-3 flex-wrap">
+          <Select value={sourceFilter} onValueChange={setSourceFilter}>
+            <SelectTrigger className="w-[160px] rounded-xl"><SelectValue placeholder="Source" /></SelectTrigger>
+            <SelectContent className="glass-strong bg-card rounded-xl">
+              <SelectItem value="all">All Sources</SelectItem>
+              <SelectItem value="organic">Organic</SelectItem>
+              <SelectItem value="google-ads">Google Ads</SelectItem>
+              <SelectItem value="meta-ads">Meta Ads</SelectItem>
+              <SelectItem value="offline-marketing">Offline Marketing</SelectItem>
+              <SelectItem value="referral">Referral</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-[160px] rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
+            <SelectContent className="glass-strong bg-card rounded-xl">
+              <SelectItem value="all">All Status</SelectItem>
+              {STAGE_OPTIONS.map((s) => (
+                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Lead Cards Grid */}
+      {isLoading ? (
+        <div className="glass-card bg-card p-12 text-center text-muted-foreground">Loading leads...</div>
+      ) : filtered && filtered.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filtered.map((contact) => {
+            const days = getLeadAge(contact.created_at);
+            const hot = isHot(contact);
+            return (
+              <div
+                key={contact.id}
+                className="glass-card bg-card p-5 cursor-pointer hover:shadow-lg transition-all"
+                onClick={() => openDetail(contact)}
+              >
+                {/* Top row: avatar + name + badge */}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
+                      {contact.name.charAt(0).toUpperCase()}
                     </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-muted-foreground">{contact.company || "—"}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={`${TYPE_STYLES[contact.type] || ""} rounded-lg`}>{contact.type}</Badge>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell text-muted-foreground capitalize">{contact.source || "—"}</TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No contacts yet. Add your first contact!</TableCell></TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                    <div>
+                      <p className="font-semibold">{contact.name}</p>
+                      <p className="text-sm text-muted-foreground">{contact.phone || "No phone"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="flex items-center gap-1 text-muted-foreground">
+                      <Clock className="w-3 h-3" /> {days}D
+                    </span>
+                    <span className="text-muted-foreground">•</span>
+                    {hot ? (
+                      <span className="flex items-center gap-1 text-accent font-semibold">
+                        <Flame className="w-3 h-3" /> HOT
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-secondary font-semibold">
+                        <Snowflake className="w-3 h-3" /> COLD
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Details */}
+                <div className="space-y-1.5 text-sm text-muted-foreground mb-4">
+                  {contact.check_in_date && (
+                    <div className="flex items-center gap-2">
+                      <CalendarDays className="w-3.5 h-3.5" />
+                      <span>Check-in: {contact.check_in_date}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Users className="w-3.5 h-3.5" />
+                    <span>{totalPeople(contact)} People</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-muted-foreground/40" />
+                    <span>Follow-up: Not Set</span>
+                  </div>
+                </div>
+
+                {/* Bottom: stage + actions */}
+                <div className="flex items-center justify-between">
+                  <Badge
+                    variant="outline"
+                    className={`${STAGE_STYLES[contact.type] || STAGE_STYLES.lead} rounded-md text-[10px] font-bold tracking-wider uppercase`}
+                  >
+                    {STAGE_OPTIONS.find((s) => s.value === contact.type)?.label || "NEW LEAD"}
+                  </Badge>
+                  <div className="flex gap-2">
+                    {contact.phone && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-primary hover:bg-primary/10 rounded-lg"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(`tel:${contact.phone}`);
+                          }}
+                        >
+                          <Phone className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-primary hover:bg-primary/10 rounded-lg"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(`https://wa.me/${contact.phone?.replace(/\D/g, "")}`);
+                          }}
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="glass-card bg-card p-12 text-center">
+          <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <h3 className="font-heading font-semibold text-lg">No leads yet</h3>
+          <p className="text-muted-foreground mt-1 text-sm">Add your first lead to get started!</p>
+        </div>
+      )}
+
+      {/* Add Lead Dialog */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent className="glass-strong bg-card rounded-2xl sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-heading text-xl">Add New Lead</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => { e.preventDefault(); createLead.mutate(); }} className="space-y-5">
+            <div className="space-y-3">
+              <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Guest Information</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input placeholder="Guest Name *" value={leadForm.name} onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })} required className="pl-10 rounded-xl" />
+              </div>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input placeholder="Phone Number *" value={leadForm.phone} onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })} required className="pl-10 rounded-xl" />
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Stay Details</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Check-in *</Label>
+                  <Input type="date" value={leadForm.check_in_date} onChange={(e) => setLeadForm({ ...leadForm, check_in_date: e.target.value })} required className="rounded-xl" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Check-out</Label>
+                  <Input type="date" value={leadForm.check_out_date} onChange={(e) => setLeadForm({ ...leadForm, check_out_date: e.target.value })} className="rounded-xl" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Adults</Label>
+                  <Input type="number" value={leadForm.adults_count} onChange={(e) => setLeadForm({ ...leadForm, adults_count: e.target.value })} min={1} className="rounded-xl" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Kids</Label>
+                  <Input type="number" value={leadForm.kids_count} onChange={(e) => setLeadForm({ ...leadForm, kids_count: e.target.value })} min={0} className="rounded-xl" />
+                </div>
+              </div>
+              <Input placeholder="City" value={leadForm.city} onChange={(e) => setLeadForm({ ...leadForm, city: e.target.value })} className="rounded-xl" />
+            </div>
+            <div className="space-y-3">
+              <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Additional</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <Input placeholder="Lead Time" value={leadForm.lead_time} onChange={(e) => setLeadForm({ ...leadForm, lead_time: e.target.value })} className="rounded-xl" />
+                <Select value={leadForm.source} onValueChange={(v) => setLeadForm({ ...leadForm, source: v })}>
+                  <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectContent className="glass-strong bg-card rounded-xl">
+                    <SelectItem value="organic">Organic</SelectItem>
+                    <SelectItem value="google-ads">Google Ads</SelectItem>
+                    <SelectItem value="meta-ads">Meta Ads</SelectItem>
+                    <SelectItem value="offline-marketing">Offline Marketing</SelectItem>
+                    <SelectItem value="referral">Referral</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end pt-2">
+              <Button type="button" variant="outline" className="rounded-xl" onClick={() => setAddDialogOpen(false)}>Cancel</Button>
+              <Button type="submit" className="rounded-xl" disabled={createLead.isPending}>
+                {createLead.isPending ? "Adding..." : "Add Lead"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lead Detail Dialog */}
+      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+        <DialogContent className="glass-strong bg-card rounded-2xl sm:max-w-3xl max-h-[85vh] overflow-y-auto">
+          {selectedLead && (
+            <>
+              {/* Header */}
+              <div className="flex items-center gap-4 mb-2">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg shrink-0">
+                  {selectedLead.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h2 className="text-xl font-heading font-bold">{selectedLead.name}</h2>
+                  <div className="flex items-center gap-2 text-sm">
+                    {isHot(selectedLead) ? (
+                      <span className="flex items-center gap-1 text-accent font-semibold text-xs">
+                        <Flame className="w-3 h-3" /> HOT LEAD
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-secondary font-semibold text-xs">
+                        <Snowflake className="w-3 h-3" /> COLD
+                      </span>
+                    )}
+                    <span className="text-muted-foreground">{selectedLead.phone}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-5">
+                  {/* Quick Actions */}
+                  <div className="glass-card bg-card/50 p-4">
+                    <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-3">Quick Actions</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        variant="outline"
+                        className="flex-col h-auto py-4 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                        onClick={() => window.open(`tel:${selectedLead.phone}`)}
+                      >
+                        <Phone className="w-5 h-5" />
+                        <span className="text-xs">Call</span>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-col h-auto py-4 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                        onClick={() => window.open(`https://wa.me/${selectedLead.phone?.replace(/\D/g, "")}`)}
+                      >
+                        <MessageCircle className="w-5 h-5" />
+                        <span className="text-xs">WhatsApp</span>
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Lead Details */}
+                  <div className="glass-card bg-card/50 p-4 space-y-3">
+                    <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Lead Details</h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">Status</Label>
+                        <Select value={editForm.type || "lead"} onValueChange={(v) => setEditForm({ ...editForm, type: v })}>
+                          <SelectTrigger className="w-[150px] h-8 text-xs rounded-lg"><SelectValue /></SelectTrigger>
+                          <SelectContent className="glass-strong bg-card rounded-xl">
+                            {STAGE_OPTIONS.map((s) => (
+                              <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">Check-in</Label>
+                        <Input
+                          type="date"
+                          value={editForm.check_in_date as string || ""}
+                          onChange={(e) => setEditForm({ ...editForm, check_in_date: e.target.value })}
+                          className="w-[150px] h-8 text-xs rounded-lg"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">Check-out</Label>
+                        <Input
+                          type="date"
+                          value={editForm.check_out_date as string || ""}
+                          onChange={(e) => setEditForm({ ...editForm, check_out_date: e.target.value })}
+                          className="w-[150px] h-8 text-xs rounded-lg"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">People</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            value={editForm.adults_count ?? 2}
+                            onChange={(e) => setEditForm({ ...editForm, adults_count: parseInt(e.target.value) || 0 })}
+                            className="w-[65px] h-8 text-xs rounded-lg"
+                            placeholder="Adults"
+                          />
+                          <Input
+                            type="number"
+                            value={editForm.kids_count ?? 0}
+                            onChange={(e) => setEditForm({ ...editForm, kids_count: parseInt(e.target.value) || 0 })}
+                            className="w-[65px] h-8 text-xs rounded-lg"
+                            placeholder="Kids"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">City</Label>
+                        <Input
+                          value={editForm.city as string || ""}
+                          onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                          className="w-[150px] h-8 text-xs rounded-lg"
+                          placeholder="City"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">Lead Time</Label>
+                        <Input
+                          value={editForm.lead_time as string || ""}
+                          onChange={(e) => setEditForm({ ...editForm, lead_time: e.target.value })}
+                          className="w-[150px] h-8 text-xs rounded-lg"
+                          placeholder="e.g. 10:30 AM"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">Source</Label>
+                        <Select value={editForm.source as string || "organic"} onValueChange={(v) => setEditForm({ ...editForm, source: v })}>
+                          <SelectTrigger className="w-[150px] h-8 text-xs rounded-lg"><SelectValue /></SelectTrigger>
+                          <SelectContent className="glass-strong bg-card rounded-xl">
+                            <SelectItem value="organic">Organic</SelectItem>
+                            <SelectItem value="google-ads">Google Ads</SelectItem>
+                            <SelectItem value="meta-ads">Meta Ads</SelectItem>
+                            <SelectItem value="offline-marketing">Offline Marketing</SelectItem>
+                            <SelectItem value="referral">Referral</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <Button className="w-full rounded-xl mt-2" size="sm" onClick={saveDetail}>
+                      Save Changes
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Right Column: Notes */}
+                <div className="glass-card bg-card/50 p-4 space-y-3">
+                  <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
+                    <StickyNote className="w-3.5 h-3.5" /> Lead Notes
+                  </h4>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add a note..."
+                      value={newNote}
+                      onChange={(e) => setNewNote(e.target.value)}
+                      className="rounded-xl text-sm"
+                      onKeyDown={(e) => e.key === "Enter" && addNote()}
+                    />
+                    <Button size="sm" className="rounded-xl shrink-0" onClick={addNote}>Add</Button>
+                  </div>
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                    {noteLines.length > 0 ? (
+                      noteLines.map((note, i) => (
+                        <div key={i} className="text-sm p-2 rounded-lg bg-muted/30">
+                          {note}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-8">No notes added yet.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
