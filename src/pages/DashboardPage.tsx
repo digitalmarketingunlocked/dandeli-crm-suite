@@ -131,12 +131,12 @@ export default function DashboardPage() {
       </div>
 
       {/* CTA Banner */}
-      <div className="glass-card bg-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-primary">
-        <div>
-          <h2 className="text-xl font-heading font-bold text-foreground">Got a new inquiry?</h2>
-          <p className="text-muted-foreground mt-1">Add them to your CRM instantly to start tracking and never miss a follow-up.</p>
+      <div className="glass-card bg-card p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-l-4 border-primary">
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-xl font-heading font-bold text-foreground">Got a new inquiry?</h2>
+          <p className="text-muted-foreground mt-1 text-sm">Add them to your CRM instantly to start tracking.</p>
         </div>
-        <Button className="gap-2 rounded-xl shadow-lg whitespace-nowrap" onClick={() => setLeadDialogOpen(true)}>
+        <Button className="gap-2 rounded-xl shadow-lg whitespace-nowrap shrink-0" onClick={() => setLeadDialogOpen(true)}>
           <Plus className="w-4 h-4" />
           Quick Add Lead
         </Button>
