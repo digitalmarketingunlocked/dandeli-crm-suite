@@ -15,6 +15,7 @@ import ColdFollowUpPage from "@/pages/ColdFollowUpPage";
 import BookingsPage from "@/pages/BookingsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
+import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/auth" element={<AuthRoute />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/admin" element={<AdminDashboardPage />} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
               <Route path="/leads" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
               <Route path="/contacts" element={<Navigate to="/leads" replace />} />
