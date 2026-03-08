@@ -5,12 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, CheckCircle2, Phone, Mail } from "lucide-react";
+import { Clock, CheckCircle2, Phone, MessageCircle } from "lucide-react";
 
-const STAGE_BADGE: Record<string, string> = {
-  inquiry: "bg-secondary/15 text-secondary border-secondary/30",
-  proposal: "bg-warning/15 text-warning border-warning/30",
-  negotiation: "bg-accent/15 text-accent border-accent/30",
+const TYPE_BADGE: Record<string, string> = {
+  lead: "bg-secondary/15 text-secondary border-secondary/30",
+  interested: "bg-primary/15 text-primary border-primary/30",
+  "follow-up": "bg-accent/15 text-accent border-accent/30",
+  negotiation: "bg-warning/15 text-warning border-warning/30",
 };
 
 export default function FollowUpsPage() {
@@ -18,13 +19,13 @@ export default function FollowUpsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: deals, isLoading } = useQuery({
-    queryKey: ["followup-deals", tenantId],
+  const { data: contacts, isLoading } = useQuery({
+    queryKey: ["followup-contacts", tenantId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("deals")
-        .select("*, contacts(name, phone, email)")
-        .in("stage", ["inquiry", "proposal", "negotiation"])
+        .from("contacts")
+        .select("*")
+        .in("type", ["follow-up", "lead", "interested", "negotiation"])
         .order("updated_at", { ascending: true });
       if (error) throw error;
       return data;
@@ -32,14 +33,15 @@ export default function FollowUpsPage() {
     enabled: !!tenantId,
   });
 
-  const updateStage = useMutation({
-    mutationFn: async ({ id, stage }: { id: string; stage: string }) => {
-      const { error } = await supabase.from("deals").update({ stage }).eq("id", id);
+  const updateType = useMutation({
+    mutationFn: async ({ id, type }: { id: string; type: string }) => {
+      const { error } = await supabase.from("contacts").update({ type }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["followup-deals"] });
-      toast({ title: "Deal updated!" });
+      queryClient.invalidateQueries({ queryKey: ["followup-contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      toast({ title: "Lead updated!" });
     },
   });
 
@@ -55,42 +57,53 @@ export default function FollowUpsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-heading font-bold">Follow-ups</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Deals that need your attention</p>
+        <p className="text-muted-foreground mt-1 text-sm">Leads that need your attention</p>
       </div>
 
       <div className="space-y-3">
         {isLoading ? (
           <div className="glass-card bg-card p-8 text-center text-muted-foreground">Loading...</div>
-        ) : deals && deals.length > 0 ? (
-          deals.map((deal) => (
-            <div key={deal.id} className="glass-card bg-card p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+        ) : contacts && contacts.length > 0 ? (
+          contacts.map((contact) => (
+            <div key={contact.id} className="glass-card bg-card p-5 flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
-                  <Clock className="w-5 h-5 text-accent" />
+                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center shrink-0 text-accent font-semibold text-sm">
+                  {contact.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-medium truncate">{deal.title}</p>
+                  <p className="font-medium truncate">{contact.name}</p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                    {deal.contacts?.name && <span>{deal.contacts.name}</span>}
-                    {deal.contacts?.phone && (
-                      <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{deal.contacts.phone}</span>
+                    {contact.phone && (
+                      <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{contact.phone}</span>
                     )}
+                    {contact.check_in_date && <span>Check-in: {contact.check_in_date}</span>}
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                <Badge variant="outline" className={`${STAGE_BADGE[deal.stage] || ""} rounded-lg`}>{deal.stage}</Badge>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">Last: {getTimeAgo(deal.updated_at)}</span>
-                <Select value={deal.stage} onValueChange={(v) => updateStage.mutate({ id: deal.id, stage: v })}>
+                <Badge variant="outline" className={`${TYPE_BADGE[contact.type] || ""} rounded-lg capitalize`}>{contact.type.replace("-", " ")}</Badge>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">Last: {getTimeAgo(contact.updated_at)}</span>
+                <Select value={contact.type} onValueChange={(v) => updateType.mutate({ id: contact.id, type: v })}>
                   <SelectTrigger className="h-8 w-[130px] text-xs rounded-lg"><SelectValue /></SelectTrigger>
                   <SelectContent className="glass-strong bg-card rounded-xl">
-                    <SelectItem value="inquiry">Inquiry</SelectItem>
-                    <SelectItem value="proposal">Proposal</SelectItem>
+                    <SelectItem value="lead">New Lead</SelectItem>
+                    <SelectItem value="interested">Interested</SelectItem>
+                    <SelectItem value="follow-up">Follow Up</SelectItem>
                     <SelectItem value="negotiation">Negotiation</SelectItem>
                     <SelectItem value="booked">Booked ✓</SelectItem>
                     <SelectItem value="lost">Lost</SelectItem>
                   </SelectContent>
                 </Select>
+                {contact.phone && (
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10 rounded-lg" onClick={() => window.open(`tel:${contact.phone}`)}>
+                      <Phone className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10 rounded-lg" onClick={() => window.open(`https://wa.me/${contact.phone?.replace(/\D/g, "")}`)}>
+                      <MessageCircle className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           ))

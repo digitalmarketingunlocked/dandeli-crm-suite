@@ -72,7 +72,7 @@ export default function DashboardPage() {
   }).length ?? 0;
   const bookedLeads = contacts?.filter((c) => c.type === "booked").length ?? 0;
   const conversionRate = totalContacts > 0 ? Math.round((bookedLeads / totalContacts) * 100) : 0;
-  const pendingFollowups = contacts?.filter((c) => c.type === "follow-up").length ?? 0;
+  const pendingFollowups = contacts?.filter((c) => ["follow-up", "lead", "interested", "negotiation"].includes(c.type)).length ?? 0;
 
   const recentHotLeads = contacts?.filter((c) => {
     const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
