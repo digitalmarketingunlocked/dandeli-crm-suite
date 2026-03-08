@@ -93,7 +93,7 @@ export default function SubscriptionSettings() {
         <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
           <Crown className="w-4 h-4" /> Available Plans
         </h4>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {PLANS.map((plan) => (
             <div
               key={plan.name}
