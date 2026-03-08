@@ -77,6 +77,12 @@ export default function ContactsPage() {
   const { tenantId, user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { statuses: leadStatuses } = useLeadStatuses();
+  const STAGE_OPTIONS = leadStatuses.map((s) => ({ value: s.value, label: s.label }));
+  const getStageStyle = (type: string) => {
+    const status = leadStatuses.find((s) => s.value === type);
+    return status ? (STAGE_COLOR_MAP[status.color] || STAGE_COLOR_MAP.secondary) : STAGE_COLOR_MAP.secondary;
+  };
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string>("all");
