@@ -46,7 +46,8 @@ const App = () => (
               <Route path="/auth" element={<AuthRoute />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-              <Route path="/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
+              <Route path="/leads" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
+              <Route path="/contacts" element={<Navigate to="/leads" replace />} />
               <Route path="/follow-ups" element={<ProtectedRoute><FollowUpsPage /></ProtectedRoute>} />
               <Route path="/cold-follow-up" element={<ProtectedRoute><ColdFollowUpPage /></ProtectedRoute>} />
               <Route path="/bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />

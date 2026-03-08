@@ -10,8 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Users, Target, Clock, Plus, CalendarDays, Phone, ChevronRight, User, MapPin, Share2, Flame } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-
-
+import LeadProfileDialog from "@/components/LeadProfileDialog";
 
 export default function DashboardPage() {
   const { tenantId, user } = useAuth();
@@ -21,6 +20,7 @@ export default function DashboardPage() {
   const [period, setPeriod] = useState("this-month");
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
+  const [selectedContact, setSelectedContact] = useState<any>(null);
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
   const [leadForm, setLeadForm] = useState({
     name: "", phone: "", check_in_date: "", check_out_date: "",
@@ -153,9 +153,9 @@ export default function DashboardPage() {
   const maxLeadCount = Math.max(...leadStageCounts.map((s) => s.count), 1);
 
   const stats = [
-    { label: "TOTAL LEADS", value: totalContacts, icon: Users, color: "text-secondary", link: "/contacts?filter=all" },
-    { label: "HOT LEADS", value: hotLeads, icon: Flame, color: "text-accent", link: "/contacts?filter=hot" },
-    { label: "CONVERSION RATE", value: `${conversionRate}%`, icon: Target, color: "text-primary", link: "/contacts?filter=booked" },
+    { label: "TOTAL LEADS", value: totalContacts, icon: Users, color: "text-secondary", link: "/leads?filter=all" },
+    { label: "HOT LEADS", value: hotLeads, icon: Flame, color: "text-accent", link: "/leads?filter=hot" },
+    { label: "CONVERSION RATE", value: `${conversionRate}%`, icon: Target, color: "text-primary", link: "/leads?filter=booked" },
     { label: "PENDING FOLLOW-UPS", value: pendingFollowups, icon: Clock, color: "text-info", link: "/follow-ups" },
   ];
 
@@ -393,7 +393,7 @@ export default function DashboardPage() {
         <div className="glass-card bg-card overflow-hidden">
           <div className="p-6 pb-3 flex items-center justify-between">
             <h3 className="font-heading font-semibold text-lg">Recent Hot Leads</h3>
-            <Button variant="ghost" size="sm" className="text-xs text-primary gap-1" onClick={() => navigate("/contacts")}>
+            <Button variant="ghost" size="sm" className="text-xs text-primary gap-1" onClick={() => navigate("/leads")}>
               View All <ChevronRight className="w-3 h-3" />
             </Button>
           </div>
@@ -403,7 +403,7 @@ export default function DashboardPage() {
                 <div
                   key={contact.id}
                   className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/30 transition-colors cursor-pointer"
-                  onClick={() => navigate("/contacts")}
+                  onClick={() => setSelectedContact(contact)}
                 >
                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
                     {contact.name.charAt(0).toUpperCase()}
@@ -464,6 +464,13 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Lead Profile Dialog */}
+      <LeadProfileDialog
+        contact={selectedContact}
+        open={!!selectedContact}
+        onOpenChange={(open) => !open && setSelectedContact(null)}
+      />
     </div>
   );
 }

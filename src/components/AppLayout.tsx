@@ -8,7 +8,7 @@ import { useFollowUpNotifications } from "@/hooks/useFollowUpNotifications";
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/contacts", icon: Users, label: "Leads" },
+  { to: "/leads", icon: Users, label: "Leads" },
   { to: "/follow-ups", icon: Clock, label: "Follow-ups" },
   { to: "/cold-follow-up", icon: Snowflake, label: "Cold Follow Up" },
   { to: "/bookings", icon: CalendarCheck, label: "Bookings" },
