@@ -14,6 +14,7 @@ import {
   CalendarCheck, User, MessageCircle
 } from "lucide-react";
 import { format, isToday, isTomorrow, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
+import BookingDetailDialog from "@/components/BookingDetailDialog";
 
 type Contact = {
   id: string;
