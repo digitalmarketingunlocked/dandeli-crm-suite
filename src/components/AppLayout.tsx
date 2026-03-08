@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/components/ThemeProvider";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Users, LogOut, Menu, X, Sparkles, Moon, Sun, Clock, Settings, Snowflake } from "lucide-react";
+import { LayoutDashboard, Users, LogOut, Menu, X, Sparkles, Moon, Sun, Clock, Settings, Snowflake, CalendarCheck } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
