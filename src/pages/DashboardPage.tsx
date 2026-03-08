@@ -262,28 +262,22 @@ export default function DashboardPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Check-in Date *</Label>
-                  <div className="relative">
-                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      type="date"
-                      value={leadForm.check_in_date}
-                      onChange={(e) => setLeadForm({ ...leadForm, check_in_date: e.target.value })}
-                      required
-                      className="pl-10 rounded-xl"
-                    />
-                  </div>
+                  <DateInput
+                    value={leadForm.check_in_date}
+                    onChange={(v) => setLeadForm({ ...leadForm, check_in_date: v })}
+                    required
+                    className="rounded-xl"
+                    placeholder="Check-in"
+                  />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Check-out Date</Label>
-                  <div className="relative">
-                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      type="date"
-                      value={leadForm.check_out_date}
-                      onChange={(e) => setLeadForm({ ...leadForm, check_out_date: e.target.value })}
-                      className="pl-10 rounded-xl"
-                    />
-                  </div>
+                  <DateInput
+                    value={leadForm.check_out_date}
+                    onChange={(v) => setLeadForm({ ...leadForm, check_out_date: v })}
+                    className="rounded-xl"
+                    placeholder="Check-out"
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
