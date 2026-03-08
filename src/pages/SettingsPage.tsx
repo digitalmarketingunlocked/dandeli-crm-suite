@@ -134,7 +134,7 @@ export default function SettingsPage() {
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground uppercase tracking-wider">Resort Name</Label>
               <Input
-                value={resortName || tenant?.name || ""}
+                value={resortName || (tenant?.name && tenant.name !== user?.email ? tenant.name : "") || ""}
                 onChange={(e) => setResortName(e.target.value)}
                 className="rounded-xl"
                 placeholder="Your resort name"
