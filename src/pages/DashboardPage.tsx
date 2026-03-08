@@ -52,6 +52,26 @@ export default function DashboardPage() {
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user!.id).single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: tenant } = useQuery({
+    queryKey: ["tenant", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("tenants").select("*").eq("id", tenantId!).single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+
   const { data: contacts } = useQuery({
     queryKey: ["contacts", tenantId],
     queryFn: async () => {
@@ -61,7 +81,6 @@ export default function DashboardPage() {
     },
     enabled: !!tenantId,
   });
-
 
 
 
@@ -113,8 +132,9 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="min-w-0">
+          <p className="text-sm text-muted-foreground">Welcome, <span className="font-semibold text-foreground">{profile?.full_name || user?.email || "User"}</span></p>
           <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground truncate">Dashboard Overview</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Real-time performance metrics</p>
+          <p className="text-muted-foreground mt-1 text-sm">Real-time performance metrics of <span className="font-medium text-foreground">{tenant?.name && tenant.name !== user?.email ? tenant.name : "your resort"}</span></p>
         </div>
         <Select value={period} onValueChange={setPeriod}>
           <SelectTrigger className="w-[140px] rounded-xl glass-subtle bg-card shrink-0">
