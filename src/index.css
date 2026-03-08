@@ -54,10 +54,10 @@
 
     --glass-blur: 20px;
     --glass-saturate: 1.8;
-    --glass-border: 1px solid hsla(210, 30%, 80%, 0.5);
+    --glass-border: 1px solid hsla(210, 30%, 80%, 0.35);
     --glass-shadow: 0 8px 32px 0 hsla(215, 30%, 10%, 0.08);
     --glass-shadow-lg: 0 16px 48px 0 hsla(215, 30%, 10%, 0.12);
-    --glass-highlight: inset 0 1px 0 0 hsla(0, 0%, 100%, 0.6);
+    --glass-highlight: inset 0 1px 0 0 hsla(0, 0%, 100%, 0.4);
 
     --gradient-mesh-1: radial-gradient(ellipse at 20% 50%, hsla(162, 72%, 42%, 0.15) 0%, transparent 50%);
     --gradient-mesh-2: radial-gradient(ellipse at 80% 20%, hsla(210, 85%, 52%, 0.12) 0%, transparent 50%);
