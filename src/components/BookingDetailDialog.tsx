@@ -77,6 +77,8 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
           property_name: propertyName || null,
           room_type: roomType || null,
           pricing: pricing ? parseFloat(pricing) : null,
+          pricing_total: pricingTotal ? parseFloat(pricingTotal) : null,
+          transport: transport || null,
           activities: activities || null,
           notes: notes || null,
         })
