@@ -65,26 +65,26 @@ export default function FollowUpsPage() {
           <div className="glass-card bg-card p-8 text-center text-muted-foreground">Loading...</div>
         ) : contacts && contacts.length > 0 ? (
           contacts.map((contact) => (
-            <div key={contact.id} className="glass-card bg-card p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div key={contact.id} className="glass-card bg-card p-4 sm:p-5 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center shrink-0 text-accent font-semibold text-sm">
                   {contact.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
                   <p className="font-medium truncate">{contact.name}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
                     {contact.phone && (
-                      <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{contact.phone}</span>
+                      <span className="flex items-center gap-1"><Phone className="w-3 h-3 shrink-0" />{contact.phone}</span>
                     )}
                     {contact.check_in_date && <span>Check-in: {contact.check_in_date}</span>}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center flex-wrap gap-2 sm:gap-3 shrink-0">
                 <Badge variant="outline" className={`${TYPE_BADGE[contact.type] || ""} rounded-lg capitalize`}>{contact.type.replace("-", " ")}</Badge>
                 <span className="text-xs text-muted-foreground whitespace-nowrap">Last: {getTimeAgo(contact.updated_at)}</span>
                 <Select value={contact.type} onValueChange={(v) => updateType.mutate({ id: contact.id, type: v })}>
-                  <SelectTrigger className="h-8 w-[130px] text-xs rounded-lg"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-8 w-[120px] text-xs rounded-lg"><SelectValue /></SelectTrigger>
                   <SelectContent className="glass-strong bg-card rounded-xl">
                     <SelectItem value="lead">New Lead</SelectItem>
                     <SelectItem value="interested">Interested</SelectItem>

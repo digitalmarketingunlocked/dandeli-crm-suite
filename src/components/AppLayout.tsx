@@ -2,16 +2,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/components/ThemeProvider";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Users, LogOut, Menu, X, Sparkles, Moon, Sun, Clock, Settings, Snowflake, CalendarCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { LayoutDashboard, Users, LogOut, Menu, X, Sparkles, Moon, Sun, Clock, Settings, Snowflake, CalendarCheck, Lock } from "lucide-react";
 import { useState } from "react";
 import { useFollowUpNotifications } from "@/hooks/useFollowUpNotifications";
+import { useTenantPlan, type PlanName } from "@/hooks/useTenantPlan";
 
-const navItems = [
+const navItems: { to: string; icon: any; label: string; requiredPlan?: PlanName }[] = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/leads", icon: Users, label: "Leads" },
   { to: "/follow-ups", icon: Clock, label: "Follow-ups" },
-  { to: "/cold-follow-up", icon: Snowflake, label: "Cold Follow Up" },
-  { to: "/bookings", icon: CalendarCheck, label: "Bookings" },
+  { to: "/cold-follow-up", icon: Snowflake, label: "Cold Follow Up", requiredPlan: "startup" },
+  { to: "/bookings", icon: CalendarCheck, label: "Bookings", requiredPlan: "business" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -19,6 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { signOut, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { hasAccess } = useTenantPlan();
   const notificationsEnabled = localStorage.getItem("followup_notifications") !== "false";
   useFollowUpNotifications(notificationsEnabled);
 
@@ -52,8 +55,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   }`
                 }
               >
-                <item.icon className="w-5 h-5" />
-                {item.label}
+                <item.icon className="w-5 h-5 shrink-0" />
+                <span className="flex-1">{item.label}</span>
+                {item.requiredPlan && !hasAccess(item.requiredPlan) && (
+                  <Badge variant="outline" className="text-[9px] px-1.5 py-0 rounded-md border-primary/30 text-primary ml-auto capitalize">
+                    {item.requiredPlan}
+                  </Badge>
+                )}
               </NavLink>
             ))}
           </nav>
