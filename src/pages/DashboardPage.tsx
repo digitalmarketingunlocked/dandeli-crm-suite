@@ -464,6 +464,13 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Lead Profile Dialog */}
+      <LeadProfileDialog
+        contact={selectedContact}
+        open={!!selectedContact}
+        onOpenChange={(open) => !open && setSelectedContact(null)}
+      />
     </div>
   );
 }
