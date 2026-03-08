@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { CreditCard, Check, Zap, Crown, ArrowUpRight, Smartphone } from "lucide-react";
+import { CreditCard, Check, Zap, Crown, ArrowUpRight, Smartphone, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { toast } from "sonner";
 
 import phonePeLogo from "@/assets/phonepe-logo.png";
 import gpayLogo from "@/assets/gpay-logo.png";
@@ -69,10 +70,20 @@ const PLANS: Plan[] = [
 
 const formatPrice = (amount: number) => `₹${amount.toLocaleString("en-IN")}`;
 
+const STATUS_CONFIG: Record<string, { icon: typeof Clock; label: string; className: string }> = {
+  pending: { icon: Clock, label: "Pending Approval", className: "bg-yellow-500/15 text-yellow-600 border-yellow-500/30" },
+  approved: { icon: CheckCircle2, label: "Approved", className: "bg-green-500/15 text-green-600 border-green-500/30" },
+  rejected: { icon: XCircle, label: "Rejected", className: "bg-destructive/15 text-destructive border-destructive/30" },
+};
+
+type DialogStep = "select-app" | "confirm-payment";
+
 export default function SubscriptionSettings() {
-  const { tenantId } = useAuth();
+  const { tenantId, user } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
+  const [dialogStep, setDialogStep] = useState<DialogStep>("select-app");
 
   const { data: tenant } = useQuery({
     queryKey: ["tenant", tenantId],
@@ -86,6 +97,42 @@ export default function SubscriptionSettings() {
       return data;
     },
     enabled: !!tenantId,
+  });
+
+  const { data: existingRequests } = useQuery({
+    queryKey: ["subscription_requests", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("subscription_requests")
+        .select("*")
+        .eq("tenant_id", tenantId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+
+  const submitRequest = useMutation({
+    mutationFn: async (plan: Plan) => {
+      const amount = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
+      const { error } = await supabase.from("subscription_requests").insert({
+        tenant_id: tenantId!,
+        user_id: user!.id,
+        plan_name: plan.name,
+        billing_period: billing,
+        amount,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscription_requests"] });
+      toast.success("Upgrade request submitted! We'll verify your payment and activate your plan shortly.");
+      closeDialog();
+    },
+    onError: () => {
+      toast.error("Failed to submit upgrade request. Please try again.");
+    },
   });
 
   const resortName = tenant?.name || "Resort";
@@ -117,12 +164,46 @@ export default function SubscriptionSettings() {
     return `upi://pay?${params.toString()}`;
   };
 
+  const openDialog = (plan: Plan) => {
+    setSelectedPlan(plan);
+    setDialogStep("select-app");
+  };
+
+  const closeDialog = () => {
+    setSelectedPlan(null);
+    setDialogStep("select-app");
+  };
+
+  const handleUpiAppClick = () => {
+    // After user clicks UPI app link, show confirmation step
+    setTimeout(() => setDialogStep("confirm-payment"), 500);
+  };
+
+  const pendingRequest = existingRequests?.find((r) => r.status === "pending");
+
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold">Subscription & Billing</h3>
         <p className="text-sm text-muted-foreground">Manage your plan, usage, and billing information.</p>
       </div>
+
+      {/* Pending Request Banner */}
+      {pendingRequest && (
+        <div className="flex items-center gap-3 p-4 rounded-2xl border border-yellow-500/30 bg-yellow-500/5">
+          <Clock className="w-5 h-5 text-yellow-600 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium">Upgrade to {pendingRequest.plan_name} is pending approval</p>
+            <p className="text-xs text-muted-foreground">
+              {formatPrice(Number(pendingRequest.amount))} ({pendingRequest.billing_period}) — submitted{" "}
+              {new Date(pendingRequest.created_at).toLocaleDateString()}
+            </p>
+          </div>
+          <Badge className={STATUS_CONFIG.pending.className + " rounded-md text-[10px]"}>
+            Pending
+          </Badge>
+        </div>
+      )}
 
       {/* Current Plan */}
       <div className="glass-card bg-card p-5 space-y-4 rounded-2xl">
@@ -240,71 +321,164 @@ export default function SubscriptionSettings() {
               <Button
                 className="w-full rounded-xl gap-2"
                 variant={plan.current ? "outline" : plan.recommended ? "default" : "outline"}
-                disabled={plan.current}
-                onClick={() => !plan.current && setSelectedPlan(plan)}
+                disabled={plan.current || !!pendingRequest}
+                onClick={() => !plan.current && openDialog(plan)}
               >
-                {plan.current ? "Current Plan" : "Upgrade"}
-                {!plan.current && <ArrowUpRight className="w-3.5 h-3.5" />}
+                {plan.current ? "Current Plan" : pendingRequest ? "Upgrade Pending" : "Upgrade"}
+                {!plan.current && !pendingRequest && <ArrowUpRight className="w-3.5 h-3.5" />}
               </Button>
             </div>
           ))}
         </div>
       </div>
 
-      {/* UPI Payment Dialog */}
-      <Dialog open={!!selectedPlan} onOpenChange={(open) => !open && setSelectedPlan(null)}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Smartphone className="w-5 h-5 text-primary" />
-              Pay via UPI
-            </DialogTitle>
-            <DialogDescription>
-              Upgrade to <span className="font-semibold text-foreground">{selectedPlan?.name}</span> plan for{" "}
-              <span className="font-semibold text-foreground">
-                {selectedPlan && formatPrice(getPrice(selectedPlan))}{getPeriod()}
-              </span>
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 pt-2">
-            <div className="p-3 rounded-xl bg-muted/30 border border-border/50 text-sm space-y-1">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Amount</span>
-                <span className="font-bold">{selectedPlan && formatPrice(getPrice(selectedPlan))}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Billing</span>
-                <span className="text-xs font-medium">{isYearly ? "Annual" : "Monthly"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">UPI ID</span>
-                <span className="font-mono text-xs">{UPI_ID}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Remarks</span>
-                <span className="text-xs">{resortName} - {selectedPlan?.name} Plan</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2">
-              {UPI_APPS.map((app) => (
-                <a
-                  key={app.name}
-                  href={selectedPlan ? buildUpiUrl(app.scheme, selectedPlan) : "#"}
-                  className="flex items-center gap-3 p-3 rounded-xl border border-border/50 bg-card hover:bg-muted/30 transition-colors cursor-pointer"
-                >
-                  <img src={app.icon} alt={app.name} className="w-8 h-8 rounded-lg object-contain" />
-                  <span className="font-medium text-sm">{app.name}</span>
-                  <ArrowUpRight className="w-4 h-4 ml-auto text-muted-foreground" />
-                </a>
-              ))}
-            </div>
-
-            <p className="text-[11px] text-muted-foreground text-center">
-              You will be redirected to your UPI app to complete the payment.
-            </p>
+      {/* Recent Requests */}
+      {existingRequests && existingRequests.length > 0 && (
+        <div className="glass-card bg-card p-5 space-y-3 rounded-2xl">
+          <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+            Upgrade History
+          </h4>
+          <div className="space-y-2">
+            {existingRequests.slice(0, 5).map((req) => {
+              const config = STATUS_CONFIG[req.status] || STATUS_CONFIG.pending;
+              const StatusIcon = config.icon;
+              return (
+                <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border/30">
+                  <div className="flex items-center gap-3">
+                    <StatusIcon className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">{req.plan_name} Plan</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatPrice(Number(req.amount))} · {req.billing_period} · {new Date(req.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge className={config.className + " rounded-md text-[10px]"}>
+                    {config.label}
+                  </Badge>
+                </div>
+              );
+            })}
           </div>
+        </div>
+      )}
+
+      {/* UPI Payment Dialog */}
+      <Dialog open={!!selectedPlan} onOpenChange={(open) => !open && closeDialog()}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          {dialogStep === "select-app" && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Smartphone className="w-5 h-5 text-primary" />
+                  Pay via UPI
+                </DialogTitle>
+                <DialogDescription>
+                  Upgrade to <span className="font-semibold text-foreground">{selectedPlan?.name}</span> plan for{" "}
+                  <span className="font-semibold text-foreground">
+                    {selectedPlan && formatPrice(getPrice(selectedPlan))}{getPeriod()}
+                  </span>
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 pt-2">
+                <div className="p-3 rounded-xl bg-muted/30 border border-border/50 text-sm space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Amount</span>
+                    <span className="font-bold">{selectedPlan && formatPrice(getPrice(selectedPlan))}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Billing</span>
+                    <span className="text-xs font-medium">{isYearly ? "Annual" : "Monthly"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">UPI ID</span>
+                    <span className="font-mono text-xs">{UPI_ID}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Remarks</span>
+                    <span className="text-xs">{resortName} - {selectedPlan?.name} Plan</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2">
+                  {UPI_APPS.map((app) => (
+                    <a
+                      key={app.name}
+                      href={selectedPlan ? buildUpiUrl(app.scheme, selectedPlan) : "#"}
+                      onClick={handleUpiAppClick}
+                      className="flex items-center gap-3 p-3 rounded-xl border border-border/50 bg-card hover:bg-muted/30 transition-colors cursor-pointer"
+                    >
+                      <img src={app.icon} alt={app.name} className="w-8 h-8 rounded-lg object-contain" />
+                      <span className="font-medium text-sm">{app.name}</span>
+                      <ArrowUpRight className="w-4 h-4 ml-auto text-muted-foreground" />
+                    </a>
+                  ))}
+                </div>
+
+                <p className="text-[11px] text-muted-foreground text-center">
+                  You will be redirected to your UPI app to complete the payment.
+                </p>
+              </div>
+            </>
+          )}
+
+          {dialogStep === "confirm-payment" && selectedPlan && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                  Confirm Payment
+                </DialogTitle>
+                <DialogDescription>
+                  Did you complete the payment for the {selectedPlan.name} plan?
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 pt-2">
+                <div className="p-4 rounded-xl bg-muted/30 border border-border/50 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Plan</span>
+                    <span className="font-semibold">{selectedPlan.name}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Amount Paid</span>
+                    <span className="font-bold">{formatPrice(getPrice(selectedPlan))}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Billing</span>
+                    <span className="font-medium">{isYearly ? "Annual" : "Monthly"}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Paid To</span>
+                    <span className="font-mono text-xs">{UPI_ID}</span>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-yellow-500/5 border border-yellow-500/20 text-xs text-yellow-700 dark:text-yellow-400">
+                  ⏳ Your plan will be activated once the admin verifies and approves your payment. This usually takes a few hours.
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Button
+                    className="w-full rounded-xl gap-2"
+                    onClick={() => submitRequest.mutate(selectedPlan)}
+                    disabled={submitRequest.isPending}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    {submitRequest.isPending ? "Submitting..." : "I Have Completed Payment"}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full rounded-xl text-sm"
+                    onClick={() => setDialogStep("select-app")}
+                  >
+                    Go Back to Payment Options
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
