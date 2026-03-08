@@ -9,7 +9,7 @@ import AppLayout from "@/components/AppLayout";
 import AuthPage from "@/pages/AuthPage";
 import DashboardPage from "@/pages/DashboardPage";
 import ContactsPage from "@/pages/ContactsPage";
-import DealsPage from "@/pages/DealsPage";
+
 import FollowUpsPage from "@/pages/FollowUpsPage";
 import ColdFollowUpPage from "@/pages/ColdFollowUpPage";
 import SettingsPage from "@/pages/SettingsPage";
