@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLeadStatuses, STAGE_COLOR_MAP, COLOR_OPTIONS } from "@/hooks/useLeadStatuses";
 import { Moon, Sun, User, Building2, Bell, Settings as SettingsIcon, MapPin, Plus, Trash2, Pencil, Tag } from "lucide-react";
+import ChangePasswordDialog from "@/components/settings/ChangePasswordDialog";
+import TeamInviteSection from "@/components/settings/TeamInviteSection";
 
 export default function SettingsPage() {
   const { user, tenantId } = useAuth();
@@ -25,6 +27,7 @@ export default function SettingsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editLabel, setEditLabel] = useState("");
   const [editColor, setEditColor] = useState("");
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   // Profile
   const { data: profile } = useQuery({
@@ -131,7 +134,7 @@ export default function SettingsPage() {
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground uppercase tracking-wider">Resort Name</Label>
               <Input
-                value={resortName || tenant?.name || ""}
+                value={resortName || (tenant?.name && tenant.name !== user?.email ? tenant.name : "") || ""}
                 onChange={(e) => setResortName(e.target.value)}
                 className="rounded-xl"
                 placeholder="Your resort name"
@@ -180,11 +183,17 @@ export default function SettingsPage() {
           >
             {updateProfile.isPending ? "Saving..." : "Update Name"}
           </Button>
-          <Button variant="outline" className="w-full rounded-xl">
+          <Button variant="outline" className="w-full rounded-xl" onClick={() => setChangePasswordOpen(true)}>
             Change Password
           </Button>
         </div>
       </div>
+
+      {/* Team Members & Invites */}
+      <TeamInviteSection />
+
+      {/* Change Password Dialog */}
+      <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
 
       {/* Lead Status Management */}
       <div className="glass-card bg-card p-6 space-y-5">
