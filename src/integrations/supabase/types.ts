@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      call_history: {
+        Row: {
+          called_at: string
+          contact_id: string
+          created_by: string | null
+          duration: string | null
+          id: string
+          notes: string | null
+          tenant_id: string
+        }
+        Insert: {
+          called_at?: string
+          contact_id: string
+          created_by?: string | null
+          duration?: string | null
+          id?: string
+          notes?: string | null
+          tenant_id: string
+        }
+        Update: {
+          called_at?: string
+          contact_id?: string
+          created_by?: string | null
+          duration?: string | null
+          id?: string
+          notes?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_history_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           adults_count: number | null
@@ -24,6 +69,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           email: string | null
+          follow_up_date: string | null
           guests_count: number | null
           id: string
           kids_count: number | null
@@ -31,6 +77,7 @@ export type Database = {
           name: string
           notes: string | null
           phone: string | null
+          recurring: string | null
           source: string | null
           tenant_id: string
           type: string
@@ -45,6 +92,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           email?: string | null
+          follow_up_date?: string | null
           guests_count?: number | null
           id?: string
           kids_count?: number | null
@@ -52,6 +100,7 @@ export type Database = {
           name: string
           notes?: string | null
           phone?: string | null
+          recurring?: string | null
           source?: string | null
           tenant_id: string
           type?: string
@@ -66,6 +115,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           email?: string | null
+          follow_up_date?: string | null
           guests_count?: number | null
           id?: string
           kids_count?: number | null
@@ -73,6 +123,7 @@ export type Database = {
           name?: string
           notes?: string | null
           phone?: string | null
+          recurring?: string | null
           source?: string | null
           tenant_id?: string
           type?: string
@@ -179,6 +230,54 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminders: {
+        Row: {
+          contact_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          message: string | null
+          reminder_date: string
+          tenant_id: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          message?: string | null
+          reminder_date: string
+          tenant_id: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          message?: string | null
+          reminder_date?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
