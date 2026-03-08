@@ -144,7 +144,7 @@ export default function DashboardPage() {
           <p className="text-muted-foreground mt-1 text-sm">Real-time performance metrics of <span className="font-medium text-foreground">{tenant?.name && tenant.name !== user?.email ? tenant.name : "your resort"}</span></p>
         </div>
         <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-[140px] rounded-xl glass-subtle bg-card shrink-0">
+          <SelectTrigger className="w-[140px] rounded-xl glass-subtle bg-card shrink-0 self-end">
             <CalendarDays className="w-4 h-4 mr-2 text-muted-foreground" />
             <SelectValue />
           </SelectTrigger>
