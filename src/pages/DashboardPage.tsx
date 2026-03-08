@@ -46,10 +46,11 @@ export default function DashboardPage() {
     mutationFn: async () => {
       const { error } = await supabase.from("contacts").insert({
         name: leadForm.name.trim(),
-        phone: leadForm.phone.trim() || null,
+        phone: leadForm.phone.trim(),
         check_in_date: leadForm.check_in_date || null,
         check_out_date: leadForm.check_out_date || null,
-        guests_count: parseInt(leadForm.guests_count) || 2,
+        adults_count: parseInt(leadForm.adults_count) || 2,
+        kids_count: parseInt(leadForm.kids_count) || 0,
         city: leadForm.city.trim() || null,
         lead_time: leadForm.lead_time.trim() || null,
         source: leadForm.source,
