@@ -413,7 +413,7 @@ export default function ContactsPage() {
                 <div className="flex items-center justify-between">
                   <Badge
                     variant="outline"
-                    className={`${STAGE_STYLES[contact.type] || STAGE_STYLES.lead} rounded-md text-[10px] font-bold tracking-wider uppercase`}
+                    className={`${getStageStyle(contact.type)} rounded-md text-[10px] font-bold tracking-wider uppercase`}
                   >
                     {STAGE_OPTIONS.find((s) => s.value === contact.type)?.label || "NEW LEAD"}
                   </Badge>
