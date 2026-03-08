@@ -432,6 +432,7 @@ export type Database = {
       tenants: {
         Row: {
           created_at: string
+          current_plan: string
           id: string
           name: string
           slug: string
@@ -439,6 +440,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          current_plan?: string
           id?: string
           name: string
           slug: string
@@ -446,6 +448,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          current_plan?: string
           id?: string
           name?: string
           slug?: string
