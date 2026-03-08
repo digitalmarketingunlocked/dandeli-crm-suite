@@ -37,6 +37,29 @@ type Contact = {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  follow_up_date: string | null;
+  recurring: string | null;
+};
+
+type CallHistory = {
+  id: string;
+  contact_id: string;
+  tenant_id: string;
+  called_at: string;
+  duration: string | null;
+  notes: string | null;
+  created_by: string | null;
+};
+
+type Reminder = {
+  id: string;
+  contact_id: string;
+  tenant_id: string;
+  reminder_date: string;
+  message: string | null;
+  is_active: boolean;
+  created_at: string;
+  created_by: string | null;
 };
 
 const STAGE_OPTIONS = [
