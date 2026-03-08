@@ -15,9 +15,12 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Plus, Search, Phone, CalendarDays, Users, MapPin, Clock, Share2, User,
   Filter, FileSpreadsheet, MessageCircle, Flame, Snowflake, ChevronRight, StickyNote,
-  Bell, Repeat, History, PhoneCall
+  Bell, Repeat, History, PhoneCall, CalendarIcon, Download
 } from "lucide-react";
 import { exportContactsToXls } from "@/lib/exportXls";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 
 type Contact = {
   id: string;
