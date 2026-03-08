@@ -220,7 +220,7 @@ export default function AdminDashboardPage() {
                                 size="sm"
                                 variant="outline"
                                 className="gap-1 rounded-lg text-destructive border-destructive/30 hover:bg-destructive/10"
-                                onClick={() => setConfirmAction({ id: req.id, action: "rejected" })}
+                                onClick={() => setConfirmAction({ id: req.id, action: "rejected", tenantId: req.tenant_id, planName: req.plan_name })}
                               >
                                 <XCircle className="w-3.5 h-3.5" /> Reject
                               </Button>
