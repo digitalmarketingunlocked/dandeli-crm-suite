@@ -127,15 +127,34 @@ export default function DashboardPage() {
     return `${days}d`;
   };
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      {/* Header with Filter */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm text-muted-foreground">Welcome, <span className="font-semibold text-foreground">{profile?.full_name || user?.email || "User"}</span></p>
+          <p className="text-sm text-muted-foreground">{getGreeting()}, <span className="font-semibold text-foreground">{profile?.full_name || user?.email || "User"}</span></p>
           <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground truncate">Dashboard Overview</h1>
           <p className="text-muted-foreground mt-1 text-sm">Real-time performance metrics of <span className="font-medium text-foreground">{tenant?.name && tenant.name !== user?.email ? tenant.name : "your resort"}</span></p>
         </div>
+        <Select value={period} onValueChange={setPeriod}>
+          <SelectTrigger className="w-[140px] rounded-xl glass-subtle bg-card shrink-0">
+            <CalendarDays className="w-4 h-4 mr-2 text-muted-foreground" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="glass-strong bg-card rounded-xl">
+            <SelectItem value="week">Week</SelectItem>
+            <SelectItem value="month">Month</SelectItem>
+            <SelectItem value="quarter">Quarter</SelectItem>
+            <SelectItem value="year">Year</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* CTA Banner */}
@@ -148,22 +167,6 @@ export default function DashboardPage() {
           <Plus className="w-4 h-4" />
           Quick Add Lead
         </Button>
-      </div>
-
-      {/* Period Filter */}
-      <div className="flex justify-end">
-        <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-[140px] rounded-xl glass-subtle bg-card">
-            <CalendarDays className="w-4 h-4 mr-2 text-muted-foreground" />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="glass-strong bg-card rounded-xl">
-            <SelectItem value="week">Week</SelectItem>
-            <SelectItem value="month">Month</SelectItem>
-            <SelectItem value="quarter">Quarter</SelectItem>
-            <SelectItem value="year">Year</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Add New Lead Dialog */}
