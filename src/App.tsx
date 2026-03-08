@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import PlanGate from "@/components/PlanGate";
 import AppLayout from "@/components/AppLayout";
 import AuthPage from "@/pages/AuthPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -51,8 +52,8 @@ const App = () => (
               <Route path="/leads" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
               <Route path="/contacts" element={<Navigate to="/leads" replace />} />
               <Route path="/follow-ups" element={<ProtectedRoute><FollowUpsPage /></ProtectedRoute>} />
-              <Route path="/cold-follow-up" element={<ProtectedRoute><ColdFollowUpPage /></ProtectedRoute>} />
-              <Route path="/bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
+              <Route path="/cold-follow-up" element={<ProtectedRoute><PlanGate requiredPlan="startup" featureName="Cold Follow-Up"><ColdFollowUpPage /></PlanGate></ProtectedRoute>} />
+              <Route path="/bookings" element={<ProtectedRoute><PlanGate requiredPlan="business" featureName="Bookings"><BookingsPage /></PlanGate></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

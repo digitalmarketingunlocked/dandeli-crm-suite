@@ -28,7 +28,7 @@ export default function AdminDashboardPage() {
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [confirmAction, setConfirmAction] = useState<{ id: string; action: "approved" | "rejected" } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ id: string; action: "approved" | "rejected"; tenantId: string; planName: string } | null>(null);
 
   // Fetch all subscription requests with tenant info
   const { data: requests, isLoading: requestsLoading } = useQuery({
@@ -59,15 +59,25 @@ export default function AdminDashboardPage() {
   });
 
   const updateRequest = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status, tenantId, planName }: { id: string; status: string; tenantId: string; planName: string }) => {
       const { error } = await supabase
         .from("subscription_requests")
         .update({ status, reviewed_at: new Date().toISOString(), reviewed_by: user!.id })
         .eq("id", id);
       if (error) throw error;
+
+      // If approved, update the tenant's current plan
+      if (status === "approved") {
+        const { error: tenantError } = await supabase
+          .from("tenants")
+          .update({ current_plan: planName.toLowerCase() })
+          .eq("id", tenantId);
+        if (tenantError) throw tenantError;
+      }
     },
     onSuccess: (_, { status }) => {
       queryClient.invalidateQueries({ queryKey: ["admin-subscription-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
       toast.success(`Request ${status} successfully`);
       setConfirmAction(null);
     },
@@ -202,7 +212,7 @@ export default function AdminDashboardPage() {
                                 size="sm"
                                 variant="outline"
                                 className="gap-1 rounded-lg text-green-600 border-green-500/30 hover:bg-green-500/10"
-                                onClick={() => setConfirmAction({ id: req.id, action: "approved" })}
+                                onClick={() => setConfirmAction({ id: req.id, action: "approved", tenantId: req.tenant_id, planName: req.plan_name })}
                               >
                                 <CheckCircle2 className="w-3.5 h-3.5" /> Approve
                               </Button>
@@ -210,7 +220,7 @@ export default function AdminDashboardPage() {
                                 size="sm"
                                 variant="outline"
                                 className="gap-1 rounded-lg text-destructive border-destructive/30 hover:bg-destructive/10"
-                                onClick={() => setConfirmAction({ id: req.id, action: "rejected" })}
+                                onClick={() => setConfirmAction({ id: req.id, action: "rejected", tenantId: req.tenant_id, planName: req.plan_name })}
                               >
                                 <XCircle className="w-3.5 h-3.5" /> Reject
                               </Button>
@@ -296,7 +306,7 @@ export default function AdminDashboardPage() {
               variant={confirmAction?.action === "approved" ? "default" : "destructive"}
               disabled={updateRequest.isPending}
               onClick={() =>
-                confirmAction && updateRequest.mutate({ id: confirmAction.id, status: confirmAction.action })
+                confirmAction && updateRequest.mutate({ id: confirmAction.id, status: confirmAction.action, tenantId: confirmAction.tenantId, planName: confirmAction.planName })
               }
             >
               {updateRequest.isPending
