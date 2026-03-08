@@ -114,6 +114,7 @@ export default function ContactsPage() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [exportFromDate, setExportFromDate] = useState<Date | undefined>();
   const [exportToDate, setExportToDate] = useState<Date | undefined>();
+  const [exportPreset, setExportPreset] = useState<string>("all");
 
   const applyExportPreset = (preset: string) => {
     const now = new Date();
