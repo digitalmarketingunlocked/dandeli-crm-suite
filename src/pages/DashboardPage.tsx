@@ -9,8 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Users, Target, Clock, Plus, CalendarDays, Phone, ChevronRight, User, MapPin, Share2, Flame } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-
+import LeadProfileDialog from "@/components/LeadProfileDialog";
 
 
 export default function DashboardPage() {
