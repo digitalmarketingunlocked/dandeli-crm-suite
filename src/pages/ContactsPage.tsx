@@ -413,8 +413,8 @@ export default function ContactsPage() {
                     <span>{totalPeople(contact)} People</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-muted-foreground/40" />
-                    <span>Follow-up: Not Set</span>
+                    <Bell className="w-3.5 h-3.5" />
+                    <span>Follow-up: {contact.follow_up_date || "Not Set"}</span>
                   </div>
                 </div>
 
