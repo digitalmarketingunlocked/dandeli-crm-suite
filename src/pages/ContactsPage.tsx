@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useLeadStatuses, STAGE_COLOR_MAP } from "@/hooks/useLeadStatuses";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,23 +63,7 @@ type Reminder = {
   created_by: string | null;
 };
 
-const STAGE_OPTIONS = [
-  { value: "lead", label: "NEW LEAD" },
-  { value: "interested", label: "INTERESTED" },
-  { value: "follow-up", label: "FOLLOW UP" },
-  { value: "negotiation", label: "NEGOTIATION" },
-  { value: "booked", label: "BOOKED" },
-  { value: "lost", label: "LOST" },
-];
-
-const STAGE_STYLES: Record<string, string> = {
-  lead: "bg-secondary/15 text-secondary border-secondary/30",
-  interested: "bg-primary/15 text-primary border-primary/30",
-  "follow-up": "bg-accent/15 text-accent border-accent/30",
-  negotiation: "bg-warning/15 text-warning border-warning/30",
-  booked: "bg-primary/20 text-primary border-primary/40",
-  lost: "bg-destructive/15 text-destructive border-destructive/30",
-};
+// Removed hardcoded STAGE_OPTIONS and STAGE_STYLES - now using useLeadStatuses hook
 
 const SOURCE_LABELS: Record<string, string> = {
   organic: "Organic",
@@ -92,6 +77,12 @@ export default function ContactsPage() {
   const { tenantId, user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { statuses: leadStatuses } = useLeadStatuses();
+  const STAGE_OPTIONS = leadStatuses.map((s) => ({ value: s.value, label: s.label }));
+  const getStageStyle = (type: string) => {
+    const status = leadStatuses.find((s) => s.value === type);
+    return status ? (STAGE_COLOR_MAP[status.color] || STAGE_COLOR_MAP.secondary) : STAGE_COLOR_MAP.secondary;
+  };
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -422,7 +413,7 @@ export default function ContactsPage() {
                 <div className="flex items-center justify-between">
                   <Badge
                     variant="outline"
-                    className={`${STAGE_STYLES[contact.type] || STAGE_STYLES.lead} rounded-md text-[10px] font-bold tracking-wider uppercase`}
+                    className={`${getStageStyle(contact.type)} rounded-md text-[10px] font-bold tracking-wider uppercase`}
                   >
                     {STAGE_OPTIONS.find((s) => s.value === contact.type)?.label || "NEW LEAD"}
                   </Badge>
