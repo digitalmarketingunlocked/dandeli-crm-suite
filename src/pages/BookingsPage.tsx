@@ -102,7 +102,7 @@ export default function BookingsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-heading font-bold text-foreground">Bookings</h1>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground">Bookings</h1>
         <p className="text-muted-foreground text-sm mt-1">Confirmed bookings by check-in date</p>
       </div>
 

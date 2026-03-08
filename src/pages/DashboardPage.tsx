@@ -111,13 +111,13 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">Dashboard Overview</h1>
-          <p className="text-muted-foreground mt-1">Real-time performance metrics</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground truncate">Dashboard Overview</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Real-time performance metrics</p>
         </div>
         <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-[140px] rounded-xl glass-subtle bg-card">
+          <SelectTrigger className="w-[140px] rounded-xl glass-subtle bg-card shrink-0">
             <CalendarDays className="w-4 h-4 mr-2 text-muted-foreground" />
             <SelectValue />
           </SelectTrigger>
@@ -131,12 +131,12 @@ export default function DashboardPage() {
       </div>
 
       {/* CTA Banner */}
-      <div className="glass-card bg-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-primary">
-        <div>
-          <h2 className="text-xl font-heading font-bold text-foreground">Got a new inquiry?</h2>
-          <p className="text-muted-foreground mt-1">Add them to your CRM instantly to start tracking and never miss a follow-up.</p>
+      <div className="glass-card bg-card p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-l-4 border-primary">
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-xl font-heading font-bold text-foreground">Got a new inquiry?</h2>
+          <p className="text-muted-foreground mt-1 text-sm">Add them to your CRM instantly to start tracking.</p>
         </div>
-        <Button className="gap-2 rounded-xl shadow-lg whitespace-nowrap" onClick={() => setLeadDialogOpen(true)}>
+        <Button className="gap-2 rounded-xl shadow-lg whitespace-nowrap shrink-0" onClick={() => setLeadDialogOpen(true)}>
           <Plus className="w-4 h-4" />
           Quick Add Lead
         </Button>
@@ -298,12 +298,12 @@ export default function DashboardPage() {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="glass-card p-6 bg-card flex flex-col items-center text-center cursor-pointer"
+            className="glass-card p-4 sm:p-6 bg-card flex flex-col items-center text-center cursor-pointer"
             onClick={() => navigate(stat.link)}
           >
-            <stat.icon className={`w-7 h-7 ${stat.color} mb-3`} />
-            <p className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">{stat.label}</p>
-            <p className="text-3xl font-heading font-bold mt-1">{stat.value}</p>
+            <stat.icon className={`w-6 h-6 sm:w-7 sm:h-7 ${stat.color} mb-2 sm:mb-3`} />
+            <p className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-muted-foreground uppercase leading-tight">{stat.label}</p>
+            <p className="text-2xl sm:text-3xl font-heading font-bold mt-1">{stat.value}</p>
           </div>
         ))}
       </div>

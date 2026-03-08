@@ -3,9 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Users, Phone, MessageCircle, ChevronRight, Snowflake } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function ColdFollowUpPage() {
   const { tenantId } = useAuth();
+  const navigate = useNavigate();
 
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["cold-contacts", tenantId],
@@ -29,8 +31,8 @@ export default function ColdFollowUpPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-heading font-bold">Cold Follow Up</h1>
-        <p className="text-muted-foreground mt-1">Re-engage leads that have gone cold</p>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold">Cold Follow Up</h1>
+        <p className="text-muted-foreground mt-1 text-sm">Re-engage leads that have gone cold</p>
       </div>
 
       {isLoading ? (
@@ -49,9 +51,9 @@ export default function ColdFollowUpPage() {
                     <p className="text-sm text-muted-foreground">{contact.phone || "No phone"}</p>
                   </div>
                 </div>
-                <div className="text-right text-xs text-muted-foreground">
+                <div className="text-right text-xs text-muted-foreground shrink-0">
                   <p className="uppercase font-semibold">Last Contact</p>
-                  <p>{new Date(contact.updated_at).toLocaleString()}</p>
+                  <p className="truncate max-w-[120px]">{new Date(contact.updated_at).toLocaleDateString()}</p>
                 </div>
               </div>
 
@@ -71,7 +73,7 @@ export default function ColdFollowUpPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <Button variant="link" size="sm" className="text-primary gap-1 p-0 h-auto text-xs">
+                <Button variant="link" size="sm" className="text-primary gap-1 p-0 h-auto text-xs" onClick={() => navigate("/contacts")}>
                   View Profile <ChevronRight className="w-3 h-3" />
                 </Button>
                 <div className="flex gap-2">
