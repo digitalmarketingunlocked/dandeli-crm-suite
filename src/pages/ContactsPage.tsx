@@ -90,9 +90,11 @@ export default function ContactsPage() {
   };
   const [searchParams] = useSearchParams();
   const urlFilter = searchParams.get("filter");
+  const urlStatus = searchParams.get("status");
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string>(() => {
+    if (urlStatus) return urlStatus;
     if (urlFilter === "booked") return "booked";
     return "all";
   });
