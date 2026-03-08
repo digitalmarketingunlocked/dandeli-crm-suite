@@ -306,7 +306,7 @@ export default function AdminDashboardPage() {
               variant={confirmAction?.action === "approved" ? "default" : "destructive"}
               disabled={updateRequest.isPending}
               onClick={() =>
-                confirmAction && updateRequest.mutate({ id: confirmAction.id, status: confirmAction.action })
+                confirmAction && updateRequest.mutate({ id: confirmAction.id, status: confirmAction.action, tenantId: confirmAction.tenantId, planName: confirmAction.planName })
               }
             >
               {updateRequest.isPending
