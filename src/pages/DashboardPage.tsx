@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DateInput } from "@/components/ui/date-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -203,9 +204,9 @@ export default function DashboardPage() {
       {/* Custom Date Range */}
       {period === "custom" && (
         <div className="flex items-center gap-3 justify-end">
-          <Input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} className="w-[140px] h-8 text-xs rounded-lg" placeholder="From" />
+          <DateInput value={customFrom} onChange={setCustomFrom} placeholder="From" className="w-[160px] h-8 text-xs rounded-lg" />
           <span className="text-xs text-muted-foreground">to</span>
-          <Input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="w-[140px] h-8 text-xs rounded-lg" placeholder="To" />
+          <DateInput value={customTo} onChange={setCustomTo} placeholder="To" className="w-[160px] h-8 text-xs rounded-lg" />
         </div>
       )}
 
@@ -261,28 +262,22 @@ export default function DashboardPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Check-in Date *</Label>
-                  <div className="relative">
-                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      type="date"
-                      value={leadForm.check_in_date}
-                      onChange={(e) => setLeadForm({ ...leadForm, check_in_date: e.target.value })}
-                      required
-                      className="pl-10 rounded-xl"
-                    />
-                  </div>
+                  <DateInput
+                    value={leadForm.check_in_date}
+                    onChange={(v) => setLeadForm({ ...leadForm, check_in_date: v })}
+                    required
+                    className="rounded-xl"
+                    placeholder="Check-in"
+                  />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Check-out Date</Label>
-                  <div className="relative">
-                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      type="date"
-                      value={leadForm.check_out_date}
-                      onChange={(e) => setLeadForm({ ...leadForm, check_out_date: e.target.value })}
-                      className="pl-10 rounded-xl"
-                    />
-                  </div>
+                  <DateInput
+                    value={leadForm.check_out_date}
+                    onChange={(v) => setLeadForm({ ...leadForm, check_out_date: v })}
+                    className="rounded-xl"
+                    placeholder="Check-out"
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">

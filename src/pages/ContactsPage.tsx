@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLeadStatuses, STAGE_COLOR_MAP } from "@/hooks/useLeadStatuses";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DateInput } from "@/components/ui/date-input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -392,19 +393,19 @@ export default function ContactsPage() {
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Filter by Check-in Date</Label>
-              <Input
-                type="date"
+              <DateInput
                 value={checkInFilter}
-                onChange={(e) => setCheckInFilter(e.target.value)}
+                onChange={setCheckInFilter}
+                placeholder="Select date"
                 className="rounded-xl"
               />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Last Contacted</Label>
-              <Input
-                type="date"
+              <DateInput
                 value={lastContactedFilter}
-                onChange={(e) => setLastContactedFilter(e.target.value)}
+                onChange={setLastContactedFilter}
+                placeholder="Select date"
                 className="rounded-xl"
               />
             </div>
@@ -554,11 +555,11 @@ export default function ContactsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Check-in *</Label>
-                  <Input type="date" value={leadForm.check_in_date} onChange={(e) => setLeadForm({ ...leadForm, check_in_date: e.target.value })} required className="rounded-xl" />
+                  <DateInput value={leadForm.check_in_date} onChange={(v) => setLeadForm({ ...leadForm, check_in_date: v })} required className="rounded-xl" placeholder="Check-in" />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Check-out</Label>
-                  <Input type="date" value={leadForm.check_out_date} onChange={(e) => setLeadForm({ ...leadForm, check_out_date: e.target.value })} className="rounded-xl" />
+                  <DateInput value={leadForm.check_out_date} onChange={(v) => setLeadForm({ ...leadForm, check_out_date: v })} className="rounded-xl" placeholder="Check-out" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -669,20 +670,18 @@ export default function ContactsPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <Label className="text-xs text-muted-foreground uppercase tracking-wider">Check-in</Label>
-                        <Input
-                          type="date"
+                        <DateInput
                           value={editForm.check_in_date as string || ""}
-                          onChange={(e) => setEditForm({ ...editForm, check_in_date: e.target.value })}
-                          className="w-[150px] h-8 text-xs rounded-lg"
+                          onChange={(v) => setEditForm({ ...editForm, check_in_date: v })}
+                          className="w-[160px] h-8 text-xs rounded-lg"
                         />
                       </div>
                       <div className="flex items-center justify-between">
                         <Label className="text-xs text-muted-foreground uppercase tracking-wider">Check-out</Label>
-                        <Input
-                          type="date"
+                        <DateInput
                           value={editForm.check_out_date as string || ""}
-                          onChange={(e) => setEditForm({ ...editForm, check_out_date: e.target.value })}
-                          className="w-[150px] h-8 text-xs rounded-lg"
+                          onChange={(v) => setEditForm({ ...editForm, check_out_date: v })}
+                          className="w-[160px] h-8 text-xs rounded-lg"
                         />
                       </div>
                       <div className="flex items-center justify-between">
@@ -737,11 +736,10 @@ export default function ContactsPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <Label className="text-xs text-muted-foreground uppercase tracking-wider">Follow-up</Label>
-                        <Input
-                          type="date"
+                        <DateInput
                           value={editForm.follow_up_date as string || ""}
-                          onChange={(e) => setEditForm({ ...editForm, follow_up_date: e.target.value })}
-                          className="w-[150px] h-8 text-xs rounded-lg"
+                          onChange={(v) => setEditForm({ ...editForm, follow_up_date: v })}
+                          className="w-[160px] h-8 text-xs rounded-lg"
                         />
                       </div>
                       <div className="flex items-center justify-between">
