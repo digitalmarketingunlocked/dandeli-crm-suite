@@ -344,6 +344,53 @@ export type Database = {
           },
         ]
       }
+      subscription_requests: {
+        Row: {
+          amount: number
+          billing_period: string
+          created_at: string
+          id: string
+          plan_name: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          billing_period?: string
+          created_at?: string
+          id?: string
+          plan_name: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          billing_period?: string
+          created_at?: string
+          id?: string
+          plan_name?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_invites: {
         Row: {
           created_at: string
