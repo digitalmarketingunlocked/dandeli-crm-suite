@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +18,9 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [period, setPeriod] = useState("month");
+  const [period, setPeriod] = useState("this-month");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
   const [leadForm, setLeadForm] = useState({
     name: "", phone: "", check_in_date: "", check_out_date: "",
@@ -84,19 +86,57 @@ export default function DashboardPage() {
 
 
 
-  const totalContacts = contacts?.length ?? 0;
-  const hotLeads = contacts?.filter((c) => {
-    const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
-    return days <= 3;
-  }).length ?? 0;
-  const bookedLeads = contacts?.filter((c) => c.type === "booked").length ?? 0;
-  const conversionRate = totalContacts > 0 ? Math.round((bookedLeads / totalContacts) * 100) : 0;
-  const pendingFollowups = contacts?.filter((c) => ["follow-up", "lead", "interested", "negotiation"].includes(c.type)).length ?? 0;
+  const filteredContacts = useMemo(() => {
+    if (!contacts) return [];
+    const now = new Date();
+    return contacts.filter((c) => {
+      const created = new Date(c.created_at);
+      switch (period) {
+        case "today": {
+          const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          return created >= start;
+        }
+        case "this-week": {
+          const day = now.getDay();
+          const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (day === 0 ? 6 : day - 1));
+          return created >= start;
+        }
+        case "this-month": {
+          const start = new Date(now.getFullYear(), now.getMonth(), 1);
+          return created >= start;
+        }
+        case "this-year": {
+          const start = new Date(now.getFullYear(), 0, 1);
+          return created >= start;
+        }
+        case "custom": {
+          if (customFrom && created < new Date(customFrom)) return false;
+          if (customTo) {
+            const end = new Date(customTo);
+            end.setHours(23, 59, 59, 999);
+            if (created > end) return false;
+          }
+          return true;
+        }
+        default:
+          return true;
+      }
+    });
+  }, [contacts, period, customFrom, customTo]);
 
-  const recentHotLeads = contacts?.filter((c) => {
+  const totalContacts = filteredContacts.length;
+  const hotLeads = filteredContacts.filter((c) => {
     const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
     return days <= 3;
-  }).slice(0, 5) ?? [];
+  }).length;
+  const bookedLeads = filteredContacts.filter((c) => c.type === "booked").length;
+  const conversionRate = totalContacts > 0 ? Math.round((bookedLeads / totalContacts) * 100) : 0;
+  const pendingFollowups = filteredContacts.filter((c) => ["follow-up", "lead", "interested", "negotiation"].includes(c.type)).length;
+
+  const recentHotLeads = filteredContacts.filter((c) => {
+    const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
+    return days <= 3;
+  }).slice(0, 5);
 
   // Lead funnel data
   const LEAD_STAGES = [
@@ -108,7 +148,7 @@ export default function DashboardPage() {
   ];
   const leadStageCounts = LEAD_STAGES.map((s) => ({
     ...s,
-    count: contacts?.filter((c) => c.type === s.key).length ?? 0,
+    count: filteredContacts.filter((c) => c.type === s.key).length,
   }));
   const maxLeadCount = Math.max(...leadStageCounts.map((s) => s.count), 1);
 
@@ -143,19 +183,31 @@ export default function DashboardPage() {
           <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground truncate">Dashboard Overview</h1>
           <p className="text-muted-foreground mt-1 text-sm">Real-time performance metrics of <span className="font-medium text-foreground">{tenant?.name && tenant.name !== user?.email ? tenant.name : "your resort"}</span></p>
         </div>
-        <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-[140px] rounded-xl glass-subtle bg-card shrink-0 self-end">
-            <CalendarDays className="w-4 h-4 mr-2 text-muted-foreground" />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="glass-strong bg-card rounded-xl">
-            <SelectItem value="week">Week</SelectItem>
-            <SelectItem value="month">Month</SelectItem>
-            <SelectItem value="quarter">Quarter</SelectItem>
-            <SelectItem value="year">Year</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2 self-end">
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger className="w-[130px] h-8 text-xs rounded-lg glass-subtle bg-card shrink-0">
+              <CalendarDays className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="glass-strong bg-card rounded-xl">
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="this-week">This Week</SelectItem>
+              <SelectItem value="this-month">This Month</SelectItem>
+              <SelectItem value="this-year">This Year</SelectItem>
+              <SelectItem value="custom">Custom</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
+
+      {/* Custom Date Range */}
+      {period === "custom" && (
+        <div className="flex items-center gap-3 justify-end">
+          <Input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} className="w-[140px] h-8 text-xs rounded-lg" placeholder="From" />
+          <span className="text-xs text-muted-foreground">to</span>
+          <Input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="w-[140px] h-8 text-xs rounded-lg" placeholder="To" />
+        </div>
+      )}
 
       {/* CTA Banner */}
       <div className="glass-card bg-card p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-l-4 border-primary">
