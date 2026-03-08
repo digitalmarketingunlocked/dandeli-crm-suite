@@ -39,7 +39,7 @@ export default function DashboardPage() {
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
   const [leadForm, setLeadForm] = useState({
     name: "", phone: "", check_in_date: "", check_out_date: "",
-    guests_count: "2", city: "", lead_time: "", source: "organic",
+    adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic",
   });
 
   const createLead = useMutation({
