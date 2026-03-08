@@ -153,9 +153,9 @@ export default function DashboardPage() {
   const maxLeadCount = Math.max(...leadStageCounts.map((s) => s.count), 1);
 
   const stats = [
-    { label: "TOTAL LEADS", value: totalContacts, icon: Users, color: "text-secondary", link: "/contacts" },
-    { label: "HOT LEADS", value: hotLeads, icon: Flame, color: "text-accent", link: "/contacts" },
-    { label: "CONVERSION RATE", value: `${conversionRate}%`, icon: Target, color: "text-primary", link: "/contacts" },
+    { label: "TOTAL LEADS", value: totalContacts, icon: Users, color: "text-secondary", link: "/contacts?filter=all" },
+    { label: "HOT LEADS", value: hotLeads, icon: Flame, color: "text-accent", link: "/contacts?filter=hot" },
+    { label: "CONVERSION RATE", value: `${conversionRate}%`, icon: Target, color: "text-primary", link: "/contacts?filter=booked" },
     { label: "PENDING FOLLOW-UPS", value: pendingFollowups, icon: Clock, color: "text-info", link: "/follow-ups" },
   ];
 

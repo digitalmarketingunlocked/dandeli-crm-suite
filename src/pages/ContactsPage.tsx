@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,13 +88,18 @@ export default function ContactsPage() {
     const status = leadStatuses.find((s) => s.value === type);
     return status ? (STAGE_COLOR_MAP[status.color] || STAGE_COLOR_MAP.secondary) : STAGE_COLOR_MAP.secondary;
   };
+  const [searchParams] = useSearchParams();
+  const urlFilter = searchParams.get("filter");
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>(() => {
+    if (urlFilter === "booked") return "booked";
+    return "all";
+  });
   const [checkInFilter, setCheckInFilter] = useState("");
   const [lastContactedFilter, setLastContactedFilter] = useState("");
   const [followUpOnly, setFollowUpOnly] = useState(false);
-  const [hotOnly, setHotOnly] = useState(false);
+  const [hotOnly, setHotOnly] = useState(() => urlFilter === "hot");
 
   // Add lead dialog
   const [addDialogOpen, setAddDialogOpen] = useState(false);
