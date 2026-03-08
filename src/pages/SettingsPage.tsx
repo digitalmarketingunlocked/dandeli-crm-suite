@@ -17,23 +17,26 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="appearance" className="w-full">
-        <TabsList className="w-full justify-start gap-1 bg-transparent p-0 border-b border-border/50 rounded-none h-auto pb-0">
-          <TabsTrigger value="notifications" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
-            <Bell className="w-4 h-4" /> Notifications
-          </TabsTrigger>
-          <TabsTrigger value="appearance" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
-            <Palette className="w-4 h-4" /> Appearance
-          </TabsTrigger>
-          <TabsTrigger value="account" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
-            <User className="w-4 h-4" /> Account
-          </TabsTrigger>
-          <TabsTrigger value="lead-statuses" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
-            <Tag className="w-4 h-4" /> Lead Statuses
-          </TabsTrigger>
-          <TabsTrigger value="crm" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
-            <SettingsIcon className="w-4 h-4" /> CRM Config
-          </TabsTrigger>
-        </TabsList>
+        <ScrollArea className="w-full whitespace-nowrap">
+          <TabsList className="w-max justify-start gap-1 bg-transparent p-0 border-b border-border/50 rounded-none h-auto pb-0">
+            <TabsTrigger value="notifications" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
+              <Bell className="w-4 h-4" /> Notifications
+            </TabsTrigger>
+            <TabsTrigger value="appearance" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
+              <Palette className="w-4 h-4" /> Appearance
+            </TabsTrigger>
+            <TabsTrigger value="account" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
+              <User className="w-4 h-4" /> Account
+            </TabsTrigger>
+            <TabsTrigger value="lead-statuses" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
+              <Tag className="w-4 h-4" /> Lead Statuses
+            </TabsTrigger>
+            <TabsTrigger value="crm" className="rounded-t-xl rounded-b-none data-[state=active]:bg-card data-[state=active]:shadow-sm gap-2 px-4 py-2.5 text-sm">
+              <SettingsIcon className="w-4 h-4" /> CRM Config
+            </TabsTrigger>
+          </TabsList>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
 
         <div className="pt-6">
           <TabsContent value="notifications">
