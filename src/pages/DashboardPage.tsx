@@ -52,6 +52,26 @@ export default function DashboardPage() {
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user!.id).single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: tenant } = useQuery({
+    queryKey: ["tenant", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("tenants").select("*").eq("id", tenantId!).single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+
   const { data: contacts } = useQuery({
     queryKey: ["contacts", tenantId],
     queryFn: async () => {
@@ -61,7 +81,6 @@ export default function DashboardPage() {
     },
     enabled: !!tenantId,
   });
-
 
 
 
