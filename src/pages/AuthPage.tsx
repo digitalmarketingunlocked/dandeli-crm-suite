@@ -111,6 +111,28 @@ export default function AuthPage() {
             </h1>
           </div>
 
+          {showForgotPassword ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-heading">Reset Password</CardTitle>
+                <CardDescription>Enter your email and we'll send you a reset link</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email">Email</Label>
+                    <Input id="forgot-email" type="email" placeholder="you@company.com" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} required />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Sending..." : "Send Reset Link"}
+                  </Button>
+                  <Button type="button" variant="link" className="w-full text-sm" onClick={() => setShowForgotPassword(false)}>
+                    Back to Sign In
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          ) : (
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">Sign In</TabsTrigger>
