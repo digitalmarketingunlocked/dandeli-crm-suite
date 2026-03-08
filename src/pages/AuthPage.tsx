@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label";
 import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Trees, Mountain, Waves, Sparkles } from "lucide-react";
+import { Trees, Mountain, Waves, Sparkles, Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
 import { Separator } from "@/components/ui/separator";
 
 export default function AuthPage() {
+  const navigate = useNavigate();
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -98,7 +100,15 @@ export default function AuthPage() {
   );
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-4 left-4 z-50 rounded-xl"
+        onClick={() => navigate("/")}
+      >
+        <Home className="w-5 h-5" />
+      </Button>
       {/* Left panel - branding */}
       <div className="hidden lg:flex lg:w-1/2 gradient-hero items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
