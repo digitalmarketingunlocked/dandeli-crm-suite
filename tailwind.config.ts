@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['Space Grotesk', 'sans-serif'],
-        body: ['-apple-system', 'SF Pro Display', 'SF Pro Text', 'system-ui', 'BlinkMacSystemFont', 'sans-serif'],
+        heading: ['-apple-system', 'SF Pro Display', 'SF Pro Text', 'system-ui', 'BlinkMacSystemFont', 'Inter', 'sans-serif'],
+        body: ['-apple-system', 'SF Pro Display', 'SF Pro Text', 'system-ui', 'BlinkMacSystemFont', 'Inter', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
