@@ -200,6 +200,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Custom Date Range */}
+      {period === "custom" && (
+        <div className="flex items-center gap-3 justify-end">
+          <Input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} className="w-[140px] h-8 text-xs rounded-lg" placeholder="From" />
+          <span className="text-xs text-muted-foreground">to</span>
+          <Input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="w-[140px] h-8 text-xs rounded-lg" placeholder="To" />
+        </div>
+      )}
+
       {/* CTA Banner */}
       <div className="glass-card bg-card p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-l-4 border-primary">
         <div className="min-w-0">
