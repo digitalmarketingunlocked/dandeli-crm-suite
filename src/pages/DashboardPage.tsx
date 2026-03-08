@@ -148,7 +148,7 @@ export default function DashboardPage() {
   ];
   const leadStageCounts = LEAD_STAGES.map((s) => ({
     ...s,
-    count: contacts?.filter((c) => c.type === s.key).length ?? 0,
+    count: filteredContacts.filter((c) => c.type === s.key).length,
   }));
   const maxLeadCount = Math.max(...leadStageCounts.map((s) => s.count), 1);
 
