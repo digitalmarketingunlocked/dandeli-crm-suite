@@ -7,23 +7,29 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { CreditCard, Check, Zap, Crown, ArrowUpRight, Smartphone } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+import phonePeLogo from "@/assets/phonepe-logo.png";
+import gpayLogo from "@/assets/gpay-logo.png";
+import amazonPayLogo from "@/assets/amazonpay-logo.png";
+import credLogo from "@/assets/cred-logo.png";
+import upiLogo from "@/assets/upi-logo.png";
 
 const UPI_ID = "digitalmarketingunlocked@ybl";
 
 const UPI_APPS = [
-  { name: "PhonePe", icon: "📱", scheme: "phonepe" },
-  { name: "Google Pay", icon: "💳", scheme: "gpay" },
-  { name: "Amazon Pay", icon: "🛒", scheme: "amazonpay" },
-  { name: "CRED", icon: "💎", scheme: "cred" },
-  { name: "Any UPI App", icon: "📲", scheme: "upi" },
+  { name: "PhonePe", icon: phonePeLogo, scheme: "phonepe" },
+  { name: "Google Pay", icon: gpayLogo, scheme: "gpay" },
+  { name: "Amazon Pay", icon: amazonPayLogo, scheme: "amazonpay" },
+  { name: "CRED", icon: credLogo, scheme: "cred" },
+  { name: "Any UPI App", icon: upiLogo, scheme: "upi" },
 ];
 
 interface Plan {
   name: string;
   subtitle?: string;
-  price: string;
-  period: string;
-  amount: number;
+  monthlyPrice: number;
+  yearlyPrice: number;
   features: string[];
   current?: boolean;
   recommended?: boolean;
@@ -32,42 +38,41 @@ interface Plan {
 const PLANS: Plan[] = [
   {
     name: "Free",
-    price: "₹0",
-    period: "/month",
-    amount: 0,
+    monthlyPrice: 0,
+    yearlyPrice: 0,
     features: ["Up to 50 leads", "1 team member", "Basic analytics", "Email support"],
     current: true,
   },
   {
     name: "Startup",
     subtitle: "For solo founders",
-    price: "₹999",
-    period: "/month",
-    amount: 999,
+    monthlyPrice: 999,
+    yearlyPrice: 9999,
     features: ["Unlimited leads", "1 team member", "Advanced analytics", "Priority support", "Custom lead statuses"],
     recommended: true,
   },
   {
     name: "Business",
     subtitle: "For growing business with sales team",
-    price: "₹1,999",
-    period: "/month",
-    amount: 1999,
+    monthlyPrice: 1999,
+    yearlyPrice: 19999,
     features: ["Everything in Startup", "3 team members", "API access", "Priority support", "Custom integrations", "Export data", "Advanced reporting"],
   },
   {
     name: "Enterprise",
     subtitle: "For large organizations",
-    price: "₹2,999",
-    period: "/month",
-    amount: 2999,
+    monthlyPrice: 2999,
+    yearlyPrice: 29999,
     features: ["Everything in Business", "Unlimited team members", "Dedicated support", "White-label options", "SLA guarantee", "Custom onboarding"],
   },
 ];
 
+const formatPrice = (amount: number) => `₹${amount.toLocaleString("en-IN")}`;
+
 export default function SubscriptionSettings() {
   const { tenantId } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
 
   const { data: tenant } = useQuery({
     queryKey: ["tenant", tenantId],
@@ -84,29 +89,31 @@ export default function SubscriptionSettings() {
   });
 
   const resortName = tenant?.name || "Resort";
+  const isYearly = billing === "yearly";
+
+  const getPrice = (plan: Plan) => (isYearly ? plan.yearlyPrice : plan.monthlyPrice);
+  const getPeriod = () => (isYearly ? "/year" : "/month");
+
+  const getMonthlySaving = (plan: Plan) => {
+    if (plan.monthlyPrice === 0) return 0;
+    return plan.monthlyPrice * 12 - plan.yearlyPrice;
+  };
 
   const buildUpiUrl = (scheme: string, plan: Plan) => {
-    const remark = `${resortName} - ${plan.name} Plan`;
+    const amount = getPrice(plan);
+    const remark = `${resortName} - ${plan.name} Plan (${isYearly ? "Annual" : "Monthly"})`;
     const params = new URLSearchParams({
       pa: UPI_ID,
       pn: "Digital Marketing Unlocked",
-      am: plan.amount.toString(),
+      am: amount.toString(),
       cu: "INR",
       tn: remark,
     });
 
-    if (scheme === "gpay") {
-      return `tez://upi/pay?${params.toString()}`;
-    }
-    if (scheme === "phonepe") {
-      return `phonepe://pay?${params.toString()}`;
-    }
-    if (scheme === "cred") {
-      return `cred://upi/pay?${params.toString()}`;
-    }
-    if (scheme === "amazonpay") {
-      return `amazonpay://upi/pay?${params.toString()}`;
-    }
+    if (scheme === "gpay") return `tez://upi/pay?${params.toString()}`;
+    if (scheme === "phonepe") return `phonepe://pay?${params.toString()}`;
+    if (scheme === "cred") return `cred://upi/pay?${params.toString()}`;
+    if (scheme === "amazonpay") return `amazonpay://upi/pay?${params.toString()}`;
     return `upi://pay?${params.toString()}`;
   };
 
@@ -163,10 +170,37 @@ export default function SubscriptionSettings() {
       </div>
 
       {/* Available Plans */}
-      <div className="space-y-3">
-        <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
-          <Crown className="w-4 h-4" /> Available Plans
-        </h4>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
+            <Crown className="w-4 h-4" /> Available Plans
+          </h4>
+          <div className="flex items-center gap-2">
+            <ToggleGroup
+              type="single"
+              value={billing}
+              onValueChange={(v) => v && setBilling(v as "monthly" | "yearly")}
+              className="bg-muted/50 rounded-xl p-1"
+            >
+              <ToggleGroupItem
+                value="monthly"
+                className="rounded-lg px-4 py-1.5 text-xs font-medium data-[state=on]:bg-card data-[state=on]:shadow-sm"
+              >
+                Monthly
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="yearly"
+                className="rounded-lg px-4 py-1.5 text-xs font-medium data-[state=on]:bg-card data-[state=on]:shadow-sm"
+              >
+                Yearly
+                <Badge variant="secondary" className="ml-1.5 text-[10px] px-1.5 py-0 bg-green-500/15 text-green-600 border-green-500/30">
+                  2 months free
+                </Badge>
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        </div>
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {PLANS.map((plan) => (
             <div
@@ -186,9 +220,14 @@ export default function SubscriptionSettings() {
                   <p className="text-xs text-muted-foreground mt-0.5">{plan.subtitle}</p>
                 )}
                 <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-2xl font-bold">{plan.price}</span>
-                  <span className="text-xs text-muted-foreground">{plan.period}</span>
+                  <span className="text-2xl font-bold">{formatPrice(getPrice(plan))}</span>
+                  <span className="text-xs text-muted-foreground">{getPeriod()}</span>
                 </div>
+                {isYearly && plan.monthlyPrice > 0 && (
+                  <p className="text-[11px] text-green-600 mt-1 font-medium">
+                    Save {formatPrice(getMonthlySaving(plan))}/year
+                  </p>
+                )}
               </div>
               <ul className="space-y-2">
                 {plan.features.map((feature) => (
@@ -222,7 +261,9 @@ export default function SubscriptionSettings() {
             </DialogTitle>
             <DialogDescription>
               Upgrade to <span className="font-semibold text-foreground">{selectedPlan?.name}</span> plan for{" "}
-              <span className="font-semibold text-foreground">{selectedPlan?.price}/month</span>
+              <span className="font-semibold text-foreground">
+                {selectedPlan && formatPrice(getPrice(selectedPlan))}{getPeriod()}
+              </span>
             </DialogDescription>
           </DialogHeader>
 
@@ -230,7 +271,11 @@ export default function SubscriptionSettings() {
             <div className="p-3 rounded-xl bg-muted/30 border border-border/50 text-sm space-y-1">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Amount</span>
-                <span className="font-bold">{selectedPlan?.price}</span>
+                <span className="font-bold">{selectedPlan && formatPrice(getPrice(selectedPlan))}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Billing</span>
+                <span className="text-xs font-medium">{isYearly ? "Annual" : "Monthly"}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">UPI ID</span>
@@ -249,7 +294,7 @@ export default function SubscriptionSettings() {
                   href={selectedPlan ? buildUpiUrl(app.scheme, selectedPlan) : "#"}
                   className="flex items-center gap-3 p-3 rounded-xl border border-border/50 bg-card hover:bg-muted/30 transition-colors cursor-pointer"
                 >
-                  <span className="text-2xl">{app.icon}</span>
+                  <img src={app.icon} alt={app.name} className="w-8 h-8 rounded-lg object-contain" />
                   <span className="font-medium text-sm">{app.name}</span>
                   <ArrowUpRight className="w-4 h-4 ml-auto text-muted-foreground" />
                 </a>
