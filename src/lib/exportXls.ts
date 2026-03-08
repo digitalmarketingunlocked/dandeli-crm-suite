@@ -92,8 +92,8 @@ export function exportContactsToXls(contacts: Contact[], statusMap?: { value: st
     const addr = XLSX.utils.encode_cell({ r: 0, c: C });
     if (!ws[addr]) continue;
     ws[addr].s = {
-      font: { bold: true, color: { rgb: "FFFFFF" }, sz: 11 },
-      fill: { fgColor: { rgb: "4472C4" } },
+      font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 },
+      fill: { fgColor: { rgb: "1A1A2E" } },
       alignment: { horizontal: "center", vertical: "center" },
       border: {
         top: { style: "thin", color: { rgb: "000000" } },
