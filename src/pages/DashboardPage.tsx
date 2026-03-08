@@ -63,7 +63,7 @@ export default function DashboardPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       setLeadDialogOpen(false);
-      setLeadForm({ name: "", phone: "", check_in_date: "", check_out_date: "", guests_count: "2", city: "", lead_time: "", source: "organic" });
+      setLeadForm({ name: "", phone: "", check_in_date: "", check_out_date: "", adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic" });
       toast({ title: "Lead added!" });
     },
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
