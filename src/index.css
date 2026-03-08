@@ -9,60 +9,60 @@
     --font-heading: -apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, BlinkMacSystemFont, 'Inter', sans-serif;
     --font-body: -apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, BlinkMacSystemFont, 'Inter', sans-serif;
 
-    --background: 0 0% 100%;
-    --foreground: 215 28% 10%;
+    --background: 210 40% 98%;
+    --foreground: 215 30% 8%;
 
-    --card: 0 0% 100% / 0.75;
-    --card-foreground: 215 28% 10%;
+    --card: 0 0% 100% / 0.85;
+    --card-foreground: 215 30% 8%;
 
-    --popover: 0 0% 100% / 0.92;
-    --popover-foreground: 215 28% 10%;
+    --popover: 0 0% 100% / 0.95;
+    --popover-foreground: 215 30% 8%;
 
-    --primary: 162 63% 36%;
+    --primary: 162 72% 32%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 75% 50%;
+    --secondary: 210 85% 48%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 30% 95%;
-    --muted-foreground: 215 18% 42%;
+    --muted: 210 35% 93%;
+    --muted-foreground: 215 20% 35%;
 
-    --accent: 28 92% 55%;
+    --accent: 28 95% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 80% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 25% 90%;
-    --input: 210 25% 90%;
-    --ring: 162 63% 36%;
+    --border: 210 30% 85%;
+    --input: 210 30% 85%;
+    --ring: 162 72% 32%;
 
     --radius: 1rem;
 
-    --sidebar-background: 215 28% 11% / 0.85;
-    --sidebar-foreground: 210 20% 95%;
-    --sidebar-primary: 162 63% 48%;
+    --sidebar-background: 215 35% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 162 72% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 20% 20% / 0.5;
-    --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 210 15% 30% / 0.3;
-    --sidebar-ring: 162 63% 48%;
+    --sidebar-accent: 215 25% 18%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 215 20% 20%;
+    --sidebar-ring: 162 72% 48%;
 
-    --success: 162 63% 36%;
-    --warning: 38 95% 50%;
-    --info: 210 75% 50%;
+    --success: 162 72% 32%;
+    --warning: 38 100% 50%;
+    --info: 210 85% 48%;
 
     --glass-blur: 20px;
     --glass-saturate: 1.8;
-    --glass-border: 1px solid hsla(0, 0%, 100%, 0.35);
-    --glass-shadow: 0 8px 32px 0 hsla(215, 28%, 10%, 0.06);
-    --glass-shadow-lg: 0 16px 48px 0 hsla(215, 28%, 10%, 0.1);
-    --glass-highlight: inset 0 1px 0 0 hsla(0, 0%, 100%, 0.5);
+    --glass-border: 1px solid hsla(210, 30%, 80%, 0.5);
+    --glass-shadow: 0 8px 32px 0 hsla(215, 30%, 10%, 0.08);
+    --glass-shadow-lg: 0 16px 48px 0 hsla(215, 30%, 10%, 0.12);
+    --glass-highlight: inset 0 1px 0 0 hsla(0, 0%, 100%, 0.6);
 
-    --gradient-mesh-1: radial-gradient(ellipse at 20% 50%, hsla(162, 63%, 45%, 0.12) 0%, transparent 50%);
-    --gradient-mesh-2: radial-gradient(ellipse at 80% 20%, hsla(210, 75%, 55%, 0.1) 0%, transparent 50%);
-    --gradient-mesh-3: radial-gradient(ellipse at 60% 80%, hsla(28, 92%, 58%, 0.07) 0%, transparent 50%);
-    --gradient-hero: linear-gradient(135deg, hsla(215, 28%, 10%, 0.95) 0%, hsla(162, 40%, 18%, 0.95) 100%);
+    --gradient-mesh-1: radial-gradient(ellipse at 20% 50%, hsla(162, 72%, 42%, 0.15) 0%, transparent 50%);
+    --gradient-mesh-2: radial-gradient(ellipse at 80% 20%, hsla(210, 85%, 52%, 0.12) 0%, transparent 50%);
+    --gradient-mesh-3: radial-gradient(ellipse at 60% 80%, hsla(28, 95%, 55%, 0.08) 0%, transparent 50%);
+    --gradient-hero: linear-gradient(135deg, hsla(215, 35%, 10%, 0.95) 0%, hsla(162, 40%, 18%, 0.95) 100%);
   }
 
   .dark {
