@@ -442,14 +442,21 @@ export default function DashboardPage() {
           <div className="p-6 pb-3">
             <h3 className="font-heading font-semibold text-lg">Lead Funnel</h3>
           </div>
-          <div className="px-6 pb-6 space-y-4">
+          <div className="px-6 pb-6 space-y-3">
             {leadStageCounts.map((item) => (
-              <div key={item.key} className="space-y-1.5">
+              <div
+                key={item.key}
+                className="space-y-1.5 p-2.5 -mx-2.5 rounded-xl hover:bg-muted/30 transition-colors cursor-pointer group"
+                onClick={() => navigate(`/leads?status=${item.key}`)}
+              >
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{item.label}</span>
-                  <span className="font-semibold">{item.count}</span>
+                  <span className="text-muted-foreground group-hover:text-foreground transition-colors">{item.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">{item.count}</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
                 </div>
-                <div className="h-2 rounded-full bg-muted/50 overflow-hidden">
+                <div className="h-2.5 rounded-full bg-muted/50 overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
