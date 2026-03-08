@@ -274,7 +274,7 @@ export default function BookingsPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                       {booking.phone && (
                         <>
                           <Button
