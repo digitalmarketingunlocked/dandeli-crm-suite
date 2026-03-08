@@ -298,12 +298,12 @@ export default function DashboardPage() {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="glass-card p-6 bg-card flex flex-col items-center text-center cursor-pointer"
+            className="glass-card p-4 sm:p-6 bg-card flex flex-col items-center text-center cursor-pointer"
             onClick={() => navigate(stat.link)}
           >
-            <stat.icon className={`w-7 h-7 ${stat.color} mb-3`} />
-            <p className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">{stat.label}</p>
-            <p className="text-3xl font-heading font-bold mt-1">{stat.value}</p>
+            <stat.icon className={`w-6 h-6 sm:w-7 sm:h-7 ${stat.color} mb-2 sm:mb-3`} />
+            <p className="text-[10px] sm:text-[11px] font-semibold tracking-wider text-muted-foreground uppercase leading-tight">{stat.label}</p>
+            <p className="text-2xl sm:text-3xl font-heading font-bold mt-1">{stat.value}</p>
           </div>
         ))}
       </div>

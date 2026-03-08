@@ -51,9 +51,9 @@ export default function ColdFollowUpPage() {
                     <p className="text-sm text-muted-foreground">{contact.phone || "No phone"}</p>
                   </div>
                 </div>
-                <div className="text-right text-xs text-muted-foreground">
+                <div className="text-right text-xs text-muted-foreground shrink-0">
                   <p className="uppercase font-semibold">Last Contact</p>
-                  <p>{new Date(contact.updated_at).toLocaleString()}</p>
+                  <p className="truncate max-w-[120px]">{new Date(contact.updated_at).toLocaleDateString()}</p>
                 </div>
               </div>
 
