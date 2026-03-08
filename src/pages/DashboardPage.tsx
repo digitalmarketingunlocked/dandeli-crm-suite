@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [period, setPeriod] = useState("this-month");
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
+  const [selectedContact, setSelectedContact] = useState<any>(null);
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
   const [leadForm, setLeadForm] = useState({
     name: "", phone: "", check_in_date: "", check_out_date: "",
