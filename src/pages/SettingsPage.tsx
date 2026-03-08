@@ -183,7 +183,7 @@ export default function SettingsPage() {
           >
             {updateProfile.isPending ? "Saving..." : "Update Name"}
           </Button>
-          <Button variant="outline" className="w-full rounded-xl">
+          <Button variant="outline" className="w-full rounded-xl" onClick={() => setChangePasswordOpen(true)}>
             Change Password
           </Button>
         </div>
