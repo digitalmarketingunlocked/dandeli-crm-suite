@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Target, TrendingUp, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Users, TrendingUp, Target, Clock, Plus, CalendarDays, Phone, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 const STAGE_COLORS: Record<string, string> = {
@@ -14,13 +17,24 @@ const STAGE_COLORS: Record<string, string> = {
   lost: "hsl(0, 72%, 51%)",
 };
 
+const STAGE_LABELS: Record<string, string> = {
+  inquiry: "Inquiry",
+  proposal: "Proposal",
+  negotiation: "Negotiation",
+  booked: "Booked",
+  completed: "Completed",
+  lost: "Lost",
+};
+
 export default function DashboardPage() {
   const { tenantId } = useAuth();
+  const navigate = useNavigate();
+  const [period, setPeriod] = useState("month");
 
   const { data: contacts } = useQuery({
     queryKey: ["contacts", tenantId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("contacts").select("*");
+      const { data, error } = await supabase.from("contacts").select("*").order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -30,7 +44,7 @@ export default function DashboardPage() {
   const { data: deals } = useQuery({
     queryKey: ["deals", tenantId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("deals").select("*");
+      const { data, error } = await supabase.from("deals").select("*, contacts(name, phone)").order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -39,18 +53,24 @@ export default function DashboardPage() {
 
   const totalContacts = contacts?.length ?? 0;
   const totalDeals = deals?.length ?? 0;
-  const totalValue = deals?.reduce((sum, d) => sum + (d.value ?? 0), 0) ?? 0;
   const activeDeals = deals?.filter((d) => !["completed", "lost"].includes(d.stage)).length ?? 0;
+  const bookedDeals = deals?.filter((d) => d.stage === "booked" || d.stage === "completed").length ?? 0;
+  const conversionRate = totalDeals > 0 ? Math.round((bookedDeals / totalDeals) * 100) : 0;
+  const pendingFollowups = deals?.filter((d) => d.stage === "inquiry" || d.stage === "proposal").length ?? 0;
 
-  const stageData = deals
-    ? Object.entries(
-        deals.reduce((acc, d) => {
-          acc[d.stage] = (acc[d.stage] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>)
-      ).map(([name, value]) => ({ name, value }))
+  const recentContacts = contacts?.slice(0, 5) ?? [];
+
+  // Deal funnel data
+  const stageCounts = deals
+    ? ["inquiry", "proposal", "negotiation", "booked", "completed", "lost"].map((stage) => ({
+        stage,
+        label: STAGE_LABELS[stage],
+        count: deals.filter((d) => d.stage === stage).length,
+      }))
     : [];
+  const maxCount = Math.max(...stageCounts.map((s) => s.count), 1);
 
+  // Chart data
   const packageData = deals
     ? Object.entries(
         deals.reduce((acc, d) => {
@@ -62,104 +82,176 @@ export default function DashboardPage() {
     : [];
 
   const stats = [
-    { label: "Total Contacts", value: totalContacts, icon: Users, gradient: "from-secondary to-info" },
-    { label: "Active Deals", value: activeDeals, icon: Target, gradient: "from-accent to-warning" },
-    { label: "Total Revenue", value: `₹${totalValue.toLocaleString("en-IN")}`, icon: TrendingUp, gradient: "from-primary to-secondary" },
-    { label: "Total Deals", value: totalDeals, icon: Calendar, gradient: "from-info to-primary" },
+    { label: "TOTAL CONTACTS", value: totalContacts, icon: Users, color: "text-secondary" },
+    { label: "ACTIVE DEALS", value: activeDeals, icon: TrendingUp, color: "text-accent" },
+    { label: "CONVERSION RATE", value: `${conversionRate}%`, icon: Target, color: "text-primary" },
+    { label: "PENDING FOLLOW-UPS", value: pendingFollowups, icon: Clock, color: "text-info" },
   ];
 
+  const getTimeAgo = (date: string) => {
+    const diff = Date.now() - new Date(date).getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (days === 0) return "Today";
+    if (days === 1) return "1d";
+    return `${days}d`;
+  };
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-heading font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Overview of your tourism business</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-heading font-bold text-foreground">Dashboard Overview</h1>
+          <p className="text-muted-foreground mt-1">Real-time performance metrics</p>
+        </div>
+        <Select value={period} onValueChange={setPeriod}>
+          <SelectTrigger className="w-[140px] rounded-xl glass-subtle bg-card">
+            <CalendarDays className="w-4 h-4 mr-2 text-muted-foreground" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="glass-strong bg-card rounded-xl">
+            <SelectItem value="week">Week</SelectItem>
+            <SelectItem value="month">Month</SelectItem>
+            <SelectItem value="quarter">Quarter</SelectItem>
+            <SelectItem value="year">Year</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* CTA Banner */}
+      <div className="glass-card bg-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-primary">
+        <div>
+          <h2 className="text-xl font-heading font-bold text-foreground">Got a new inquiry?</h2>
+          <p className="text-muted-foreground mt-1">Add them to your CRM instantly to start tracking and never miss a follow-up.</p>
+        </div>
+        <Button className="gap-2 rounded-xl shadow-lg whitespace-nowrap" onClick={() => navigate("/contacts")}>
+          <Plus className="w-4 h-4" />
+          Quick Add Lead
+        </Button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
-          <div key={stat.label} className="glass-card p-6 bg-card">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-                <p className="text-2xl font-heading font-bold mt-1">{stat.value}</p>
-              </div>
-              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg`}>
-                <stat.icon className="w-6 h-6 text-primary-foreground" />
-              </div>
-            </div>
+          <div key={stat.label} className="glass-card p-6 bg-card flex flex-col items-center text-center">
+            <stat.icon className={`w-7 h-7 ${stat.color} mb-3`} />
+            <p className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">{stat.label}</p>
+            <p className="text-3xl font-heading font-bold mt-1">{stat.value}</p>
           </div>
         ))}
       </div>
 
-      {/* Charts */}
+      {/* Recent Contacts & Deal Funnel */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Contacts */}
         <div className="glass-card bg-card overflow-hidden">
-          <div className="p-6 pb-0">
-            <h3 className="font-heading font-semibold text-lg">Deals by Stage</h3>
+          <div className="p-6 pb-3 flex items-center justify-between">
+            <h3 className="font-heading font-semibold text-lg">Recent Contacts</h3>
+            <Button variant="ghost" size="sm" className="text-xs text-primary gap-1" onClick={() => navigate("/contacts")}>
+              View All <ChevronRight className="w-3 h-3" />
+            </Button>
           </div>
-          <div className="p-6">
-            {stageData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={stageData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsla(210, 15%, 50%, 0.15)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip
-                    contentStyle={{
-                      background: "hsla(0, 0%, 100%, 0.8)",
-                      backdropFilter: "blur(12px)",
-                      border: "1px solid hsla(0, 0%, 100%, 0.3)",
-                      borderRadius: "12px",
-                      boxShadow: "0 8px 32px hsla(0,0%,0%,0.1)",
-                    }}
-                  />
-                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                    {stageData.map((entry) => (
-                      <Cell key={entry.name} fill={STAGE_COLORS[entry.name] || "hsl(162, 60%, 38%)"} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+          <div className="px-6 pb-6 space-y-1">
+            {recentContacts.length > 0 ? (
+              recentContacts.map((contact) => (
+                <div key={contact.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/30 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
+                    {contact.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{contact.name}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {contact.phone && (
+                        <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{contact.phone}</span>
+                      )}
+                      {contact.company && <span>· {contact.company}</span>}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className={`text-xs font-medium px-2 py-1 rounded-lg ${
+                      contact.type === "customer" ? "bg-primary/15 text-primary" :
+                      contact.type === "partner" ? "bg-accent/15 text-accent" :
+                      "bg-secondary/15 text-secondary"
+                    }`}>
+                      {contact.type === "lead" ? "New Lead" : contact.type.charAt(0).toUpperCase() + contact.type.slice(1)}
+                    </span>
+                    <p className="text-[10px] text-muted-foreground mt-1">⏱ {getTimeAgo(contact.created_at)}</p>
+                  </div>
+                </div>
+              ))
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                No deals yet. Create your first deal!
+              <div className="py-8 text-center text-sm text-muted-foreground">
+                No contacts yet. Add your first contact!
               </div>
             )}
           </div>
         </div>
 
+        {/* Deal Funnel */}
         <div className="glass-card bg-card overflow-hidden">
-          <div className="p-6 pb-0">
-            <h3 className="font-heading font-semibold text-lg">Revenue by Package</h3>
+          <div className="p-6 pb-3">
+            <h3 className="font-heading font-semibold text-lg">Deal Funnel</h3>
           </div>
-          <div className="p-6">
-            {packageData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie data={packageData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
-                    {packageData.map((_, i) => (
-                      <Cell key={i} fill={Object.values(STAGE_COLORS)[i % Object.values(STAGE_COLORS).length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value: number) => `₹${value.toLocaleString("en-IN")}`}
-                    contentStyle={{
-                      background: "hsla(0, 0%, 100%, 0.8)",
-                      backdropFilter: "blur(12px)",
-                      border: "1px solid hsla(0, 0%, 100%, 0.3)",
-                      borderRadius: "12px",
-                      boxShadow: "0 8px 32px hsla(0,0%,0%,0.1)",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+          <div className="px-6 pb-6 space-y-4">
+            {stageCounts.length > 0 ? (
+              stageCounts.map((item) => (
+                <div key={item.stage} className="space-y-1.5">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">{item.label}</span>
+                    <span className="font-semibold">{item.count}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted/50 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${(item.count / maxCount) * 100}%`,
+                        backgroundColor: STAGE_COLORS[item.stage],
+                        minWidth: item.count > 0 ? "8px" : "0px",
+                      }}
+                    />
+                  </div>
+                </div>
+              ))
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                No revenue data yet.
+              <div className="py-8 text-center text-sm text-muted-foreground">
+                No deals yet. Create your first deal!
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Revenue Chart */}
+      <div className="glass-card bg-card overflow-hidden">
+        <div className="p-6 pb-0">
+          <h3 className="font-heading font-semibold text-lg">Revenue by Package</h3>
+        </div>
+        <div className="p-6">
+          {packageData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie data={packageData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
+                  {packageData.map((_, i) => (
+                    <Cell key={i} fill={Object.values(STAGE_COLORS)[i % Object.values(STAGE_COLORS).length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: number) => `₹${value.toLocaleString("en-IN")}`}
+                  contentStyle={{
+                    background: "hsla(var(--card))",
+                    backdropFilter: "blur(12px)",
+                    border: "1px solid hsla(0, 0%, 100%, 0.2)",
+                    borderRadius: "12px",
+                    boxShadow: "0 8px 32px hsla(0,0%,0%,0.1)",
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[280px] flex items-center justify-center text-muted-foreground">
+              No revenue data yet.
+            </div>
+          )}
         </div>
       </div>
     </div>
