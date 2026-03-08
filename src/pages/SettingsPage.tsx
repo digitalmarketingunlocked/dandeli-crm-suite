@@ -118,8 +118,8 @@ export default function SettingsPage() {
           </h3>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Push Notifications</p>
-              <p className="text-xs text-muted-foreground">Receive alerts for new leads and follow-ups.</p>
+              <p className="text-sm font-medium">Follow-up Reminders</p>
+              <p className="text-xs text-muted-foreground">Receive push notifications & alarms for scheduled follow-ups only.</p>
             </div>
             <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
           </div>
