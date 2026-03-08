@@ -13,7 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
   Plus, Search, Phone, CalendarDays, Users, MapPin, Clock, Share2, User,
-  Filter, FileSpreadsheet, MessageCircle, Flame, Snowflake, ChevronRight, StickyNote
+  Filter, FileSpreadsheet, MessageCircle, Flame, Snowflake, ChevronRight, StickyNote,
+  Bell, Repeat, History, PhoneCall
 } from "lucide-react";
 
 type Contact = {
