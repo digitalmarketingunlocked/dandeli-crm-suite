@@ -45,7 +45,7 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<AuthRoute />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/admin" element={<AdminDashboardPage />} />
