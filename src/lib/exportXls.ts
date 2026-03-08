@@ -110,7 +110,7 @@ export function exportContactsToXls(contacts: Contact[], statusMap?: { value: st
       const addr = XLSX.utils.encode_cell({ r: R, c: C });
       if (!ws[addr]) ws[addr] = { v: "", t: "s" };
       
-      const isStatusCol = C === 8; // Status column
+      const isStatusCol = C === 9; // Status column
       const statusValue = contacts[R - 1]?.type || "";
       const statusColor = STATUS_COLORS[statusValue] || "FFFFFF";
 
