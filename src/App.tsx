@@ -12,6 +12,7 @@ import ContactsPage from "@/pages/ContactsPage";
 
 import FollowUpsPage from "@/pages/FollowUpsPage";
 import ColdFollowUpPage from "@/pages/ColdFollowUpPage";
+import BookingsPage from "@/pages/BookingsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
@@ -48,7 +49,7 @@ const App = () => (
               <Route path="/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
               <Route path="/follow-ups" element={<ProtectedRoute><FollowUpsPage /></ProtectedRoute>} />
               <Route path="/cold-follow-up" element={<ProtectedRoute><ColdFollowUpPage /></ProtectedRoute>} />
-              
+              <Route path="/bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
