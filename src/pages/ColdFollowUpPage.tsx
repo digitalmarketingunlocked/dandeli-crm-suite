@@ -1,13 +1,14 @@
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Users, Phone, MessageCircle, ChevronRight, Snowflake } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { CalendarDays, Users, Phone, MessageCircle, Snowflake } from "lucide-react";
+import LeadProfileDialog from "@/components/LeadProfileDialog";
 
 export default function ColdFollowUpPage() {
   const { tenantId } = useAuth();
-  const navigate = useNavigate();
+  const [selectedContact, setSelectedContact] = useState<any>(null);
 
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["cold-contacts", tenantId],
@@ -17,7 +18,6 @@ export default function ColdFollowUpPage() {
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      // Filter cold leads: older than 3 days
       return data.filter((c) => {
         const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
         return days > 3;
@@ -40,7 +40,11 @@ export default function ColdFollowUpPage() {
       ) : contacts && contacts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {contacts.map((contact) => (
-            <div key={contact.id} className="glass-card bg-card p-5">
+            <div
+              key={contact.id}
+              className="glass-card bg-card p-5 cursor-pointer transition-all hover:shadow-md"
+              onClick={() => setSelectedContact(contact)}
+            >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center text-secondary font-semibold text-sm">
@@ -72,10 +76,7 @@ export default function ColdFollowUpPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <Button variant="link" size="sm" className="text-primary gap-1 p-0 h-auto text-xs" onClick={() => navigate("/contacts")}>
-                  View Profile <ChevronRight className="w-3 h-3" />
-                </Button>
+              <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
                 <div className="flex gap-2">
                   {contact.phone && (
                     <>
@@ -109,6 +110,12 @@ export default function ColdFollowUpPage() {
           <p className="text-muted-foreground mt-1 text-sm">All your leads are being followed up on time!</p>
         </div>
       )}
+
+      <LeadProfileDialog
+        contact={selectedContact}
+        open={!!selectedContact}
+        onOpenChange={(open) => !open && setSelectedContact(null)}
+      />
     </div>
   );
 }
