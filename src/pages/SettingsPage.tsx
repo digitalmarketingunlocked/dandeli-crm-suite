@@ -27,6 +27,7 @@ export default function SettingsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editLabel, setEditLabel] = useState("");
   const [editColor, setEditColor] = useState("");
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   // Profile
   const { data: profile } = useQuery({
