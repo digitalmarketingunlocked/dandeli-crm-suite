@@ -209,9 +209,10 @@ export default function BookingsPage() {
               <Card
                 key={booking.id}
                 className={cn(
-                  "rounded-2xl transition-all hover:shadow-md",
+                  "rounded-2xl transition-all hover:shadow-md cursor-pointer",
                   isCheckinToday && "border-primary/50 bg-primary/5"
                 )}
+                onClick={() => setSelectedBooking(booking)}
               >
                 <CardContent className="p-4 sm:p-5">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
