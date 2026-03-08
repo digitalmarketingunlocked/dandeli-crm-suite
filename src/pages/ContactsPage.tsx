@@ -849,6 +849,96 @@ export default function ContactsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5" /> Export Leads to Excel
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Quick presets */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Quick Select</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: "Today", value: "today" },
+                  { label: "This Week", value: "this-week" },
+                  { label: "This Month", value: "this-month" },
+                  { label: "All Time", value: "all" },
+                ].map((preset) => (
+                  <Button
+                    key={preset.value}
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl"
+                    onClick={() => applyExportPreset(preset.value)}
+                  >
+                    {preset.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom date range */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-sm mb-1 block">From</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal rounded-xl text-sm">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {exportFromDate ? format(exportFromDate, "dd MMM yyyy") : "Start date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={exportFromDate}
+                      onSelect={setExportFromDate}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div>
+                <Label className="text-sm mb-1 block">To</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal rounded-xl text-sm">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {exportToDate ? format(exportToDate, "dd MMM yyyy") : "End date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={exportToDate}
+                      onSelect={setExportToDate}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            {/* Summary */}
+            <p className="text-sm text-muted-foreground">
+              {exportFromDate || exportToDate
+                ? `Exporting leads from ${exportFromDate ? format(exportFromDate, "dd MMM yyyy") : "beginning"} to ${exportToDate ? format(exportToDate, "dd MMM yyyy") : "now"}`
+                : "Exporting all leads"}
+            </p>
+
+            <Button className="w-full gap-2 rounded-xl" onClick={handleExport}>
+              <FileSpreadsheet className="w-4 h-4" /> Download Excel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
