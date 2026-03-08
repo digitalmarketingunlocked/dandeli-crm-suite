@@ -18,7 +18,9 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [period, setPeriod] = useState("month");
+  const [period, setPeriod] = useState("this-month");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
   const [leadForm, setLeadForm] = useState({
     name: "", phone: "", check_in_date: "", check_out_date: "",
