@@ -71,7 +71,7 @@ export default function ColdFollowUpPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <Button variant="link" size="sm" className="text-primary gap-1 p-0 h-auto text-xs">
+                <Button variant="link" size="sm" className="text-primary gap-1 p-0 h-auto text-xs" onClick={() => navigate("/contacts")}>
                   View Profile <ChevronRight className="w-3 h-3" />
                 </Button>
                 <div className="flex gap-2">
