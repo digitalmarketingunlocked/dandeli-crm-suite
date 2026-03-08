@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Moon, Sun, User, Building2, Bell, Settings as SettingsIcon, MapPin } from "lucide-react";
+import { useLeadStatuses, STAGE_COLOR_MAP, COLOR_OPTIONS } from "@/hooks/useLeadStatuses";
+import { Moon, Sun, User, Building2, Bell, Settings as SettingsIcon, MapPin, Plus, Trash2, Pencil, Tag } from "lucide-react";
 
 export default function SettingsPage() {
   const { user, tenantId } = useAuth();
