@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Users, LogOut, Menu, X, Sparkles, Moon, Sun, Clock, Settings, Snowflake, CalendarCheck } from "lucide-react";
 import { useState } from "react";
+import { useFollowUpNotifications } from "@/hooks/useFollowUpNotifications";
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
