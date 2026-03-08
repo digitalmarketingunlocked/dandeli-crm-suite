@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
   User, Phone, MapPin, CalendarDays, Users,
-  Building2, BedDouble, IndianRupee, Sparkles, Save, MessageCircle
+  Building2, BedDouble, IndianRupee, Sparkles, Save, MessageCircle, Car
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
@@ -35,6 +35,8 @@ type Contact = {
   property_name?: string | null;
   room_type?: string | null;
   pricing?: number | null;
+  pricing_total?: number | null;
+  transport?: string | null;
   activities?: string | null;
 };
 
@@ -49,6 +51,8 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
   const [propertyName, setPropertyName] = useState("");
   const [roomType, setRoomType] = useState("");
   const [pricing, setPricing] = useState("");
+  const [pricingTotal, setPricingTotal] = useState("");
+  const [transport, setTransport] = useState("");
   const [activities, setActivities] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -57,6 +61,8 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
       setPropertyName(booking.property_name || "");
       setRoomType(booking.room_type || "");
       setPricing(booking.pricing?.toString() || "");
+      setPricingTotal(booking.pricing_total?.toString() || "");
+      setTransport(booking.transport || "");
       setActivities(booking.activities || "");
       setNotes(booking.notes || "");
     }
@@ -71,6 +77,8 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
           property_name: propertyName || null,
           room_type: roomType || null,
           pricing: pricing ? parseFloat(pricing) : null,
+          pricing_total: pricingTotal ? parseFloat(pricingTotal) : null,
+          transport: transport || null,
           activities: activities || null,
           notes: notes || null,
         })
@@ -180,15 +188,41 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5 text-xs font-medium">
+                <IndianRupee className="w-3.5 h-3.5 text-muted-foreground" /> Pricing / Head
+              </Label>
+              <Input
+                type="number"
+                placeholder="e.g. 5000"
+                value={pricing}
+                onChange={(e) => setPricing(e.target.value)}
+                className="rounded-xl"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5 text-xs font-medium">
+                <IndianRupee className="w-3.5 h-3.5 text-muted-foreground" /> Total
+              </Label>
+              <Input
+                type="number"
+                placeholder="e.g. 25000"
+                value={pricingTotal}
+                onChange={(e) => setPricingTotal(e.target.value)}
+                className="rounded-xl"
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label className="flex items-center gap-1.5 text-xs font-medium">
-              <IndianRupee className="w-3.5 h-3.5 text-muted-foreground" /> Pricing
+              <Car className="w-3.5 h-3.5 text-muted-foreground" /> Transport
             </Label>
             <Input
-              type="number"
-              placeholder="e.g. 15000"
-              value={pricing}
-              onChange={(e) => setPricing(e.target.value)}
+              placeholder="e.g. Self drive, Pickup from station"
+              value={transport}
+              onChange={(e) => setTransport(e.target.value)}
               className="rounded-xl"
             />
           </div>

@@ -79,11 +79,13 @@ export type Database = {
           notes: string | null
           phone: string | null
           pricing: number | null
+          pricing_total: number | null
           property_name: string | null
           recurring: string | null
           room_type: string | null
           source: string | null
           tenant_id: string
+          transport: string | null
           type: string
           updated_at: string
         }
@@ -106,11 +108,13 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           pricing?: number | null
+          pricing_total?: number | null
           property_name?: string | null
           recurring?: string | null
           room_type?: string | null
           source?: string | null
           tenant_id: string
+          transport?: string | null
           type?: string
           updated_at?: string
         }
@@ -133,11 +137,13 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           pricing?: number | null
+          pricing_total?: number | null
           property_name?: string | null
           recurring?: string | null
           room_type?: string | null
           source?: string | null
           tenant_id?: string
+          transport?: string | null
           type?: string
           updated_at?: string
         }
