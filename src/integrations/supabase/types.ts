@@ -61,6 +61,7 @@ export type Database = {
       }
       contacts: {
         Row: {
+          activities: string | null
           adults_count: number | null
           check_in_date: string | null
           check_out_date: string | null
@@ -77,13 +78,17 @@ export type Database = {
           name: string
           notes: string | null
           phone: string | null
+          pricing: number | null
+          property_name: string | null
           recurring: string | null
+          room_type: string | null
           source: string | null
           tenant_id: string
           type: string
           updated_at: string
         }
         Insert: {
+          activities?: string | null
           adults_count?: number | null
           check_in_date?: string | null
           check_out_date?: string | null
@@ -100,13 +105,17 @@ export type Database = {
           name: string
           notes?: string | null
           phone?: string | null
+          pricing?: number | null
+          property_name?: string | null
           recurring?: string | null
+          room_type?: string | null
           source?: string | null
           tenant_id: string
           type?: string
           updated_at?: string
         }
         Update: {
+          activities?: string | null
           adults_count?: number | null
           check_in_date?: string | null
           check_out_date?: string | null
@@ -123,7 +132,10 @@ export type Database = {
           name?: string
           notes?: string | null
           phone?: string | null
+          pricing?: number | null
+          property_name?: string | null
           recurring?: string | null
+          room_type?: string | null
           source?: string | null
           tenant_id?: string
           type?: string
