@@ -393,7 +393,7 @@ export default function DashboardPage() {
         <div className="glass-card bg-card overflow-hidden">
           <div className="p-6 pb-3 flex items-center justify-between">
             <h3 className="font-heading font-semibold text-lg">Recent Hot Leads</h3>
-            <Button variant="ghost" size="sm" className="text-xs text-primary gap-1" onClick={() => navigate("/contacts")}>
+            <Button variant="ghost" size="sm" className="text-xs text-primary gap-1" onClick={() => navigate("/leads")}>
               View All <ChevronRight className="w-3 h-3" />
             </Button>
           </div>
