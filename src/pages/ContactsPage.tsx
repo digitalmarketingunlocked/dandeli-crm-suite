@@ -274,7 +274,19 @@ export default function ContactsPage() {
           <p className="text-muted-foreground mt-1">Track and manage your resort inquiries</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2 rounded-xl">
+          <Button
+            variant="outline"
+            className="gap-2 rounded-xl"
+            onClick={() => {
+              if (filtered && filtered.length > 0) {
+                const statusMap = leadStatuses.map(s => ({ value: s.value, label: s.label, color: s.color }));
+                exportContactsToXls(filtered, statusMap);
+                toast({ title: "Exported!" });
+              } else {
+                toast({ title: "No data to export", variant: "destructive" });
+              }
+            }}
+          >
             <FileSpreadsheet className="w-4 h-4" /> Export XLS
           </Button>
           <Button className="gap-2 rounded-xl shadow-lg" onClick={() => setAddDialogOpen(true)}>

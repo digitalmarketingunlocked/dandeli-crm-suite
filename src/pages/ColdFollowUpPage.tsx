@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function ColdFollowUpPage() {
   const { tenantId } = useAuth();
+  const navigate = useNavigate();
 
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["cold-contacts", tenantId],
