@@ -1,7 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/components/ThemeProvider";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Users, Target, LogOut, Menu, X, Sparkles } from "lucide-react";
+import { LayoutDashboard, Users, Target, LogOut, Menu, X, Sparkles, Moon, Sun } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
