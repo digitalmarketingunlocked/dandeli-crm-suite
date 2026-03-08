@@ -197,6 +197,23 @@ export default function ContactsPage() {
     setNewNote("");
   };
 
+  const logCall = () => {
+    if (!selectedLead || !tenantId) return;
+    const insertCall = async () => {
+      const { error } = await supabase.from("call_history").insert({
+        contact_id: selectedLead.id,
+        tenant_id: tenantId,
+        notes: newCallNote.trim() || null,
+        created_by: user?.id || null,
+      });
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["call_history", selectedLead.id] });
+      setNewCallNote("");
+      toast({ title: "Call logged!" });
+    };
+    insertCall();
+  };
+
   const openDetail = (contact: Contact) => {
     setSelectedLead(contact);
     setEditForm({
@@ -208,6 +225,8 @@ export default function ContactsPage() {
       city: contact.city || "",
       lead_time: contact.lead_time || "",
       source: contact.source || "",
+      follow_up_date: contact.follow_up_date || "",
+      recurring: contact.recurring || "none",
     });
     setDetailOpen(true);
   };
@@ -224,6 +243,8 @@ export default function ContactsPage() {
       city: editForm.city || null,
       lead_time: editForm.lead_time || null,
       source: editForm.source || null,
+      follow_up_date: editForm.follow_up_date || null,
+      recurring: editForm.recurring || "none",
     });
     setDetailOpen(false);
   };
