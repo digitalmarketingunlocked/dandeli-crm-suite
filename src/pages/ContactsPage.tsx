@@ -393,10 +393,10 @@ export default function ContactsPage() {
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Filter by Check-in Date</Label>
-              <Input
-                type="date"
+              <DateInput
                 value={checkInFilter}
-                onChange={(e) => setCheckInFilter(e.target.value)}
+                onChange={setCheckInFilter}
+                placeholder="Select date"
                 className="rounded-xl"
               />
             </div>
