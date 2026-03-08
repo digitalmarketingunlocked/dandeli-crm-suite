@@ -108,6 +108,9 @@ export default function SubscriptionSettings() {
               )}
               <div>
                 <h5 className="font-semibold">{plan.name}</h5>
+                {plan.subtitle && (
+                  <p className="text-xs text-muted-foreground mt-0.5">{plan.subtitle}</p>
+                )}
                 <div className="flex items-baseline gap-1 mt-1">
                   <span className="text-2xl font-bold">{plan.price}</span>
                   <span className="text-xs text-muted-foreground">{plan.period}</span>
