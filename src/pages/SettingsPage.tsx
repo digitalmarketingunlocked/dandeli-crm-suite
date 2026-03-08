@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Palette, Bell, User, Tag, Settings as SettingsIcon } from "lucide-react";
 import AppearanceSettings from "@/components/settings/AppearanceSettings";
 import NotificationSettings from "@/components/settings/NotificationSettings";
