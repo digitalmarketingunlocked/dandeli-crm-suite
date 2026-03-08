@@ -332,13 +332,9 @@ export default function ContactsPage() {
             variant="outline"
             className="gap-2 rounded-xl"
             onClick={() => {
-              if (filtered && filtered.length > 0) {
-                const statusMap = leadStatuses.map(s => ({ value: s.value, label: s.label, color: s.color }));
-                exportContactsToXls(filtered, statusMap);
-                toast({ title: "Exported!" });
-              } else {
-                toast({ title: "No data to export", variant: "destructive" });
-              }
+              setExportFromDate(undefined);
+              setExportToDate(undefined);
+              setExportDialogOpen(true);
             }}
           >
             <FileSpreadsheet className="w-4 h-4" /> Export XLS
