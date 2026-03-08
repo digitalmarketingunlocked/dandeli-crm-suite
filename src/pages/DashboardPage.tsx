@@ -31,9 +31,42 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 export default function DashboardPage() {
-  const { tenantId } = useAuth();
+  const { tenantId, user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [period, setPeriod] = useState("month");
+  const [leadDialogOpen, setLeadDialogOpen] = useState(false);
+  const [leadForm, setLeadForm] = useState({
+    name: "", phone: "", check_in_date: "", check_out_date: "",
+    guests_count: "2", city: "", lead_time: "", source: "organic",
+  });
+
+  const createLead = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("contacts").insert({
+        name: leadForm.name.trim(),
+        phone: leadForm.phone.trim() || null,
+        check_in_date: leadForm.check_in_date || null,
+        check_out_date: leadForm.check_out_date || null,
+        guests_count: parseInt(leadForm.guests_count) || 2,
+        city: leadForm.city.trim() || null,
+        lead_time: leadForm.lead_time.trim() || null,
+        source: leadForm.source,
+        type: "lead",
+        tenant_id: tenantId!,
+        created_by: user!.id,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      setLeadDialogOpen(false);
+      setLeadForm({ name: "", phone: "", check_in_date: "", check_out_date: "", guests_count: "2", city: "", lead_time: "", source: "organic" });
+      toast({ title: "Lead added!" });
+    },
+    onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
 
   const { data: contacts } = useQuery({
     queryKey: ["contacts", tenantId],
