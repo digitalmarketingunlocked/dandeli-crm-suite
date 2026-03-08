@@ -131,7 +131,7 @@ export default function SettingsPage() {
               <p className="text-sm font-medium">Follow-up Reminders</p>
               <p className="text-xs text-muted-foreground">Receive push notifications & alarms for scheduled follow-ups only.</p>
             </div>
-            <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
+            <Switch checked={pushNotifications} onCheckedChange={handleNotificationToggle} />
           </div>
         </div>
 

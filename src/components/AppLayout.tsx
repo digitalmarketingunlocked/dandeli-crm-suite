@@ -19,6 +19,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { signOut, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const notificationsEnabled = localStorage.getItem("followup_notifications") !== "false";
+  useFollowUpNotifications(notificationsEnabled);
 
   return (
     <div className="min-h-screen flex">
