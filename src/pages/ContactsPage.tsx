@@ -237,32 +237,54 @@ export default function ContactsPage() {
           className="gap-2 rounded-xl"
           onClick={() => setShowFilters(!showFilters)}
         >
-          <Filter className="w-4 h-4" /> Show Filters
+          <Filter className="w-4 h-4" /> {showFilters ? "Hide Filters" : "Show Filters"}
         </Button>
       </div>
 
       {showFilters && (
-        <div className="flex gap-3 flex-wrap">
-          <Select value={sourceFilter} onValueChange={setSourceFilter}>
-            <SelectTrigger className="w-[160px] rounded-xl"><SelectValue placeholder="Source" /></SelectTrigger>
-            <SelectContent className="glass-strong bg-card rounded-xl">
-              <SelectItem value="all">All Sources</SelectItem>
-              <SelectItem value="organic">Organic</SelectItem>
-              <SelectItem value="google-ads">Google Ads</SelectItem>
-              <SelectItem value="meta-ads">Meta Ads</SelectItem>
-              <SelectItem value="offline-marketing">Offline Marketing</SelectItem>
-              <SelectItem value="referral">Referral</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[160px] rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
-            <SelectContent className="glass-strong bg-card rounded-xl">
-              <SelectItem value="all">All Status</SelectItem>
-              {STAGE_OPTIONS.map((s) => (
-                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="glass-card bg-card p-5 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Filter by Status</Label>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="rounded-xl"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                <SelectContent className="glass-strong bg-card rounded-xl">
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  {STAGE_OPTIONS.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Filter by Check-in Date</Label>
+              <Input
+                type="date"
+                value={checkInFilter}
+                onChange={(e) => setCheckInFilter(e.target.value)}
+                className="rounded-xl"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Last Contacted</Label>
+              <Input
+                type="date"
+                value={lastContactedFilter}
+                onChange={(e) => setLastContactedFilter(e.target.value)}
+                className="rounded-xl"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-6">
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <Switch checked={followUpOnly} onCheckedChange={setFollowUpOnly} />
+              <span className="flex items-center gap-1">🔔 Follow-up Only</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <Switch checked={hotOnly} onCheckedChange={setHotOnly} />
+              <span className="flex items-center gap-1">🔥 Hot Only</span>
+            </label>
+          </div>
         </div>
       )}
 
