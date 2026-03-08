@@ -212,7 +212,7 @@ export default function AdminDashboardPage() {
                                 size="sm"
                                 variant="outline"
                                 className="gap-1 rounded-lg text-green-600 border-green-500/30 hover:bg-green-500/10"
-                                onClick={() => setConfirmAction({ id: req.id, action: "approved" })}
+                                onClick={() => setConfirmAction({ id: req.id, action: "approved", tenantId: req.tenant_id, planName: req.plan_name })}
                               >
                                 <CheckCircle2 className="w-3.5 h-3.5" /> Approve
                               </Button>
