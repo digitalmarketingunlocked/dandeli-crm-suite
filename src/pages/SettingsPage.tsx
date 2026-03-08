@@ -53,7 +53,17 @@ export default function SettingsPage() {
   const [fullName, setFullName] = useState("");
   const [resortName, setResortName] = useState("");
   const [resortLocation, setResortLocation] = useState("");
-  const [pushNotifications, setPushNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(() => {
+    return localStorage.getItem("followup_notifications") !== "false";
+  });
+
+  const handleNotificationToggle = async (checked: boolean) => {
+    setPushNotifications(checked);
+    localStorage.setItem("followup_notifications", checked ? "true" : "false");
+    if (checked && "Notification" in window && Notification.permission === "default") {
+      await Notification.requestPermission();
+    }
+  };
 
   // Sync state when data loads
   useState(() => {
