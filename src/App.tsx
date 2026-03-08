@@ -11,6 +11,7 @@ import DashboardPage from "@/pages/DashboardPage";
 import ContactsPage from "@/pages/ContactsPage";
 import DealsPage from "@/pages/DealsPage";
 import FollowUpsPage from "@/pages/FollowUpsPage";
+import ColdFollowUpPage from "@/pages/ColdFollowUpPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
