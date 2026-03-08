@@ -1,17 +1,22 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLeadStatuses, STAGE_COLOR_MAP } from "@/hooks/useLeadStatuses";
+import { useToast } from "@/hooks/use-toast";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
+  Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  User, Phone, MapPin, CalendarDays, Users, Mail,
-  MessageCircle, Clock, Bell, FileText
+  Phone, MapPin, CalendarDays, Users, Mail,
+  MessageCircle, Clock, Bell, StickyNote, Flame, Snowflake,
+  PhoneCall,
 } from "lucide-react";
-import { format, parseISO, formatDistanceToNow } from "date-fns";
 
 type Contact = {
   id: string;
@@ -27,16 +32,14 @@ type Contact = {
   source: string | null;
   type: string;
   notes: string | null;
+  lead_time: string | null;
+  follow_up_date: string | null;
+  recurring: string | null;
   created_at: string;
   updated_at: string;
-};
-
-type Reminder = {
-  id: string;
-  message: string | null;
-  reminder_date: string;
-  is_active: boolean | null;
-  created_at: string;
+  tenant_id: string;
+  created_by: string | null;
+  company: string | null;
 };
 
 interface LeadProfileDialogProps {
@@ -46,29 +49,55 @@ interface LeadProfileDialogProps {
 }
 
 export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadProfileDialogProps) {
+  const { tenantId, user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { statuses: leadStatuses } = useLeadStatuses();
+  const STAGE_OPTIONS = leadStatuses.map((s) => ({ value: s.value, label: s.label }));
+
+  const [editForm, setEditForm] = useState<Partial<Contact>>({});
+  const [newNote, setNewNote] = useState("");
+  const [newCallNote, setNewCallNote] = useState("");
+  const [callSortBy, setCallSortBy] = useState<"date" | "duration">("date");
+  const [localContact, setLocalContact] = useState<Contact | null>(null);
+
+  useEffect(() => {
+    if (contact && open) {
+      setLocalContact(contact);
+      setEditForm({
+        type: contact.type,
+        check_in_date: contact.check_in_date || "",
+        check_out_date: contact.check_out_date || "",
+        adults_count: contact.adults_count,
+        kids_count: contact.kids_count,
+        city: contact.city || "",
+        lead_time: contact.lead_time || "",
+        source: contact.source || "",
+        follow_up_date: contact.follow_up_date || "",
+        recurring: contact.recurring || "none",
+      });
+      setNewNote("");
+      setNewCallNote("");
+    }
+  }, [contact, open]);
+
   const { data: reminders = [] } = useQuery({
     queryKey: ["reminders", contact?.id],
     queryFn: async () => {
-      if (!contact) return [];
       const { data, error } = await supabase
-        .from("reminders")
-        .select("*")
-        .eq("contact_id", contact.id)
+        .from("reminders").select("*").eq("contact_id", contact!.id)
         .order("reminder_date", { ascending: false });
       if (error) throw error;
-      return data as Reminder[];
+      return data;
     },
     enabled: !!contact?.id && open,
   });
 
   const { data: callHistory = [] } = useQuery({
-    queryKey: ["call-history", contact?.id],
+    queryKey: ["call_history", contact?.id],
     queryFn: async () => {
-      if (!contact) return [];
       const { data, error } = await supabase
-        .from("call_history")
-        .select("*")
-        .eq("contact_id", contact.id)
+        .from("call_history").select("*").eq("contact_id", contact!.id)
         .order("called_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -76,151 +105,296 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
     enabled: !!contact?.id && open,
   });
 
-  if (!contact) return null;
+  const updateContact = useMutation({
+    mutationFn: async (updates: Partial<Contact> & { id: string }) => {
+      const { id, ...rest } = updates;
+      const { error } = await supabase.from("contacts").update(rest).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      toast({ title: "Lead updated!" });
+    },
+    onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
 
-  const daysSinceUpdate = Math.floor(
-    (Date.now() - new Date(contact.updated_at).getTime()) / (1000 * 60 * 60 * 24)
-  );
+  const addNote = () => {
+    if (!localContact || !newNote.trim()) return;
+    const existingNotes = localContact.notes || "";
+    const timestamp = new Date().toLocaleString();
+    const updatedNotes = existingNotes ? `${existingNotes}\n[${timestamp}] ${newNote.trim()}` : `[${timestamp}] ${newNote.trim()}`;
+    updateContact.mutate({ id: localContact.id, notes: updatedNotes });
+    setLocalContact({ ...localContact, notes: updatedNotes });
+    setNewNote("");
+  };
+
+  const logCall = () => {
+    if (!localContact || !tenantId) return;
+    const insertCall = async () => {
+      const { error } = await supabase.from("call_history").insert({
+        contact_id: localContact.id,
+        tenant_id: tenantId,
+        notes: newCallNote.trim() || null,
+        created_by: user?.id || null,
+      });
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["call_history", localContact.id] });
+      setNewCallNote("");
+      toast({ title: "Call logged!" });
+    };
+    insertCall();
+  };
+
+  const saveDetail = () => {
+    if (!localContact) return;
+    updateContact.mutate({
+      id: localContact.id,
+      type: editForm.type,
+      check_in_date: editForm.check_in_date || null,
+      check_out_date: editForm.check_out_date || null,
+      adults_count: editForm.adults_count,
+      kids_count: editForm.kids_count,
+      city: editForm.city || null,
+      lead_time: editForm.lead_time || null,
+      source: editForm.source || null,
+      follow_up_date: editForm.follow_up_date || null,
+      recurring: editForm.recurring || "none",
+    });
+    onOpenChange(false);
+  };
+
+  if (!localContact) return null;
+
+  const daysSinceCreation = Math.floor((Date.now() - new Date(localContact.created_at).getTime()) / (1000 * 60 * 60 * 24));
+  const isHot = daysSinceCreation <= 3;
+  const noteLines = (localContact.notes || "").split("\n").filter(Boolean);
+
+  const sortedCalls = [...callHistory].sort((a, b) => {
+    if (callSortBy === "duration") return (b.duration || "").localeCompare(a.duration || "");
+    return new Date(b.called_at).getTime() - new Date(a.called_at).getTime();
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2.5 text-lg">
-            <div className="w-9 h-9 rounded-full bg-secondary/15 flex items-center justify-center text-secondary font-semibold text-sm shrink-0">
-              {contact.name.charAt(0).toUpperCase()}
+      <DialogContent className="glass-strong bg-card rounded-2xl sm:max-w-3xl max-h-[85vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-2">
+          <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg shrink-0">
+            {localContact.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <h2 className="text-xl font-heading font-bold">{localContact.name}</h2>
+            <div className="flex items-center gap-2 text-sm">
+              {isHot ? (
+                <span className="flex items-center gap-1 text-accent font-semibold text-xs">
+                  <Flame className="w-3 h-3" /> HOT LEAD
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-secondary font-semibold text-xs">
+                  <Snowflake className="w-3 h-3" /> COLD
+                </span>
+              )}
+              {localContact.phone && <span className="text-muted-foreground">{localContact.phone}</span>}
+              {localContact.email && (
+                <span className="flex items-center gap-1 text-muted-foreground text-xs">
+                  <Mail className="w-3 h-3" /> {localContact.email}
+                </span>
+              )}
             </div>
-            {contact.name}
-          </DialogTitle>
-          <DialogDescription className="flex flex-wrap items-center gap-2 pt-1">
-            {contact.phone && (
-              <span className="flex items-center gap-1 text-xs">
-                <Phone className="w-3 h-3" /> {contact.phone}
-              </span>
-            )}
-            {contact.email && (
-              <span className="flex items-center gap-1 text-xs">
-                <Mail className="w-3 h-3" /> {contact.email}
-              </span>
-            )}
-            {contact.city && (
-              <span className="flex items-center gap-1 text-xs">
-                <MapPin className="w-3 h-3" /> {contact.city}
-              </span>
-            )}
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* Status badges */}
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" className="text-xs">{contact.type}</Badge>
-          {contact.source && <Badge variant="secondary" className="text-xs">{contact.source}</Badge>}
-          <Badge variant="destructive" className="text-xs">
-            <Clock className="w-3 h-3 mr-1" /> Cold {daysSinceUpdate}d
-          </Badge>
-        </div>
-
-        {/* Stay info */}
-        <div className="grid grid-cols-3 gap-3 rounded-xl bg-muted/50 p-3">
-          <div className="text-center">
-            <p className="text-[10px] uppercase text-muted-foreground font-medium tracking-wider">Check-in</p>
-            <p className="font-semibold text-sm text-foreground">
-              {contact.check_in_date ? format(parseISO(contact.check_in_date), "dd MMM") : "—"}
-            </p>
-          </div>
-          <div className="text-center">
-            <p className="text-[10px] uppercase text-muted-foreground font-medium tracking-wider">Check-out</p>
-            <p className="font-semibold text-sm text-foreground">
-              {contact.check_out_date ? format(parseISO(contact.check_out_date), "dd MMM") : "—"}
-            </p>
-          </div>
-          <div className="text-center">
-            <p className="text-[10px] uppercase text-muted-foreground font-medium tracking-wider">Guests</p>
-            <p className="font-semibold text-sm text-foreground flex items-center justify-center gap-1">
-              <Users className="w-3.5 h-3.5 text-muted-foreground" />
-              {(contact.adults_count || 0) + (contact.kids_count || 0)}
-            </p>
           </div>
         </div>
 
-        {/* Notes */}
-        {contact.notes && (
-          <div className="space-y-1.5">
-            <p className="text-xs font-medium flex items-center gap-1.5 text-muted-foreground">
-              <FileText className="w-3.5 h-3.5" /> Notes
-            </p>
-            <p className="text-sm text-foreground bg-muted/30 rounded-lg p-2.5">{contact.notes}</p>
-          </div>
-        )}
-
-        <Separator />
-
-        {/* Reminder History */}
-        <div className="space-y-3">
-          <p className="text-xs font-semibold flex items-center gap-1.5 uppercase tracking-wider text-muted-foreground">
-            <Bell className="w-3.5 h-3.5" /> Reminder History
-          </p>
-          {reminders.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">No reminders set for this lead</p>
-          ) : (
-            <div className="space-y-2 max-h-[200px] overflow-y-auto">
-              {reminders.map((r) => (
-                <div key={r.id} className="flex items-start gap-2.5 rounded-lg bg-muted/30 p-2.5">
-                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${r.is_active ? "bg-primary" : "bg-muted-foreground/40"}`} />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-foreground">
-                      {format(parseISO(r.reminder_date), "dd MMM yyyy, hh:mm a")}
-                    </p>
-                    {r.message && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{r.message}</p>}
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
-                      {formatDistanceToNow(parseISO(r.created_at), { addSuffix: true })}
-                    </p>
-                  </div>
-                  {r.is_active && <Badge className="text-[9px] px-1.5 py-0 shrink-0">Active</Badge>}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Call History */}
-        {callHistory.length > 0 && (
-          <>
-            <Separator />
-            <div className="space-y-3">
-              <p className="text-xs font-semibold flex items-center gap-1.5 uppercase tracking-wider text-muted-foreground">
-                <Phone className="w-3.5 h-3.5" /> Call History
-              </p>
-              <div className="space-y-2 max-h-[150px] overflow-y-auto">
-                {callHistory.map((c) => (
-                  <div key={c.id} className="flex items-start gap-2.5 rounded-lg bg-muted/30 p-2.5">
-                    <Phone className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-foreground">
-                        {format(parseISO(c.called_at), "dd MMM yyyy, hh:mm a")}
-                      </p>
-                      {c.duration && <p className="text-[10px] text-muted-foreground">Duration: {c.duration}</p>}
-                      {c.notes && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{c.notes}</p>}
-                    </div>
-                  </div>
-                ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left Column */}
+          <div className="space-y-5">
+            {/* Quick Actions */}
+            <div className="glass-card bg-card/50 p-4">
+              <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-3">Quick Actions</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-col h-auto py-4 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                  onClick={() => window.open(`tel:${localContact.phone}`)}
+                  disabled={!localContact.phone}
+                >
+                  <Phone className="w-5 h-5" />
+                  <span className="text-xs">Call</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-col h-auto py-4 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                  onClick={() => window.open(`https://wa.me/${localContact.phone?.replace(/\D/g, "")}`)}
+                  disabled={!localContact.phone}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span className="text-xs">WhatsApp</span>
+                </Button>
               </div>
             </div>
-          </>
-        )}
 
-        {/* Quick actions */}
-        <div className="flex items-center gap-2 pt-1">
-          {contact.phone && (
-            <>
-              <Button size="sm" variant="outline" className="rounded-xl text-xs flex-1" onClick={() => window.open(`tel:${contact.phone}`)}>
-                <Phone className="w-3.5 h-3.5 mr-1" /> Call
+            {/* Lead Details */}
+            <div className="glass-card bg-card/50 p-4 space-y-3">
+              <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Lead Details</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Status</Label>
+                  <Select value={editForm.type || "lead"} onValueChange={(v) => setEditForm({ ...editForm, type: v })}>
+                    <SelectTrigger className="w-[150px] h-8 text-xs rounded-lg"><SelectValue /></SelectTrigger>
+                    <SelectContent className="glass-strong bg-card rounded-xl">
+                      {STAGE_OPTIONS.map((s) => (
+                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Check-in</Label>
+                  <Input type="date" value={editForm.check_in_date as string || ""} onChange={(e) => setEditForm({ ...editForm, check_in_date: e.target.value })} className="w-[150px] h-8 text-xs rounded-lg" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Check-out</Label>
+                  <Input type="date" value={editForm.check_out_date as string || ""} onChange={(e) => setEditForm({ ...editForm, check_out_date: e.target.value })} className="w-[150px] h-8 text-xs rounded-lg" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">People</Label>
+                  <div className="flex gap-2">
+                    <Input type="number" value={editForm.adults_count ?? 2} onChange={(e) => setEditForm({ ...editForm, adults_count: parseInt(e.target.value) || 0 })} className="w-[65px] h-8 text-xs rounded-lg" placeholder="Adults" />
+                    <Input type="number" value={editForm.kids_count ?? 0} onChange={(e) => setEditForm({ ...editForm, kids_count: parseInt(e.target.value) || 0 })} className="w-[65px] h-8 text-xs rounded-lg" placeholder="Kids" />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">City</Label>
+                  <Input value={editForm.city as string || ""} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })} className="w-[150px] h-8 text-xs rounded-lg" placeholder="City" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Lead Time</Label>
+                  <Input value={editForm.lead_time as string || ""} onChange={(e) => setEditForm({ ...editForm, lead_time: e.target.value })} className="w-[150px] h-8 text-xs rounded-lg" placeholder="e.g. 10:30 AM" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Source</Label>
+                  <Select value={editForm.source as string || "organic"} onValueChange={(v) => setEditForm({ ...editForm, source: v })}>
+                    <SelectTrigger className="w-[150px] h-8 text-xs rounded-lg"><SelectValue /></SelectTrigger>
+                    <SelectContent className="glass-strong bg-card rounded-xl">
+                      <SelectItem value="organic">Organic</SelectItem>
+                      <SelectItem value="google-ads">Google Ads</SelectItem>
+                      <SelectItem value="meta-ads">Meta Ads</SelectItem>
+                      <SelectItem value="offline-marketing">Offline Marketing</SelectItem>
+                      <SelectItem value="referral">Referral</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Follow-up</Label>
+                  <Input type="date" value={editForm.follow_up_date as string || ""} onChange={(e) => setEditForm({ ...editForm, follow_up_date: e.target.value })} className="w-[150px] h-8 text-xs rounded-lg" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Recurring</Label>
+                  <Select value={editForm.recurring as string || "none"} onValueChange={(v) => setEditForm({ ...editForm, recurring: v })}>
+                    <SelectTrigger className="w-[150px] h-8 text-xs rounded-lg"><SelectValue /></SelectTrigger>
+                    <SelectContent className="glass-strong bg-card rounded-xl">
+                      <SelectItem value="none">No Repeat</SelectItem>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button className="w-full rounded-xl mt-2" size="sm" onClick={saveDetail}>
+                Save Changes
               </Button>
-              <Button size="sm" variant="outline" className="rounded-xl text-xs flex-1 text-green-600" onClick={() => window.open(`https://wa.me/${contact.phone?.replace(/\D/g, "")}`)}>
-                <MessageCircle className="w-3.5 h-3.5 mr-1" /> WhatsApp
-              </Button>
-            </>
-          )}
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-5">
+            {/* Notes */}
+            <div className="glass-card bg-card/50 p-4 space-y-3">
+              <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
+                <StickyNote className="w-3.5 h-3.5" /> Lead Notes
+              </h4>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Add a note..."
+                  value={newNote}
+                  onChange={(e) => setNewNote(e.target.value)}
+                  className="rounded-xl text-sm"
+                  onKeyDown={(e) => e.key === "Enter" && addNote()}
+                />
+                <Button size="sm" className="rounded-xl shrink-0" onClick={addNote}>Add</Button>
+              </div>
+              <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                {noteLines.length > 0 ? (
+                  noteLines.map((note, i) => (
+                    <div key={i} className="text-sm p-2 rounded-lg bg-muted/30">{note}</div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">No notes added yet.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Reminder History */}
+            <div className="glass-card bg-card/50 p-4 space-y-3">
+              <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
+                <Bell className="w-3.5 h-3.5" /> Reminder History
+              </h4>
+              <div className="space-y-2 max-h-[150px] overflow-y-auto">
+                {reminders.length > 0 ? (
+                  reminders.map((r) => (
+                    <div key={r.id} className="text-sm p-2 rounded-lg bg-muted/30 flex items-center justify-between">
+                      <span>{r.message || "Reminder"}</span>
+                      <span className="text-xs text-muted-foreground">{new Date(r.reminder_date).toLocaleDateString()}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4 italic">No active reminder.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Call History */}
+            <div className="glass-card bg-card/50 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
+                  <PhoneCall className="w-3.5 h-3.5" /> Call History
+                </h4>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="uppercase tracking-wider font-semibold">Sort:</span>
+                  <Select value={callSortBy} onValueChange={(v: "date" | "duration") => setCallSortBy(v)}>
+                    <SelectTrigger className="w-[80px] h-7 text-xs rounded-lg"><SelectValue /></SelectTrigger>
+                    <SelectContent className="glass-strong bg-card rounded-xl">
+                      <SelectItem value="date">Date</SelectItem>
+                      <SelectItem value="duration">Duration</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Call note (optional)"
+                  value={newCallNote}
+                  onChange={(e) => setNewCallNote(e.target.value)}
+                  className="rounded-xl text-sm"
+                />
+                <Button size="sm" className="rounded-xl shrink-0 gap-1" onClick={logCall}>
+                  <PhoneCall className="w-3 h-3" /> Log
+                </Button>
+              </div>
+              <div className="space-y-2 max-h-[150px] overflow-y-auto">
+                {sortedCalls.length > 0 ? (
+                  sortedCalls.map((c) => (
+                    <div key={c.id} className="text-sm p-2 rounded-lg bg-muted/30 flex items-center justify-between">
+                      <span>{c.notes || "Call"}</span>
+                      <span className="text-xs text-muted-foreground">{new Date(c.called_at).toLocaleString()}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4 italic">No calls logged yet.</p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
