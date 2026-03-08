@@ -183,18 +183,21 @@ export default function DashboardPage() {
           <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground truncate">Dashboard Overview</h1>
           <p className="text-muted-foreground mt-1 text-sm">Real-time performance metrics of <span className="font-medium text-foreground">{tenant?.name && tenant.name !== user?.email ? tenant.name : "your resort"}</span></p>
         </div>
-        <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-[140px] rounded-xl glass-subtle bg-card shrink-0 self-end">
-            <CalendarDays className="w-4 h-4 mr-2 text-muted-foreground" />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="glass-strong bg-card rounded-xl">
-            <SelectItem value="week">Week</SelectItem>
-            <SelectItem value="month">Month</SelectItem>
-            <SelectItem value="quarter">Quarter</SelectItem>
-            <SelectItem value="year">Year</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2 self-end">
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger className="w-[130px] h-8 text-xs rounded-lg glass-subtle bg-card shrink-0">
+              <CalendarDays className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="glass-strong bg-card rounded-xl">
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="this-week">This Week</SelectItem>
+              <SelectItem value="this-month">This Month</SelectItem>
+              <SelectItem value="this-year">This Year</SelectItem>
+              <SelectItem value="custom">Custom</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* CTA Banner */}
