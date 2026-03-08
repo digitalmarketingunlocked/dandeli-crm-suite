@@ -117,6 +117,7 @@ export default function ContactsPage() {
   const [exportPreset, setExportPreset] = useState<string>("all");
 
   const applyExportPreset = (preset: string) => {
+    setExportPreset(preset);
     const now = new Date();
     switch (preset) {
       case "today":
