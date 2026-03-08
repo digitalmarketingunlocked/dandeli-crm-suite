@@ -403,7 +403,7 @@ export default function DashboardPage() {
                 <div
                   key={contact.id}
                   className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/30 transition-colors cursor-pointer"
-                  onClick={() => navigate("/contacts")}
+                  onClick={() => setSelectedContact(contact)}
                 >
                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
                     {contact.name.charAt(0).toUpperCase()}
