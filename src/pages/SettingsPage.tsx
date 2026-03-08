@@ -189,6 +189,12 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Team Members & Invites */}
+      <TeamInviteSection />
+
+      {/* Change Password Dialog */}
+      <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
+
       {/* Lead Status Management */}
       <div className="glass-card bg-card p-6 space-y-5">
         <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
