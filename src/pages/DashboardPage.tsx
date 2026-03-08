@@ -6,11 +6,11 @@ import { Users, Target, TrendingUp, Calendar } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 const STAGE_COLORS: Record<string, string> = {
-  inquiry: "hsl(200, 80%, 44%)",
+  inquiry: "hsl(210, 70%, 52%)",
   proposal: "hsl(38, 92%, 50%)",
-  negotiation: "hsl(28, 90%, 55%)",
-  booked: "hsl(158, 64%, 32%)",
-  completed: "hsl(158, 64%, 22%)",
+  negotiation: "hsl(28, 88%, 58%)",
+  booked: "hsl(162, 60%, 38%)",
+  completed: "hsl(162, 60%, 28%)",
   lost: "hsl(0, 72%, 51%)",
 };
 
@@ -62,10 +62,10 @@ export default function DashboardPage() {
     : [];
 
   const stats = [
-    { label: "Total Contacts", value: totalContacts, icon: Users, color: "text-secondary" },
-    { label: "Active Deals", value: activeDeals, icon: Target, color: "text-accent" },
-    { label: "Total Revenue", value: `₹${totalValue.toLocaleString("en-IN")}`, icon: TrendingUp, color: "text-primary" },
-    { label: "Total Deals", value: totalDeals, icon: Calendar, color: "text-info" },
+    { label: "Total Contacts", value: totalContacts, icon: Users, gradient: "from-secondary to-info" },
+    { label: "Active Deals", value: activeDeals, icon: Target, gradient: "from-accent to-warning" },
+    { label: "Total Revenue", value: `₹${totalValue.toLocaleString("en-IN")}`, icon: TrendingUp, gradient: "from-primary to-secondary" },
+    { label: "Total Deals", value: totalDeals, icon: Calendar, gradient: "from-info to-primary" },
   ];
 
   return (
@@ -78,37 +78,45 @@ export default function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
-          <Card key={stat.label} className="border-border hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-2xl font-heading font-bold mt-1">{stat.value}</p>
-                </div>
-                <stat.icon className={`w-10 h-10 ${stat.color} opacity-80`} />
+          <div key={stat.label} className="glass-card p-6 bg-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                <p className="text-2xl font-heading font-bold mt-1">{stat.value}</p>
               </div>
-            </CardContent>
-          </Card>
+              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg`}>
+                <stat.icon className="w-6 h-6 text-primary-foreground" />
+              </div>
+            </div>
+          </div>
         ))}
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-heading">Deals by Stage</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="glass-card bg-card overflow-hidden">
+          <div className="p-6 pb-0">
+            <h3 className="font-heading font-semibold text-lg">Deals by Stage</h3>
+          </div>
+          <div className="p-6">
             {stageData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={stageData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(150, 10%, 88%)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsla(210, 15%, 50%, 0.15)" />
                   <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                  <Tooltip
+                    contentStyle={{
+                      background: "hsla(0, 0%, 100%, 0.8)",
+                      backdropFilter: "blur(12px)",
+                      border: "1px solid hsla(0, 0%, 100%, 0.3)",
+                      borderRadius: "12px",
+                      boxShadow: "0 8px 32px hsla(0,0%,0%,0.1)",
+                    }}
+                  />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                     {stageData.map((entry) => (
-                      <Cell key={entry.name} fill={STAGE_COLORS[entry.name] || "hsl(158, 64%, 32%)"} />
+                      <Cell key={entry.name} fill={STAGE_COLORS[entry.name] || "hsl(162, 60%, 38%)"} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -118,14 +126,14 @@ export default function DashboardPage() {
                 No deals yet. Create your first deal!
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-heading">Revenue by Package</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="glass-card bg-card overflow-hidden">
+          <div className="p-6 pb-0">
+            <h3 className="font-heading font-semibold text-lg">Revenue by Package</h3>
+          </div>
+          <div className="p-6">
             {packageData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
@@ -134,7 +142,16 @@ export default function DashboardPage() {
                       <Cell key={i} fill={Object.values(STAGE_COLORS)[i % Object.values(STAGE_COLORS).length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => `₹${value.toLocaleString("en-IN")}`} />
+                  <Tooltip
+                    formatter={(value: number) => `₹${value.toLocaleString("en-IN")}`}
+                    contentStyle={{
+                      background: "hsla(0, 0%, 100%, 0.8)",
+                      backdropFilter: "blur(12px)",
+                      border: "1px solid hsla(0, 0%, 100%, 0.3)",
+                      borderRadius: "12px",
+                      boxShadow: "0 8px 32px hsla(0,0%,0%,0.1)",
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -142,8 +159,8 @@ export default function DashboardPage() {
                 No revenue data yet.
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

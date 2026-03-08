@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -13,13 +12,22 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, GripVertical } from "lucide-react";
 
 const STAGES = [
-  { key: "inquiry", label: "Inquiry", color: "bg-info/20 text-info border-info/30" },
-  { key: "proposal", label: "Proposal", color: "bg-warning/20 text-warning border-warning/30" },
-  { key: "negotiation", label: "Negotiation", color: "bg-accent/20 text-accent border-accent/30" },
-  { key: "booked", label: "Booked", color: "bg-primary/20 text-primary border-primary/30" },
-  { key: "completed", label: "Completed", color: "bg-success/20 text-success border-success/30" },
-  { key: "lost", label: "Lost", color: "bg-destructive/20 text-destructive border-destructive/30" },
+  { key: "inquiry", label: "Inquiry", gradient: "from-info/20 to-info/5" },
+  { key: "proposal", label: "Proposal", gradient: "from-warning/20 to-warning/5" },
+  { key: "negotiation", label: "Negotiation", gradient: "from-accent/20 to-accent/5" },
+  { key: "booked", label: "Booked", gradient: "from-primary/20 to-primary/5" },
+  { key: "completed", label: "Completed", gradient: "from-success/20 to-success/5" },
+  { key: "lost", label: "Lost", gradient: "from-destructive/20 to-destructive/5" },
 ];
+
+const STAGE_BADGE: Record<string, string> = {
+  inquiry: "bg-info/20 text-info border-info/30",
+  proposal: "bg-warning/20 text-warning border-warning/30",
+  negotiation: "bg-accent/20 text-accent border-accent/30",
+  booked: "bg-primary/20 text-primary border-primary/30",
+  completed: "bg-success/20 text-success border-success/30",
+  lost: "bg-destructive/20 text-destructive border-destructive/30",
+};
 
 const PACKAGES = [
   { value: "rafting", label: "🏄 Rafting" },
@@ -86,27 +94,27 @@ export default function DealsPage() {
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2"><Plus className="w-4 h-4" /> New Deal</Button>
+            <Button className="gap-2 rounded-xl shadow-lg"><Plus className="w-4 h-4" /> New Deal</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="glass-strong bg-card rounded-2xl">
             <DialogHeader>
               <DialogTitle className="font-heading">New Deal</DialogTitle>
             </DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); createDeal.mutate(); }} className="space-y-4">
               <div className="space-y-2">
                 <Label>Title *</Label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. River Rafting Group Booking" required />
+                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. River Rafting Group Booking" required className="rounded-xl" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Value (₹)</Label>
-                  <Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder="25000" />
+                  <Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder="25000" className="rounded-xl" />
                 </div>
                 <div className="space-y-2">
                   <Label>Package</Label>
                   <Select value={form.package_type} onValueChange={(v) => setForm({ ...form, package_type: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent className="glass-strong bg-card rounded-xl">
                       {PACKAGES.map((p) => (
                         <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
                       ))}
@@ -116,9 +124,9 @@ export default function DealsPage() {
               </div>
               <div className="space-y-2">
                 <Label>Expected Date</Label>
-                <Input type="date" value={form.expected_date} onChange={(e) => setForm({ ...form, expected_date: e.target.value })} />
+                <Input type="date" value={form.expected_date} onChange={(e) => setForm({ ...form, expected_date: e.target.value })} className="rounded-xl" />
               </div>
-              <Button type="submit" className="w-full" disabled={createDeal.isPending}>
+              <Button type="submit" className="w-full rounded-xl" disabled={createDeal.isPending}>
                 {createDeal.isPending ? "Creating..." : "Create Deal"}
               </Button>
             </form>
@@ -136,47 +144,44 @@ export default function DealsPage() {
             <div key={stage.key} className="min-w-[280px] flex-shrink-0">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className={stage.color}>{stage.label}</Badge>
+                  <Badge variant="outline" className={`${STAGE_BADGE[stage.key]} rounded-lg`}>{stage.label}</Badge>
                   <span className="text-xs text-muted-foreground">({stageDeals.length})</span>
                 </div>
                 <span className="text-xs font-medium text-muted-foreground">₹{stageTotal.toLocaleString("en-IN")}</span>
               </div>
               <div className="space-y-3">
                 {isLoading ? (
-                  <Card className="border-border"><CardContent className="p-4 text-sm text-muted-foreground">Loading...</CardContent></Card>
+                  <div className="glass-card p-4 bg-card text-sm text-muted-foreground">Loading...</div>
                 ) : stageDeals.length > 0 ? (
                   stageDeals.map((deal) => (
-                    <Card key={deal.id} className="border-border hover:shadow-md transition-shadow cursor-pointer group">
-                      <CardContent className="p-4 space-y-2">
-                        <div className="flex items-start justify-between">
-                          <h3 className="font-medium text-sm leading-tight">{deal.title}</h3>
-                          <GripVertical className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                        {deal.package_type && (
-                          <span className="text-xs text-muted-foreground capitalize">
-                            {PACKAGES.find((p) => p.value === deal.package_type)?.label || deal.package_type}
-                          </span>
+                    <div key={deal.id} className="glass-card p-4 bg-card space-y-2 group cursor-pointer">
+                      <div className="flex items-start justify-between">
+                        <h3 className="font-medium text-sm leading-tight">{deal.title}</h3>
+                        <GripVertical className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      {deal.package_type && (
+                        <span className="text-xs text-muted-foreground capitalize">
+                          {PACKAGES.find((p) => p.value === deal.package_type)?.label || deal.package_type}
+                        </span>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-gradient">{`₹${(deal.value ?? 0).toLocaleString("en-IN")}`}</span>
+                        {deal.expected_date && (
+                          <span className="text-xs text-muted-foreground">{new Date(deal.expected_date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
                         )}
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-primary">₹{(deal.value ?? 0).toLocaleString("en-IN")}</span>
-                          {deal.expected_date && (
-                            <span className="text-xs text-muted-foreground">{new Date(deal.expected_date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
-                          )}
-                        </div>
-                        {/* Quick stage change */}
-                        <Select value={deal.stage} onValueChange={(v) => updateStage.mutate({ id: deal.id, stage: v })}>
-                          <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {STAGES.map((s) => (
-                              <SelectItem key={s.key} value={s.key} className="text-xs">{s.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </CardContent>
-                    </Card>
+                      </div>
+                      <Select value={deal.stage} onValueChange={(v) => updateStage.mutate({ id: deal.id, stage: v })}>
+                        <SelectTrigger className="h-7 text-xs rounded-lg"><SelectValue /></SelectTrigger>
+                        <SelectContent className="glass-strong bg-card rounded-xl">
+                          {STAGES.map((s) => (
+                            <SelectItem key={s.key} value={s.key} className="text-xs">{s.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   ))
                 ) : (
-                  <div className="border border-dashed border-border rounded-lg p-6 text-center text-xs text-muted-foreground">
+                  <div className="border border-dashed border-border rounded-2xl p-6 text-center text-xs text-muted-foreground backdrop-blur-sm">
                     No deals
                   </div>
                 )}
