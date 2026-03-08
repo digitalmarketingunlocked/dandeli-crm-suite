@@ -51,6 +51,8 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
   const [propertyName, setPropertyName] = useState("");
   const [roomType, setRoomType] = useState("");
   const [pricing, setPricing] = useState("");
+  const [pricingTotal, setPricingTotal] = useState("");
+  const [transport, setTransport] = useState("");
   const [activities, setActivities] = useState("");
   const [notes, setNotes] = useState("");
 
