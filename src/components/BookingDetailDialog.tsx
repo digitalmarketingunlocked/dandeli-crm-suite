@@ -188,15 +188,41 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5 text-xs font-medium">
+                <IndianRupee className="w-3.5 h-3.5 text-muted-foreground" /> Pricing / Head
+              </Label>
+              <Input
+                type="number"
+                placeholder="e.g. 5000"
+                value={pricing}
+                onChange={(e) => setPricing(e.target.value)}
+                className="rounded-xl"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5 text-xs font-medium">
+                <IndianRupee className="w-3.5 h-3.5 text-muted-foreground" /> Total
+              </Label>
+              <Input
+                type="number"
+                placeholder="e.g. 25000"
+                value={pricingTotal}
+                onChange={(e) => setPricingTotal(e.target.value)}
+                className="rounded-xl"
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label className="flex items-center gap-1.5 text-xs font-medium">
-              <IndianRupee className="w-3.5 h-3.5 text-muted-foreground" /> Pricing
+              <Car className="w-3.5 h-3.5 text-muted-foreground" /> Transport
             </Label>
             <Input
-              type="number"
-              placeholder="e.g. 15000"
-              value={pricing}
-              onChange={(e) => setPricing(e.target.value)}
+              placeholder="e.g. Self drive, Pickup from station"
+              value={transport}
+              onChange={(e) => setTransport(e.target.value)}
               className="rounded-xl"
             />
           </div>
