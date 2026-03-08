@@ -69,8 +69,11 @@ export default function ContactsPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [checkInFilter, setCheckInFilter] = useState("");
+  const [lastContactedFilter, setLastContactedFilter] = useState("");
+  const [followUpOnly, setFollowUpOnly] = useState(false);
+  const [hotOnly, setHotOnly] = useState(false);
 
   // Add lead dialog
   const [addDialogOpen, setAddDialogOpen] = useState(false);
