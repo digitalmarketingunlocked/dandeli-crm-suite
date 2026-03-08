@@ -41,7 +41,7 @@ const PLANS: Plan[] = [
     name: "Free",
     monthlyPrice: 0,
     yearlyPrice: 0,
-    features: ["Up to 50 leads", "1 team member", "Basic analytics", "Email support"],
+    features: ["Up to 50 leads", "1 team member", "Basic analytics", "Email support", "1 data export"],
     current: true,
   },
   {
@@ -57,7 +57,7 @@ const PLANS: Plan[] = [
     subtitle: "For growing business with sales team",
     monthlyPrice: 1999,
     yearlyPrice: 19999,
-    features: ["Everything in Startup", "3 team members", "API access", "Priority support", "Custom integrations", "Export data", "Advanced reporting"],
+    features: ["Everything in Startup", "3 team members", "API access", "Priority support", "Custom integrations", "Export data", "Advanced reporting", "Bookings page access"],
   },
   {
     name: "Enterprise",
