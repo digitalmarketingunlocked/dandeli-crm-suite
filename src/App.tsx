@@ -30,25 +30,27 @@ function AuthRoute() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/auth" element={<AuthRoute />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
-            <Route path="/deals" element={<ProtectedRoute><DealsPage /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/auth" element={<AuthRoute />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+              <Route path="/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
+              <Route path="/deals" element={<ProtectedRoute><DealsPage /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;
