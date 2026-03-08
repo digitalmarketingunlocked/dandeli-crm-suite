@@ -308,6 +308,12 @@ export default function BookingsPage() {
           })}
         </div>
       )}
+
+      <BookingDetailDialog
+        booking={selectedBooking}
+        open={!!selectedBooking}
+        onOpenChange={(open) => !open && setSelectedBooking(null)}
+      />
     </div>
   );
 }
