@@ -47,6 +47,7 @@ const App = () => (
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
               <Route path="/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
               <Route path="/follow-ups" element={<ProtectedRoute><FollowUpsPage /></ProtectedRoute>} />
+              <Route path="/cold-follow-up" element={<ProtectedRoute><ColdFollowUpPage /></ProtectedRoute>} />
               <Route path="/deals" element={<ProtectedRoute><DealsPage /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
