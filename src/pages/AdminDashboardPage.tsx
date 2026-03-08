@@ -59,15 +59,25 @@ export default function AdminDashboardPage() {
   });
 
   const updateRequest = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status, tenantId, planName }: { id: string; status: string; tenantId: string; planName: string }) => {
       const { error } = await supabase
         .from("subscription_requests")
         .update({ status, reviewed_at: new Date().toISOString(), reviewed_by: user!.id })
         .eq("id", id);
       if (error) throw error;
+
+      // If approved, update the tenant's current plan
+      if (status === "approved") {
+        const { error: tenantError } = await supabase
+          .from("tenants")
+          .update({ current_plan: planName.toLowerCase() })
+          .eq("id", tenantId);
+        if (tenantError) throw tenantError;
+      }
     },
     onSuccess: (_, { status }) => {
       queryClient.invalidateQueries({ queryKey: ["admin-subscription-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
       toast.success(`Request ${status} successfully`);
       setConfirmAction(null);
     },
