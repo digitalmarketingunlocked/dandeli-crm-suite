@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, TrendingUp, Target, Clock, Plus, CalendarDays, Phone, ChevronRight } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Users, TrendingUp, Target, Clock, Plus, CalendarDays, Phone, ChevronRight, User, MapPin, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { useToast } from "@/hooks/use-toast";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 const STAGE_COLORS: Record<string, string> = {
   inquiry: "hsl(210, 70%, 52%)",
@@ -27,9 +31,42 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 export default function DashboardPage() {
-  const { tenantId } = useAuth();
+  const { tenantId, user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [period, setPeriod] = useState("month");
+  const [leadDialogOpen, setLeadDialogOpen] = useState(false);
+  const [leadForm, setLeadForm] = useState({
+    name: "", phone: "", check_in_date: "", check_out_date: "",
+    guests_count: "2", city: "", lead_time: "", source: "organic",
+  });
+
+  const createLead = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("contacts").insert({
+        name: leadForm.name.trim(),
+        phone: leadForm.phone.trim() || null,
+        check_in_date: leadForm.check_in_date || null,
+        check_out_date: leadForm.check_out_date || null,
+        guests_count: parseInt(leadForm.guests_count) || 2,
+        city: leadForm.city.trim() || null,
+        lead_time: leadForm.lead_time.trim() || null,
+        source: leadForm.source,
+        type: "lead",
+        tenant_id: tenantId!,
+        created_by: user!.id,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      setLeadDialogOpen(false);
+      setLeadForm({ name: "", phone: "", check_in_date: "", check_out_date: "", guests_count: "2", city: "", lead_time: "", source: "organic" });
+      toast({ title: "Lead added!" });
+    },
+    onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
 
   const { data: contacts } = useQuery({
     queryKey: ["contacts", tenantId],
@@ -124,11 +161,138 @@ export default function DashboardPage() {
           <h2 className="text-xl font-heading font-bold text-foreground">Got a new inquiry?</h2>
           <p className="text-muted-foreground mt-1">Add them to your CRM instantly to start tracking and never miss a follow-up.</p>
         </div>
-        <Button className="gap-2 rounded-xl shadow-lg whitespace-nowrap" onClick={() => navigate("/contacts")}>
+        <Button className="gap-2 rounded-xl shadow-lg whitespace-nowrap" onClick={() => setLeadDialogOpen(true)}>
           <Plus className="w-4 h-4" />
           Quick Add Lead
         </Button>
       </div>
+
+      {/* Add New Lead Dialog */}
+      <Dialog open={leadDialogOpen} onOpenChange={setLeadDialogOpen}>
+        <DialogContent className="glass-strong bg-card rounded-2xl sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-heading text-xl">Add New Lead</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => { e.preventDefault(); createLead.mutate(); }} className="space-y-6">
+            {/* Guest Information */}
+            <div className="space-y-3">
+              <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Guest Information</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Guest Name"
+                  value={leadForm.name}
+                  onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
+                  required
+                  maxLength={100}
+                  className="pl-10 rounded-xl"
+                />
+              </div>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Phone Number"
+                  value={leadForm.phone}
+                  onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
+                  maxLength={20}
+                  className="pl-10 rounded-xl"
+                />
+              </div>
+            </div>
+
+            {/* Stay Details */}
+            <div className="space-y-3">
+              <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Stay Details</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative">
+                  <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    placeholder="Check-in"
+                    value={leadForm.check_in_date}
+                    onChange={(e) => setLeadForm({ ...leadForm, check_in_date: e.target.value })}
+                    className="pl-10 rounded-xl"
+                  />
+                </div>
+                <div className="relative">
+                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="number"
+                    placeholder="Guests"
+                    value={leadForm.guests_count}
+                    onChange={(e) => setLeadForm({ ...leadForm, guests_count: e.target.value })}
+                    min={1}
+                    max={100}
+                    className="pl-10 rounded-xl"
+                  />
+                </div>
+                <div className="relative">
+                  <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    placeholder="Check-out"
+                    value={leadForm.check_out_date}
+                    onChange={(e) => setLeadForm({ ...leadForm, check_out_date: e.target.value })}
+                    className="pl-10 rounded-xl"
+                  />
+                </div>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="City"
+                    value={leadForm.city}
+                    onChange={(e) => setLeadForm({ ...leadForm, city: e.target.value })}
+                    maxLength={100}
+                    className="pl-10 rounded-xl"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Info */}
+            <div className="space-y-3">
+              <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Additional Info</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Lead Time (e.g. 10:30 AM)"
+                    value={leadForm.lead_time}
+                    onChange={(e) => setLeadForm({ ...leadForm, lead_time: e.target.value })}
+                    maxLength={50}
+                    className="pl-10 rounded-xl"
+                  />
+                </div>
+                <div className="relative">
+                  <Share2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+                  <Select value={leadForm.source} onValueChange={(v) => setLeadForm({ ...leadForm, source: v })}>
+                    <SelectTrigger className="pl-10 rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent className="glass-strong bg-card rounded-xl">
+                      <SelectItem value="organic">Organic</SelectItem>
+                      <SelectItem value="referral">Referral</SelectItem>
+                      <SelectItem value="social">Social Media</SelectItem>
+                      <SelectItem value="website">Website</SelectItem>
+                      <SelectItem value="walk-in">Walk-in</SelectItem>
+                      <SelectItem value="phone">Phone</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 justify-end pt-2">
+              <Button type="button" variant="outline" className="rounded-xl" onClick={() => setLeadDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" className="rounded-xl" disabled={createLead.isPending}>
+                {createLead.isPending ? "Adding..." : "Add Lead"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

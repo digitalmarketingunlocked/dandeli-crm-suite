@@ -16,11 +16,16 @@ export type Database = {
     Tables: {
       contacts: {
         Row: {
+          check_in_date: string | null
+          check_out_date: string | null
+          city: string | null
           company: string | null
           created_at: string
           created_by: string | null
           email: string | null
+          guests_count: number | null
           id: string
+          lead_time: string | null
           name: string
           notes: string | null
           phone: string | null
@@ -30,11 +35,16 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          check_in_date?: string | null
+          check_out_date?: string | null
+          city?: string | null
           company?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
+          guests_count?: number | null
           id?: string
+          lead_time?: string | null
           name: string
           notes?: string | null
           phone?: string | null
@@ -44,11 +54,16 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          check_in_date?: string | null
+          check_out_date?: string | null
+          city?: string | null
           company?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
+          guests_count?: number | null
           id?: string
+          lead_time?: string | null
           name?: string
           notes?: string | null
           phone?: string | null
