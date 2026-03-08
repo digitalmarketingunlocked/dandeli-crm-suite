@@ -18,7 +18,7 @@ const PLAN_DETAILS: Record<string, { price: string; features: string[] }> = {
   },
   business: {
     price: "₹1,999/mo",
-    features: ["Everything in Startup", "3 team members", "Bookings page", "Export data", "API access"],
+    features: ["Everything in Startup", "3 team members", "Bookings page", "Export data", "Advanced reporting"],
   },
   enterprise: {
     price: "₹2,999/mo",
