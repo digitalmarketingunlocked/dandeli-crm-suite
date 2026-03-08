@@ -54,17 +54,22 @@ export function exportContactsToXls(contacts: Contact[], statusMap?: { value: st
     "Date": new Date(c.created_at).toLocaleDateString("en-IN"),
     "Name": c.name,
     "Number": c.phone || "",
+    "City": c.city || "",
     "Check In": c.check_in_date || "",
     "Check Out": c.check_out_date || "",
     "Number of People": (c.adults_count || 0) + (c.kids_count || 0),
     "Time": c.lead_time || "",
     "Status": statusMap?.find(s => s.value === c.type)?.label || STATUS_LABELS[c.type] || c.type,
-    "Follow Up 1": c.follow_up_date || "",
     "Remarks": c.notes?.split("\n")[0]?.replace(/\[.*?\]\s?/, "") || "",
   }));
 
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(data);
+
+  // Freeze first row
+  ws["!freeze"] = { xSplit: 0, ySplit: 1 };
+  if (!ws["!views"]) ws["!views"] = [];
+  ws["!views"][0] = { state: "frozen", ySplit: 1 };
 
   // Column widths
   ws["!cols"] = [
@@ -72,12 +77,12 @@ export function exportContactsToXls(contacts: Contact[], statusMap?: { value: st
     { wch: 12 }, // Date
     { wch: 18 }, // Name
     { wch: 14 }, // Number
+    { wch: 14 }, // City
     { wch: 12 }, // Check In
     { wch: 12 }, // Check Out
     { wch: 14 }, // People
     { wch: 8 },  // Time
     { wch: 20 }, // Status
-    { wch: 22 }, // Follow Up 1
     { wch: 22 }, // Remarks
   ];
 
