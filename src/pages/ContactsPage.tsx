@@ -17,6 +17,7 @@ import {
   Filter, FileSpreadsheet, MessageCircle, Flame, Snowflake, ChevronRight, StickyNote,
   Bell, Repeat, History, PhoneCall
 } from "lucide-react";
+import { exportContactsToXls } from "@/lib/exportXls";
 
 type Contact = {
   id: string;
