@@ -125,6 +125,28 @@ export default function ContactsPage() {
     enabled: !!tenantId,
   });
 
+  // Call history for selected lead
+  const { data: callHistory } = useQuery({
+    queryKey: ["call_history", selectedLead?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("call_history").select("*").eq("contact_id", selectedLead!.id).order("called_at", { ascending: false });
+      if (error) throw error;
+      return data as CallHistory[];
+    },
+    enabled: !!selectedLead?.id && detailOpen,
+  });
+
+  // Reminders for selected lead
+  const { data: reminders } = useQuery({
+    queryKey: ["reminders", selectedLead?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("reminders").select("*").eq("contact_id", selectedLead!.id).order("reminder_date", { ascending: false });
+      if (error) throw error;
+      return data as Reminder[];
+    },
+    enabled: !!selectedLead?.id && detailOpen,
+  });
+
   const createLead = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("contacts").insert({
