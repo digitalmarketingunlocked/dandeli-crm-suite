@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
   User, Phone, MapPin, CalendarDays, Users,
-  Building2, BedDouble, IndianRupee, Sparkles, Save, MessageCircle
+  Building2, BedDouble, IndianRupee, Sparkles, Save, MessageCircle, Car
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
