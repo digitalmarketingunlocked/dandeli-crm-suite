@@ -191,9 +191,12 @@ export default function ContactsPage() {
     const matchesSearch =
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       (c.phone?.includes(search));
-    const matchesSource = sourceFilter === "all" || c.source === sourceFilter;
     const matchesType = typeFilter === "all" || c.type === typeFilter;
-    return matchesSearch && matchesSource && matchesType;
+    const matchesCheckIn = !checkInFilter || c.check_in_date === checkInFilter;
+    const matchesLastContacted = !lastContactedFilter || c.updated_at.startsWith(lastContactedFilter);
+    const matchesHot = !hotOnly || isHot(c);
+    // followUpOnly: placeholder filter (no follow-up field yet, shows all for now)
+    return matchesSearch && matchesType && matchesCheckIn && matchesLastContacted && matchesHot;
   });
 
   const totalPeople = (c: Contact) => (c.adults_count || 0) + (c.kids_count || 0);
