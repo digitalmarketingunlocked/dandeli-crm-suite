@@ -402,10 +402,10 @@ export default function ContactsPage() {
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Last Contacted</Label>
-              <Input
-                type="date"
+              <DateInput
                 value={lastContactedFilter}
-                onChange={(e) => setLastContactedFilter(e.target.value)}
+                onChange={setLastContactedFilter}
+                placeholder="Select date"
                 className="rounded-xl"
               />
             </div>
