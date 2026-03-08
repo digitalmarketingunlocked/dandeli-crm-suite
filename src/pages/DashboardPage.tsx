@@ -62,15 +62,8 @@ export default function DashboardPage() {
     enabled: !!tenantId,
   });
 
-  const { data: deals } = useQuery({
-    queryKey: ["deals", tenantId],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("deals").select("*, contacts(name, phone)").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!tenantId,
-  });
+
+
 
   const totalContacts = contacts?.length ?? 0;
   const hotLeads = contacts?.filter((c) => {
