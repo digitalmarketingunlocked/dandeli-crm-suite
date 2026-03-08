@@ -111,13 +111,13 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-heading font-bold text-foreground">Dashboard Overview</h1>
-          <p className="text-muted-foreground mt-1">Real-time performance metrics</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground truncate">Dashboard Overview</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Real-time performance metrics</p>
         </div>
         <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-[140px] rounded-xl glass-subtle bg-card">
+          <SelectTrigger className="w-[140px] rounded-xl glass-subtle bg-card shrink-0">
             <CalendarDays className="w-4 h-4 mr-2 text-muted-foreground" />
             <SelectValue />
           </SelectTrigger>
