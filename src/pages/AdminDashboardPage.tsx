@@ -28,7 +28,7 @@ export default function AdminDashboardPage() {
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [confirmAction, setConfirmAction] = useState<{ id: string; action: "approved" | "rejected" } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ id: string; action: "approved" | "rejected"; tenantId: string; planName: string } | null>(null);
 
   // Fetch all subscription requests with tenant info
   const { data: requests, isLoading: requestsLoading } = useQuery({
