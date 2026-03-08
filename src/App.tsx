@@ -9,6 +9,7 @@ import AuthPage from "@/pages/AuthPage";
 import DashboardPage from "@/pages/DashboardPage";
 import ContactsPage from "@/pages/ContactsPage";
 import DealsPage from "@/pages/DealsPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/auth" element={<AuthRoute />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
             <Route path="/deals" element={<ProtectedRoute><DealsPage /></ProtectedRoute>} />

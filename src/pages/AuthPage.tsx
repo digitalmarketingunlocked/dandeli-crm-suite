@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,8 @@ export default function AuthPage() {
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -32,6 +35,23 @@ export default function AuthPage() {
       if (error) throw error;
     } catch (err: any) {
       toast({ title: "Google sign-in failed", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast({ title: "Reset email sent!", description: "Check your inbox for the reset link." });
+      setShowForgotPassword(false);
+    } catch (err: any) {
+      toast({ title: "Reset failed", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -91,6 +111,28 @@ export default function AuthPage() {
             </h1>
           </div>
 
+          {showForgotPassword ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-heading">Reset Password</CardTitle>
+                <CardDescription>Enter your email and we'll send you a reset link</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email">Email</Label>
+                    <Input id="forgot-email" type="email" placeholder="you@company.com" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} required />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Sending..." : "Send Reset Link"}
+                  </Button>
+                  <Button type="button" variant="link" className="w-full text-sm" onClick={() => setShowForgotPassword(false)}>
+                    Back to Sign In
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          ) : (
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">Sign In</TabsTrigger>
@@ -123,6 +165,9 @@ export default function AuthPage() {
                     </div>
                     <Button type="submit" className="w-full" disabled={loading}>
                       {loading ? "Signing in..." : "Sign In"}
+                    </Button>
+                    <Button type="button" variant="link" className="w-full text-sm" onClick={() => setShowForgotPassword(true)}>
+                      Forgot your password?
                     </Button>
                   </form>
                 </CardContent>
@@ -169,6 +214,7 @@ export default function AuthPage() {
               </Card>
             </TabsContent>
           </Tabs>
+          )}
         </div>
       </div>
     </div>
