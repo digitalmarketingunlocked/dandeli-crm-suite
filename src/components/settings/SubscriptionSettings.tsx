@@ -12,17 +12,26 @@ const PLANS = [
     current: true,
   },
   {
-    name: "Pro",
+    name: "Startup",
+    subtitle: "For solo founders",
     price: "₹999",
     period: "/month",
     features: ["Unlimited leads", "5 team members", "Advanced analytics", "Priority support", "Custom lead statuses", "Export data"],
     recommended: true,
   },
   {
+    name: "Business",
+    subtitle: "For growing business with sales team",
+    price: "₹1,999",
+    period: "/month",
+    features: ["Everything in Startup", "15 team members", "API access", "Priority support", "Custom integrations", "Advanced reporting"],
+  },
+  {
     name: "Enterprise",
+    subtitle: "For large organizations",
     price: "₹2,999",
     period: "/month",
-    features: ["Everything in Pro", "Unlimited team members", "API access", "Dedicated support", "Custom integrations", "White-label options"],
+    features: ["Everything in Business", "Unlimited team members", "Dedicated support", "White-label options", "SLA guarantee", "Custom onboarding"],
   },
 ];
 
