@@ -18,6 +18,13 @@ export default function SettingsPage() {
   const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { statuses, addStatus, updateStatus, deleteStatus } = useLeadStatuses();
+  const [newStatusLabel, setNewStatusLabel] = useState("");
+  const [newStatusValue, setNewStatusValue] = useState("");
+  const [newStatusColor, setNewStatusColor] = useState("secondary");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editLabel, setEditLabel] = useState("");
+  const [editColor, setEditColor] = useState("");
 
   // Profile
   const { data: profile } = useQuery({

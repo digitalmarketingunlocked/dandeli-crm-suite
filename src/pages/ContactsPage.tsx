@@ -63,23 +63,7 @@ type Reminder = {
   created_by: string | null;
 };
 
-const STAGE_OPTIONS = [
-  { value: "lead", label: "NEW LEAD" },
-  { value: "interested", label: "INTERESTED" },
-  { value: "follow-up", label: "FOLLOW UP" },
-  { value: "negotiation", label: "NEGOTIATION" },
-  { value: "booked", label: "BOOKED" },
-  { value: "lost", label: "LOST" },
-];
-
-const STAGE_STYLES: Record<string, string> = {
-  lead: "bg-secondary/15 text-secondary border-secondary/30",
-  interested: "bg-primary/15 text-primary border-primary/30",
-  "follow-up": "bg-accent/15 text-accent border-accent/30",
-  negotiation: "bg-warning/15 text-warning border-warning/30",
-  booked: "bg-primary/20 text-primary border-primary/40",
-  lost: "bg-destructive/15 text-destructive border-destructive/30",
-};
+// Removed hardcoded STAGE_OPTIONS and STAGE_STYLES - now using useLeadStatuses hook
 
 const SOURCE_LABELS: Record<string, string> = {
   organic: "Organic",
