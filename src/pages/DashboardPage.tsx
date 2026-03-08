@@ -39,17 +39,18 @@ export default function DashboardPage() {
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
   const [leadForm, setLeadForm] = useState({
     name: "", phone: "", check_in_date: "", check_out_date: "",
-    guests_count: "2", city: "", lead_time: "", source: "organic",
+    adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic",
   });
 
   const createLead = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("contacts").insert({
         name: leadForm.name.trim(),
-        phone: leadForm.phone.trim() || null,
+        phone: leadForm.phone.trim(),
         check_in_date: leadForm.check_in_date || null,
         check_out_date: leadForm.check_out_date || null,
-        guests_count: parseInt(leadForm.guests_count) || 2,
+        adults_count: parseInt(leadForm.adults_count) || 2,
+        kids_count: parseInt(leadForm.kids_count) || 0,
         city: leadForm.city.trim() || null,
         lead_time: leadForm.lead_time.trim() || null,
         source: leadForm.source,
@@ -62,7 +63,7 @@ export default function DashboardPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       setLeadDialogOpen(false);
-      setLeadForm({ name: "", phone: "", check_in_date: "", check_out_date: "", guests_count: "2", city: "", lead_time: "", source: "organic" });
+      setLeadForm({ name: "", phone: "", check_in_date: "", check_out_date: "", adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic" });
       toast({ title: "Lead added!" });
     },
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
@@ -180,7 +181,7 @@ export default function DashboardPage() {
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Guest Name"
+                  placeholder="Guest Name *"
                   value={leadForm.name}
                   onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
                   required
@@ -191,9 +192,10 @@ export default function DashboardPage() {
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Phone Number"
+                  placeholder="Phone Number *"
                   value={leadForm.phone}
                   onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
+                  required
                   maxLength={20}
                   className="pl-10 rounded-xl"
                 />
@@ -204,48 +206,73 @@ export default function DashboardPage() {
             <div className="space-y-3">
               <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Stay Details</Label>
               <div className="grid grid-cols-2 gap-3">
-                <div className="relative">
-                  <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    type="date"
-                    placeholder="Check-in"
-                    value={leadForm.check_in_date}
-                    onChange={(e) => setLeadForm({ ...leadForm, check_in_date: e.target.value })}
-                    className="pl-10 rounded-xl"
-                  />
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Check-in Date *</Label>
+                  <div className="relative">
+                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="date"
+                      value={leadForm.check_in_date}
+                      onChange={(e) => setLeadForm({ ...leadForm, check_in_date: e.target.value })}
+                      required
+                      className="pl-10 rounded-xl"
+                    />
+                  </div>
                 </div>
-                <div className="relative">
-                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    type="number"
-                    placeholder="Guests"
-                    value={leadForm.guests_count}
-                    onChange={(e) => setLeadForm({ ...leadForm, guests_count: e.target.value })}
-                    min={1}
-                    max={100}
-                    className="pl-10 rounded-xl"
-                  />
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Check-out Date</Label>
+                  <div className="relative">
+                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="date"
+                      value={leadForm.check_out_date}
+                      onChange={(e) => setLeadForm({ ...leadForm, check_out_date: e.target.value })}
+                      className="pl-10 rounded-xl"
+                    />
+                  </div>
                 </div>
-                <div className="relative">
-                  <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    type="date"
-                    placeholder="Check-out"
-                    value={leadForm.check_out_date}
-                    onChange={(e) => setLeadForm({ ...leadForm, check_out_date: e.target.value })}
-                    className="pl-10 rounded-xl"
-                  />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Adults</Label>
+                  <div className="relative">
+                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="number"
+                      placeholder="Adults"
+                      value={leadForm.adults_count}
+                      onChange={(e) => setLeadForm({ ...leadForm, adults_count: e.target.value })}
+                      min={1}
+                      max={100}
+                      className="pl-10 rounded-xl"
+                    />
+                  </div>
                 </div>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="City"
-                    value={leadForm.city}
-                    onChange={(e) => setLeadForm({ ...leadForm, city: e.target.value })}
-                    maxLength={100}
-                    className="pl-10 rounded-xl"
-                  />
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Kids</Label>
+                  <div className="relative">
+                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="number"
+                      placeholder="Kids"
+                      value={leadForm.kids_count}
+                      onChange={(e) => setLeadForm({ ...leadForm, kids_count: e.target.value })}
+                      min={0}
+                      max={100}
+                      className="pl-10 rounded-xl"
+                    />
+                  </div>
                 </div>
+              </div>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="City"
+                  value={leadForm.city}
+                  onChange={(e) => setLeadForm({ ...leadForm, city: e.target.value })}
+                  maxLength={100}
+                  className="pl-10 rounded-xl"
+                />
               </div>
             </div>
 
@@ -269,12 +296,10 @@ export default function DashboardPage() {
                     <SelectTrigger className="pl-10 rounded-xl"><SelectValue /></SelectTrigger>
                     <SelectContent className="glass-strong bg-card rounded-xl">
                       <SelectItem value="organic">Organic</SelectItem>
+                      <SelectItem value="google-ads">Google Ads</SelectItem>
+                      <SelectItem value="meta-ads">Meta Ads</SelectItem>
+                      <SelectItem value="offline-marketing">Offline Marketing</SelectItem>
                       <SelectItem value="referral">Referral</SelectItem>
-                      <SelectItem value="social">Social Media</SelectItem>
-                      <SelectItem value="website">Website</SelectItem>
-                      <SelectItem value="walk-in">Walk-in</SelectItem>
-                      <SelectItem value="phone">Phone</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

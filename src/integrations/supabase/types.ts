@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       contacts: {
         Row: {
+          adults_count: number | null
           check_in_date: string | null
           check_out_date: string | null
           city: string | null
@@ -25,6 +26,7 @@ export type Database = {
           email: string | null
           guests_count: number | null
           id: string
+          kids_count: number | null
           lead_time: string | null
           name: string
           notes: string | null
@@ -35,6 +37,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          adults_count?: number | null
           check_in_date?: string | null
           check_out_date?: string | null
           city?: string | null
@@ -44,6 +47,7 @@ export type Database = {
           email?: string | null
           guests_count?: number | null
           id?: string
+          kids_count?: number | null
           lead_time?: string | null
           name: string
           notes?: string | null
@@ -54,6 +58,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          adults_count?: number | null
           check_in_date?: string | null
           check_out_date?: string | null
           city?: string | null
@@ -63,6 +68,7 @@ export type Database = {
           email?: string | null
           guests_count?: number | null
           id?: string
+          kids_count?: number | null
           lead_time?: string | null
           name?: string
           notes?: string | null
