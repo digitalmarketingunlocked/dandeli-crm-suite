@@ -41,7 +41,7 @@ const PLANS: Plan[] = [
     name: "Free",
     monthlyPrice: 0,
     yearlyPrice: 0,
-    features: ["Up to 50 leads", "1 team member", "Basic analytics", "Email support"],
+    features: ["Up to 50 leads", "1 team member", "Basic analytics", "Email support", "1 data export"],
     current: true,
   },
   {
