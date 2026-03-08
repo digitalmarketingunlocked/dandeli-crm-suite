@@ -736,11 +736,10 @@ export default function ContactsPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <Label className="text-xs text-muted-foreground uppercase tracking-wider">Follow-up</Label>
-                        <Input
-                          type="date"
+                        <DateInput
                           value={editForm.follow_up_date as string || ""}
-                          onChange={(e) => setEditForm({ ...editForm, follow_up_date: e.target.value })}
-                          className="w-[150px] h-8 text-xs rounded-lg"
+                          onChange={(v) => setEditForm({ ...editForm, follow_up_date: v })}
+                          className="w-[160px] h-8 text-xs rounded-lg"
                         />
                       </div>
                       <div className="flex items-center justify-between">
