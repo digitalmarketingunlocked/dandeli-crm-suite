@@ -144,6 +144,9 @@ export default function AuthPage() {
                     <Button type="submit" className="w-full" disabled={loading}>
                       {loading ? "Signing in..." : "Sign In"}
                     </Button>
+                    <Button type="button" variant="link" className="w-full text-sm" onClick={() => setShowForgotPassword(true)}>
+                      Forgot your password?
+                    </Button>
                   </form>
                 </CardContent>
               </Card>
