@@ -204,9 +204,9 @@ export default function DashboardPage() {
       {/* Custom Date Range */}
       {period === "custom" && (
         <div className="flex items-center gap-3 justify-end">
-          <Input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} className="w-[140px] h-8 text-xs rounded-lg" placeholder="From" />
+          <DateInput value={customFrom} onChange={setCustomFrom} placeholder="From" className="w-[160px] h-8 text-xs rounded-lg" />
           <span className="text-xs text-muted-foreground">to</span>
-          <Input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} className="w-[140px] h-8 text-xs rounded-lg" placeholder="To" />
+          <DateInput value={customTo} onChange={setCustomTo} placeholder="To" className="w-[160px] h-8 text-xs rounded-lg" />
         </div>
       )}
 
