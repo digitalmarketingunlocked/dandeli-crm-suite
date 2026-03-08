@@ -555,7 +555,7 @@ export default function ContactsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Check-in *</Label>
-                  <Input type="date" value={leadForm.check_in_date} onChange={(e) => setLeadForm({ ...leadForm, check_in_date: e.target.value })} required className="rounded-xl" />
+                  <DateInput value={leadForm.check_in_date} onChange={(v) => setLeadForm({ ...leadForm, check_in_date: v })} required className="rounded-xl" placeholder="Check-in" />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Check-out</Label>
