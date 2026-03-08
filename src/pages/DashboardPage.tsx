@@ -351,10 +351,10 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{contact.name}</p>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                      {contact.phone && <span>{contact.phone}</span>}
-                      <span className="flex items-center gap-1"><Users className="w-3 h-3" />{(contact.adults_count || 0) + (contact.kids_count || 0)} People</span>
-                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{getTimeAgo(contact.created_at)}</span>
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground mt-0.5">
+                      {contact.phone && <span className="truncate max-w-[100px]">{contact.phone}</span>}
+                      <span className="flex items-center gap-0.5 whitespace-nowrap"><Users className="w-3 h-3" />{(contact.adults_count || 0) + (contact.kids_count || 0)}</span>
+                      <span className="flex items-center gap-0.5 whitespace-nowrap"><Clock className="w-3 h-3" />{getTimeAgo(contact.created_at)}</span>
                     </div>
                   </div>
                   <div className="text-right shrink-0 flex flex-col items-end gap-1">
