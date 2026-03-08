@@ -14,6 +14,7 @@ import {
   CalendarCheck, User, MessageCircle
 } from "lucide-react";
 import { format, isToday, isTomorrow, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
+import BookingDetailDialog from "@/components/BookingDetailDialog";
 
 type Contact = {
   id: string;
@@ -39,6 +40,7 @@ export default function BookingsPage() {
   const [customFrom, setCustomFrom] = useState<Date | undefined>();
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const [search, setSearch] = useState("");
+  const [selectedBooking, setSelectedBooking] = useState<Contact | null>(null);
 
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ["bookings"],
@@ -207,9 +209,10 @@ export default function BookingsPage() {
               <Card
                 key={booking.id}
                 className={cn(
-                  "rounded-2xl transition-all hover:shadow-md",
+                  "rounded-2xl transition-all hover:shadow-md cursor-pointer",
                   isCheckinToday && "border-primary/50 bg-primary/5"
                 )}
+                onClick={() => setSelectedBooking(booking)}
               >
                 <CardContent className="p-4 sm:p-5">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
@@ -271,7 +274,7 @@ export default function BookingsPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                       {booking.phone && (
                         <>
                           <Button
@@ -305,6 +308,12 @@ export default function BookingsPage() {
           })}
         </div>
       )}
+
+      <BookingDetailDialog
+        booking={selectedBooking}
+        open={!!selectedBooking}
+        onOpenChange={(open) => !open && setSelectedBooking(null)}
+      />
     </div>
   );
 }
