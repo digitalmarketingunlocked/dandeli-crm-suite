@@ -31,8 +31,8 @@ export default function ColdFollowUpPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-heading font-bold">Cold Follow Up</h1>
-        <p className="text-muted-foreground mt-1">Re-engage leads that have gone cold</p>
+        <h1 className="text-2xl sm:text-3xl font-heading font-bold">Cold Follow Up</h1>
+        <p className="text-muted-foreground mt-1 text-sm">Re-engage leads that have gone cold</p>
       </div>
 
       {isLoading ? (
