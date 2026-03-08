@@ -35,6 +35,8 @@ type Contact = {
   property_name?: string | null;
   room_type?: string | null;
   pricing?: number | null;
+  pricing_total?: number | null;
+  transport?: string | null;
   activities?: string | null;
 };
 
