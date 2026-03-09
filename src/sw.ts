@@ -10,7 +10,7 @@ precacheAndRoute(self.__WB_MANIFEST);
 self.addEventListener("push", (event) => {
   const data = event.data?.json() ?? {};
   const title = data.title || "Follow-up Reminder";
-  const options: NotificationOptions = {
+  const options = {
     body: data.body || "You have a pending follow-up",
     icon: data.icon || "/pwa-icon-192.png",
     badge: "/pwa-icon-192.png",
@@ -18,7 +18,7 @@ self.addEventListener("push", (event) => {
     tag: data.tag || "followup-reminder",
     renotify: true,
     data: { url: data.url || "/follow-ups" },
-  };
+  } as any;
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
