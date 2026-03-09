@@ -57,9 +57,9 @@ export default function MaintenanceNotice({
   }
 
   return (
-    <div className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-foreground flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+    <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-foreground flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-2">
-        <Clock3 className="w-4 h-4 text-warning" />
+        <Clock3 className="w-4 h-4 text-primary" />
         <p className="text-sm font-medium">Scheduled maintenance countdown</p>
       </div>
       <div className="text-sm">
