@@ -90,13 +90,14 @@ export default function SubscriptionSettings() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenants")
-        .select("name")
+        .select("name, current_plan")
         .eq("id", tenantId!)
         .single();
       if (error) throw error;
       return data;
     },
     enabled: !!tenantId,
+    refetchInterval: 10_000, // Check for plan updates
   });
 
   const { data: existingRequests } = useQuery({
@@ -136,10 +137,16 @@ export default function SubscriptionSettings() {
   });
 
   const resortName = tenant?.name || "Resort";
+  const currentPlan = (tenant?.current_plan || "free").toLowerCase();
   const isYearly = billing === "yearly";
+
+  const PLAN_ORDER = ["free", "startup", "business", "enterprise"];
+  const currentPlanIndex = PLAN_ORDER.indexOf(currentPlan);
 
   const getPrice = (plan: Plan) => (isYearly ? plan.yearlyPrice : plan.monthlyPrice);
   const getPeriod = () => (isYearly ? "/year" : "/month");
+  const isCurrentPlan = (plan: Plan) => plan.name.toLowerCase() === currentPlan;
+  const canUpgrade = (plan: Plan) => PLAN_ORDER.indexOf(plan.name.toLowerCase()) > currentPlanIndex;
 
   const getMonthlySaving = (plan: Plan) => {
     if (plan.monthlyPrice === 0) return 0;
@@ -206,19 +213,26 @@ export default function SubscriptionSettings() {
       )}
 
       {/* Current Plan */}
-      <div className="glass-card bg-card p-5 space-y-4 rounded-2xl">
-        <div className="flex items-center justify-between">
-          <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
-            <CreditCard className="w-4 h-4" /> Current Plan
-          </h4>
-          <Badge className="bg-primary/15 text-primary border-primary/30 rounded-md text-xs">Free Plan</Badge>
-        </div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold">₹0</span>
-          <span className="text-sm text-muted-foreground">/month</span>
-        </div>
-        <p className="text-sm text-muted-foreground">Your current billing cycle ends on April 8, 2026.</p>
-      </div>
+      {(() => {
+        const activePlan = PLANS.find((p) => p.name.toLowerCase() === currentPlan) || PLANS[0];
+        return (
+          <div className="glass-card bg-card p-5 space-y-4 rounded-2xl">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
+                <CreditCard className="w-4 h-4" /> Current Plan
+              </h4>
+              <Badge className="bg-primary/15 text-primary border-primary/30 rounded-md text-xs capitalize">{currentPlan} Plan</Badge>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold">{formatPrice(activePlan.monthlyPrice)}</span>
+              <span className="text-sm text-muted-foreground">/month</span>
+            </div>
+            {currentPlan !== "free" && (
+              <p className="text-sm text-muted-foreground">You have full access to {activePlan.name} features.</p>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Usage */}
       <div className="glass-card bg-card p-5 space-y-4 rounded-2xl">
@@ -287,10 +301,15 @@ export default function SubscriptionSettings() {
             <div
               key={plan.name}
               className={`glass-card bg-card p-5 rounded-2xl space-y-4 relative ${
-                plan.recommended ? "ring-2 ring-primary" : ""
-              }`}
+                plan.recommended && !isCurrentPlan(plan) ? "ring-2 ring-primary" : ""
+              } ${isCurrentPlan(plan) ? "ring-2 ring-primary/50" : ""}`}
             >
-              {plan.recommended && (
+              {isCurrentPlan(plan) && (
+                <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] rounded-md px-3">
+                  Current Plan
+                </Badge>
+              )}
+              {plan.recommended && !isCurrentPlan(plan) && (
                 <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] rounded-md px-3">
                   Recommended
                 </Badge>
@@ -320,12 +339,12 @@ export default function SubscriptionSettings() {
               </ul>
               <Button
                 className="w-full rounded-xl gap-2"
-                variant={plan.current ? "outline" : plan.recommended ? "default" : "outline"}
-                disabled={plan.current || !!pendingRequest}
-                onClick={() => !plan.current && openDialog(plan)}
+                variant={isCurrentPlan(plan) ? "outline" : plan.recommended ? "default" : "outline"}
+                disabled={isCurrentPlan(plan) || !canUpgrade(plan) || !!pendingRequest}
+                onClick={() => canUpgrade(plan) && openDialog(plan)}
               >
-                {plan.current ? "Current Plan" : pendingRequest ? "Upgrade Pending" : "Upgrade"}
-                {!plan.current && !pendingRequest && <ArrowUpRight className="w-3.5 h-3.5" />}
+                {isCurrentPlan(plan) ? "Current Plan" : !canUpgrade(plan) ? "Included" : pendingRequest ? "Upgrade Pending" : "Upgrade"}
+                {canUpgrade(plan) && !pendingRequest && <ArrowUpRight className="w-3.5 h-3.5" />}
               </Button>
             </div>
           ))}

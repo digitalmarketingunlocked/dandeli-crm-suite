@@ -105,6 +105,7 @@ export default function AdminUserManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      queryClient.invalidateQueries({ queryKey: ["tenant"] });
       toast.success("Plan updated");
     },
     onError: () => toast.error("Failed to update plan"),
