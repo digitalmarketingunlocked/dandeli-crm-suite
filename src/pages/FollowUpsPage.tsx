@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Clock, CheckCircle2, Phone, MessageCircle } from "lucide-react";
+import LeadProfileDialog from "@/components/LeadProfileDialog";
 
 const TYPE_BADGE: Record<string, string> = {
   lead: "bg-secondary/15 text-secondary border-secondary/30",
@@ -18,6 +20,7 @@ export default function FollowUpsPage() {
   const { tenantId } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedContact, setSelectedContact] = useState<any>(null);
 
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["followup-contacts", tenantId],
@@ -65,7 +68,7 @@ export default function FollowUpsPage() {
           <div className="glass-card bg-card p-8 text-center text-muted-foreground">Loading...</div>
         ) : contacts && contacts.length > 0 ? (
           contacts.map((contact) => (
-            <div key={contact.id} className="glass-card bg-card p-4 sm:p-5 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-4">
+            <div key={contact.id} className="glass-card bg-card p-4 sm:p-5 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-4 cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all" onClick={() => setSelectedContact(contact)}>
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center shrink-0 text-accent font-semibold text-sm">
                   {contact.name.charAt(0).toUpperCase()}
@@ -80,7 +83,7 @@ export default function FollowUpsPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center flex-wrap gap-2 sm:gap-3 shrink-0">
+              <div className="flex items-center flex-wrap gap-2 sm:gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
                 <Badge variant="outline" className={`${TYPE_BADGE[contact.type] || ""} rounded-lg capitalize`}>{contact.type.replace("-", " ")}</Badge>
                 <span className="text-xs text-muted-foreground whitespace-nowrap">Last: {getTimeAgo(contact.updated_at)}</span>
                 <Select value={contact.type} onValueChange={(v) => updateType.mutate({ id: contact.id, type: v })}>
@@ -115,6 +118,12 @@ export default function FollowUpsPage() {
           </div>
         )}
       </div>
+
+      <LeadProfileDialog
+        contact={selectedContact}
+        open={!!selectedContact}
+        onOpenChange={(open) => { if (!open) setSelectedContact(null); }}
+      />
     </div>
   );
 }
