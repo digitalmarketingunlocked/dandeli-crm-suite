@@ -399,6 +399,15 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
           </div>
         </div>
       </DialogContent>
+
+      <CallFlowDialog
+        open={callFlowOpen}
+        onOpenChange={setCallFlowOpen}
+        contactId={localContact.id}
+        contactName={localContact.name}
+        contactPhone={localContact.phone}
+        currentType={localContact.type}
+      />
     </Dialog>
   );
 }
