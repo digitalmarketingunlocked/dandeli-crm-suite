@@ -68,7 +68,7 @@ export default function FollowUpsPage() {
           <div className="glass-card bg-card p-8 text-center text-muted-foreground">Loading...</div>
         ) : contacts && contacts.length > 0 ? (
           contacts.map((contact) => (
-            <div key={contact.id} className="glass-card bg-card p-4 sm:p-5 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-4">
+            <div key={contact.id} className="glass-card bg-card p-4 sm:p-5 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-4 cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all" onClick={() => setSelectedContact(contact)}>
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center shrink-0 text-accent font-semibold text-sm">
                   {contact.name.charAt(0).toUpperCase()}
