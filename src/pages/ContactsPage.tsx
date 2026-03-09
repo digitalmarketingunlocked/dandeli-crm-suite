@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { normalizePhone } from "@/lib/phoneUtils";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
