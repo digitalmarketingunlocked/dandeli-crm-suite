@@ -142,8 +142,8 @@ export default function AdminUserManagement() {
           <SelectContent>
             <SelectItem value="all">All Plans</SelectItem>
             <SelectItem value="free">Free</SelectItem>
-            <SelectItem value="starter">Starter</SelectItem>
-            <SelectItem value="professional">Professional</SelectItem>
+            <SelectItem value="startup">Startup</SelectItem>
+            <SelectItem value="business">Business</SelectItem>
             <SelectItem value="enterprise">Enterprise</SelectItem>
           </SelectContent>
         </Select>
@@ -233,11 +233,11 @@ export default function AdminUserManagement() {
                         <DropdownMenuItem onClick={() => updatePlan.mutate({ tenantId: u.tenant_id, plan: "free" })}>
                           Set Free Plan
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => updatePlan.mutate({ tenantId: u.tenant_id, plan: "starter" })}>
-                          Set Starter Plan
+                        <DropdownMenuItem onClick={() => updatePlan.mutate({ tenantId: u.tenant_id, plan: "startup" })}>
+                          Set Startup Plan
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => updatePlan.mutate({ tenantId: u.tenant_id, plan: "professional" })}>
-                          Set Professional Plan
+                        <DropdownMenuItem onClick={() => updatePlan.mutate({ tenantId: u.tenant_id, plan: "business" })}>
+                          Set Business Plan
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => updatePlan.mutate({ tenantId: u.tenant_id, plan: "enterprise" })}>
                           Set Enterprise Plan
