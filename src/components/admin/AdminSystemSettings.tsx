@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Settings2, Shield, ToggleLeft, Users, Save } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Settings2, Shield, ToggleLeft, Users, Save, Layers } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import type { FeatureKey } from "@/hooks/useTenantPlan";
 
 interface SystemSetting {
   id: string;
@@ -18,6 +20,17 @@ interface SystemSetting {
   description: string | null;
   updated_at: string;
 }
+
+const ALL_FEATURES: { key: FeatureKey; label: string }[] = [
+  { key: "leads", label: "Leads & Contacts" },
+  { key: "follow_ups", label: "Follow-ups" },
+  { key: "cold_follow_up", label: "Cold Follow Up" },
+  { key: "bookings", label: "Bookings" },
+  { key: "deals", label: "Deals" },
+  { key: "team_management", label: "Team Management" },
+];
+
+const PLANS = ["free", "startup", "business", "enterprise"] as const;
 
 export default function AdminSystemSettings() {
   const { user } = useAuth();
@@ -49,6 +62,7 @@ export default function AdminSystemSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-system-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["plan-feature-access"] });
       toast.success("Setting updated");
     },
     onError: () => toast.error("Failed to update setting"),
@@ -60,11 +74,79 @@ export default function AdminSystemSettings() {
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
+      <PlanFeatureAccessCard
+        setting={getSetting("plan_feature_access")}
+        onSave={(v) => updateSetting.mutate({ key: "plan_feature_access", value: v })}
+      />
       <MaintenanceModeCard setting={getSetting("maintenance_mode")} onSave={(v) => updateSetting.mutate({ key: "maintenance_mode", value: v })} />
       <RegistrationCard setting={getSetting("registration_enabled")} onSave={(v) => updateSetting.mutate({ key: "registration_enabled", value: v })} />
       <TeamLimitsCard setting={getSetting("max_team_members")} onSave={(v) => updateSetting.mutate({ key: "max_team_members", value: v })} />
       <FeatureFlagsCard setting={getSetting("feature_flags")} onSave={(v) => updateSetting.mutate({ key: "feature_flags", value: v })} />
     </div>
+  );
+}
+
+function PlanFeatureAccessCard({ setting, onSave }: { setting?: SystemSetting; onSave: (v: any) => void }) {
+  const [access, setAccess] = useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    if (setting?.value) {
+      setAccess(setting.value);
+    }
+  }, [setting]);
+
+  const toggleFeature = (plan: string, feature: string) => {
+    setAccess((prev) => {
+      const current = prev[plan] || [];
+      const updated = current.includes(feature)
+        ? current.filter((f) => f !== feature)
+        : [...current, feature];
+      return { ...prev, [plan]: updated };
+    });
+  };
+
+  return (
+    <Card className="rounded-2xl md:col-span-2">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Layers className="h-4 w-4 text-primary" />
+          <CardTitle className="text-sm font-semibold">Plan Feature Access</CardTitle>
+        </div>
+        <CardDescription className="text-xs">Control which features each plan tier can access</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Feature</th>
+                {PLANS.map((plan) => (
+                  <th key={plan} className="text-center py-2 px-3 font-medium capitalize text-muted-foreground">{plan}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {ALL_FEATURES.map((feat) => (
+                <tr key={feat.key} className="border-b border-border/50">
+                  <td className="py-3 pr-4 font-medium">{feat.label}</td>
+                  {PLANS.map((plan) => (
+                    <td key={plan} className="text-center py-3 px-3">
+                      <Checkbox
+                        checked={(access[plan] || []).includes(feat.key)}
+                        onCheckedChange={() => toggleFeature(plan, feat.key)}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <Button size="sm" className="rounded-xl gap-2" onClick={() => onSave(access)}>
+          <Save className="h-3.5 w-3.5" /> Save Feature Access
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
