@@ -118,6 +118,12 @@ export default function FollowUpsPage() {
           </div>
         )}
       </div>
+
+      <LeadProfileDialog
+        contact={selectedContact}
+        open={!!selectedContact}
+        onOpenChange={(open) => { if (!open) setSelectedContact(null); }}
+      />
     </div>
   );
 }
