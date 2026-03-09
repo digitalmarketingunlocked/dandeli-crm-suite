@@ -177,6 +177,7 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
   });
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-strong bg-card rounded-2xl sm:max-w-3xl max-h-[85vh] overflow-y-auto">
         {/* Header */}
