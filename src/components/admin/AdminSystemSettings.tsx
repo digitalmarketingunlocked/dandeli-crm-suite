@@ -90,7 +90,6 @@ export default function AdminSystemSettings() {
       <MaintenanceModeCard setting={getSetting("maintenance_mode")} onSave={(v) => updateSetting.mutate({ key: "maintenance_mode", value: v })} />
       <RegistrationCard setting={getSetting("registration_enabled")} onSave={(v) => updateSetting.mutate({ key: "registration_enabled", value: v })} />
       <TeamLimitsCard setting={getSetting("max_team_members")} onSave={(v) => updateSetting.mutate({ key: "max_team_members", value: v })} />
-      </div>
     </div>
   );
 }
