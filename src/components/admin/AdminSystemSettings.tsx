@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Settings2, Shield, ToggleLeft, Users, Save, Layers } from "lucide-react";
+import { Settings2, Shield, Users, Save, Layers } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import type { FeatureKey } from "@/hooks/useTenantPlan";
@@ -90,7 +90,6 @@ export default function AdminSystemSettings() {
       <MaintenanceModeCard setting={getSetting("maintenance_mode")} onSave={(v) => updateSetting.mutate({ key: "maintenance_mode", value: v })} />
       <RegistrationCard setting={getSetting("registration_enabled")} onSave={(v) => updateSetting.mutate({ key: "registration_enabled", value: v })} />
       <TeamLimitsCard setting={getSetting("max_team_members")} onSave={(v) => updateSetting.mutate({ key: "max_team_members", value: v })} />
-      <FeatureFlagsCard setting={getSetting("feature_flags")} onSave={(v) => updateSetting.mutate({ key: "feature_flags", value: v })} />
     </div>
   );
 }
@@ -272,36 +271,3 @@ function TeamLimitsCard({ setting, onSave }: { setting?: SystemSetting; onSave: 
   );
 }
 
-function FeatureFlagsCard({ setting, onSave }: { setting?: SystemSetting; onSave: (v: any) => void }) {
-  const [flags, setFlags] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    if (setting) setFlags(setting.value || {});
-  }, [setting]);
-
-  const toggleFlag = (key: string) => {
-    const updated = { ...flags, [key]: !flags[key] };
-    setFlags(updated);
-    onSave(updated);
-  };
-
-  return (
-    <Card className="rounded-2xl">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <ToggleLeft className="h-4 w-4 text-primary" />
-          <CardTitle className="text-sm font-semibold">Feature Flags</CardTitle>
-        </div>
-        <CardDescription className="text-xs">Enable/disable features globally</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {Object.entries(flags).map(([key, enabled]) => (
-          <div key={key} className="flex items-center justify-between">
-            <Label className="text-sm">{key.replace(/_/g, " ")}</Label>
-            <Switch checked={enabled} onCheckedChange={() => toggleFlag(key)} />
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  );
-}
