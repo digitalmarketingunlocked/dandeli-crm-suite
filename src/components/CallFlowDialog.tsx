@@ -75,6 +75,22 @@ export default function CallFlowDialog({
         const { error: updateErr } = await supabase
           .from("contacts").update(updates).eq("id", contactId);
         if (updateErr) throw updateErr;
+
+        // Create a reminder if follow-up date is set
+        if (followUpDate) {
+          const reminderDateTime = followUpTime
+            ? `${followUpDate}T${followUpTime}:00`
+            : `${followUpDate}T09:00:00`;
+          const { error: reminderErr } = await supabase.from("reminders").insert({
+            contact_id: contactId,
+            tenant_id: tenantId,
+            created_by: user?.id || null,
+            reminder_date: reminderDateTime,
+            message: `Follow-up call with ${contactName}${notes.trim() ? `: ${notes.trim()}` : ""}`,
+            is_active: true,
+          });
+          if (reminderErr) throw reminderErr;
+        }
       }
     },
     onSuccess: () => {
