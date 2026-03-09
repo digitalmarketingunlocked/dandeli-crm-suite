@@ -20,6 +20,7 @@ export default function FollowUpsPage() {
   const { tenantId } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedContact, setSelectedContact] = useState<any>(null);
 
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["followup-contacts", tenantId],
