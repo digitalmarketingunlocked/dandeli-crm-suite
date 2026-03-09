@@ -30,6 +30,8 @@ export default function AuthPage() {
   const [signupName, setSignupName] = useState("");
   const [signupCompany, setSignupCompany] = useState("");
 
+  const { maintenanceActive, hasCountdown, countdownMs, message, deadline } = useMaintenanceMode();
+
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
