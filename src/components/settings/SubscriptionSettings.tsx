@@ -301,10 +301,15 @@ export default function SubscriptionSettings() {
             <div
               key={plan.name}
               className={`glass-card bg-card p-5 rounded-2xl space-y-4 relative ${
-                plan.recommended ? "ring-2 ring-primary" : ""
-              }`}
+                plan.recommended && !isCurrentPlan(plan) ? "ring-2 ring-primary" : ""
+              } ${isCurrentPlan(plan) ? "ring-2 ring-primary/50" : ""}`}
             >
-              {plan.recommended && (
+              {isCurrentPlan(plan) && (
+                <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] rounded-md px-3">
+                  Current Plan
+                </Badge>
+              )}
+              {plan.recommended && !isCurrentPlan(plan) && (
                 <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] rounded-md px-3">
                   Recommended
                 </Badge>
