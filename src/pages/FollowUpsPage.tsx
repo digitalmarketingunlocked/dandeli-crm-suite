@@ -83,7 +83,7 @@ export default function FollowUpsPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center flex-wrap gap-2 sm:gap-3 shrink-0">
+              <div className="flex items-center flex-wrap gap-2 sm:gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
                 <Badge variant="outline" className={`${TYPE_BADGE[contact.type] || ""} rounded-lg capitalize`}>{contact.type.replace("-", " ")}</Badge>
                 <span className="text-xs text-muted-foreground whitespace-nowrap">Last: {getTimeAgo(contact.updated_at)}</span>
                 <Select value={contact.type} onValueChange={(v) => updateType.mutate({ id: contact.id, type: v })}>
