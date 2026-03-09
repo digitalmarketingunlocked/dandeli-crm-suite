@@ -95,6 +95,15 @@ export default function AdminUserManagement() {
     mutationFn: async ({ tenantId, plan }: { tenantId: string; plan: string }) => {
       const { error } = await supabase.from("tenants").update({ current_plan: plan }).eq("id", tenantId);
       if (error) throw error;
+
+      // Auto-approve any pending subscription requests for this plan & tenant
+      await supabase
+        .from("subscription_requests")
+        .update({ status: "approved", reviewed_at: new Date().toISOString(), reviewed_by: user!.id })
+        .eq("tenant_id", tenantId)
+        .eq("status", "pending")
+        .ilike("plan_name", plan);
+
       await supabase.from("audit_logs").insert({
         admin_id: user!.id,
         action: "plan_changed",
