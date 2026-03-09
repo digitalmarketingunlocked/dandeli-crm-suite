@@ -208,7 +208,7 @@ export default function ContactsPage() {
     mutationFn: async () => {
       const { error } = await supabase.from("contacts").insert({
         name: leadForm.name.trim(),
-        phone: leadForm.phone.trim(),
+        phone: normalizePhone(leadForm.phone),
         check_in_date: leadForm.check_in_date || null,
         check_out_date: leadForm.check_out_date || null,
         adults_count: parseInt(leadForm.adults_count) || 2,
