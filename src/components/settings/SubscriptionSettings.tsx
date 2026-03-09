@@ -90,13 +90,14 @@ export default function SubscriptionSettings() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tenants")
-        .select("name")
+        .select("name, current_plan")
         .eq("id", tenantId!)
         .single();
       if (error) throw error;
       return data;
     },
     enabled: !!tenantId,
+    refetchInterval: 10_000, // Check for plan updates
   });
 
   const { data: existingRequests } = useQuery({
