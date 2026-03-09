@@ -86,8 +86,6 @@ export default function CallFlowDialog({
   });
 
   const handleSpoke = () => {
-    // Open dialer
-    if (contactPhone) window.open(`tel:${contactPhone}`);
     setStep(2);
   };
 
