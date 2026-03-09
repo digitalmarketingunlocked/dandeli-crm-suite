@@ -213,19 +213,26 @@ export default function SubscriptionSettings() {
       )}
 
       {/* Current Plan */}
-      <div className="glass-card bg-card p-5 space-y-4 rounded-2xl">
-        <div className="flex items-center justify-between">
-          <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
-            <CreditCard className="w-4 h-4" /> Current Plan
-          </h4>
-          <Badge className="bg-primary/15 text-primary border-primary/30 rounded-md text-xs">Free Plan</Badge>
-        </div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold">₹0</span>
-          <span className="text-sm text-muted-foreground">/month</span>
-        </div>
-        <p className="text-sm text-muted-foreground">Your current billing cycle ends on April 8, 2026.</p>
-      </div>
+      {(() => {
+        const activePlan = PLANS.find((p) => p.name.toLowerCase() === currentPlan) || PLANS[0];
+        return (
+          <div className="glass-card bg-card p-5 space-y-4 rounded-2xl">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
+                <CreditCard className="w-4 h-4" /> Current Plan
+              </h4>
+              <Badge className="bg-primary/15 text-primary border-primary/30 rounded-md text-xs capitalize">{currentPlan} Plan</Badge>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold">{formatPrice(activePlan.monthlyPrice)}</span>
+              <span className="text-sm text-muted-foreground">/month</span>
+            </div>
+            {currentPlan !== "free" && (
+              <p className="text-sm text-muted-foreground">You have full access to {activePlan.name} features.</p>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Usage */}
       <div className="glass-card bg-card p-5 space-y-4 rounded-2xl">
