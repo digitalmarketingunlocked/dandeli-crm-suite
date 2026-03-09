@@ -63,6 +63,7 @@ export default function AdminSystemSettings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-system-settings"] });
       queryClient.invalidateQueries({ queryKey: ["plan-feature-access"] });
+      queryClient.invalidateQueries({ queryKey: ["maintenance-mode-setting"] });
       toast.success("Setting updated");
     },
     onError: () => toast.error("Failed to update setting"),
