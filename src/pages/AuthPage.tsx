@@ -11,6 +11,8 @@ import { Trees, Mountain, Waves, Sparkles, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
 import { Separator } from "@/components/ui/separator";
+import { useMaintenanceMode } from "@/hooks/useMaintenanceMode";
+import MaintenanceNotice from "@/components/MaintenanceNotice";
 
 export default function AuthPage() {
   const navigate = useNavigate();
