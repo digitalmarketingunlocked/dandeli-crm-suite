@@ -162,13 +162,23 @@ function PlanFeatureAccessCard({ setting, onSave }: { setting?: SystemSetting; o
 function MaintenanceModeCard({ setting, onSave }: { setting?: SystemSetting; onSave: (v: any) => void }) {
   const [enabled, setEnabled] = useState(false);
   const [message, setMessage] = useState("");
+  const [deadline, setDeadline] = useState("");
 
   useEffect(() => {
     if (setting) {
       setEnabled(setting.value?.enabled || false);
-      setMessage(setting.value?.message || "");
+      setMessage(setting.value?.message || "System is under maintenance.");
+      setDeadline(toLocalDateTimeInput(setting.value?.deadline));
     }
   }, [setting]);
+
+  const saveMaintenance = () => {
+    onSave({
+      enabled,
+      message,
+      deadline: deadline ? new Date(deadline).toISOString() : null,
+    });
+  };
 
   return (
     <Card className="rounded-2xl">
@@ -177,18 +187,23 @@ function MaintenanceModeCard({ setting, onSave }: { setting?: SystemSetting; onS
           <Shield className="h-4 w-4 text-destructive" />
           <CardTitle className="text-sm font-semibold">Maintenance Mode</CardTitle>
         </div>
-        <CardDescription className="text-xs">Put the app in maintenance mode for all users</CardDescription>
+        <CardDescription className="text-xs">Set a deadline to auto-enable maintenance and show a live countdown to users</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
-          <Label>Enabled</Label>
+          <Label>Enabled Now</Label>
           <Switch checked={enabled} onCheckedChange={setEnabled} />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs">Maintenance Start Deadline</Label>
+          <Input type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="rounded-xl text-sm" />
+          <p className="text-xs text-muted-foreground">If set, all users see a countdown and maintenance activates automatically at this time.</p>
         </div>
         <div className="space-y-2">
           <Label className="text-xs">Maintenance Message</Label>
           <Textarea value={message} onChange={(e) => setMessage(e.target.value)} className="rounded-xl text-sm" rows={2} />
         </div>
-        <Button size="sm" className="rounded-xl gap-2" onClick={() => onSave({ enabled, message })}>
+        <Button size="sm" className="rounded-xl gap-2" onClick={saveMaintenance}>
           <Save className="h-3.5 w-3.5" /> Save
         </Button>
       </CardContent>
