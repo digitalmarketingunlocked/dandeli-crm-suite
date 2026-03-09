@@ -376,17 +376,6 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
                   </Select>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Call note (optional)"
-                  value={newCallNote}
-                  onChange={(e) => setNewCallNote(e.target.value)}
-                  className="rounded-xl text-sm"
-                />
-                <Button size="sm" className="rounded-xl shrink-0 gap-1" onClick={logCall}>
-                  <PhoneCall className="w-3 h-3" /> Log
-                </Button>
-              </div>
               <div className="space-y-2 max-h-[150px] overflow-y-auto">
                 {sortedCalls.length > 0 ? (
                   sortedCalls.map((c) => (
