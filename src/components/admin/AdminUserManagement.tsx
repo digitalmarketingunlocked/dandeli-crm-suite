@@ -142,8 +142,8 @@ export default function AdminUserManagement() {
           <SelectContent>
             <SelectItem value="all">All Plans</SelectItem>
             <SelectItem value="free">Free</SelectItem>
-            <SelectItem value="starter">Starter</SelectItem>
-            <SelectItem value="professional">Professional</SelectItem>
+            <SelectItem value="startup">Startup</SelectItem>
+            <SelectItem value="business">Business</SelectItem>
             <SelectItem value="enterprise">Enterprise</SelectItem>
           </SelectContent>
         </Select>
