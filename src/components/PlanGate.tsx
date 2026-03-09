@@ -1,15 +1,16 @@
 import { ReactNode } from "react";
-import { useTenantPlan, PlanName } from "@/hooks/useTenantPlan";
+import { useTenantPlan, type PlanName, type FeatureKey } from "@/hooks/useTenantPlan";
 import UpgradeGateDialog from "@/components/UpgradeGateDialog";
 
 interface PlanGateProps {
-  requiredPlan: PlanName;
+  feature?: FeatureKey;
+  requiredPlan?: PlanName;
   featureName: string;
   children: ReactNode;
 }
 
-export default function PlanGate({ requiredPlan, featureName, children }: PlanGateProps) {
-  const { hasAccess, isLoading } = useTenantPlan();
+export default function PlanGate({ feature, requiredPlan, featureName, children }: PlanGateProps) {
+  const { hasAccess, hasFeature, getRequiredPlan, isLoading } = useTenantPlan();
 
   if (isLoading) {
     return (
@@ -19,7 +20,14 @@ export default function PlanGate({ requiredPlan, featureName, children }: PlanGa
     );
   }
 
-  if (!hasAccess(requiredPlan)) {
+  // Feature-based gating (dynamic, admin-controlled)
+  if (feature && !hasFeature(feature)) {
+    const needed = getRequiredPlan(feature) || "startup";
+    return <UpgradeGateDialog open={true} requiredPlan={needed} featureName={featureName} />;
+  }
+
+  // Legacy plan-based gating
+  if (requiredPlan && !hasAccess(requiredPlan)) {
     return <UpgradeGateDialog open={true} requiredPlan={requiredPlan} featureName={featureName} />;
   }
 
