@@ -339,12 +339,12 @@ export default function SubscriptionSettings() {
               </ul>
               <Button
                 className="w-full rounded-xl gap-2"
-                variant={plan.current ? "outline" : plan.recommended ? "default" : "outline"}
-                disabled={plan.current || !!pendingRequest}
-                onClick={() => !plan.current && openDialog(plan)}
+                variant={isCurrentPlan(plan) ? "outline" : plan.recommended ? "default" : "outline"}
+                disabled={isCurrentPlan(plan) || !canUpgrade(plan) || !!pendingRequest}
+                onClick={() => canUpgrade(plan) && openDialog(plan)}
               >
-                {plan.current ? "Current Plan" : pendingRequest ? "Upgrade Pending" : "Upgrade"}
-                {!plan.current && !pendingRequest && <ArrowUpRight className="w-3.5 h-3.5" />}
+                {isCurrentPlan(plan) ? "Current Plan" : !canUpgrade(plan) ? "Included" : pendingRequest ? "Upgrade Pending" : "Upgrade"}
+                {canUpgrade(plan) && !pendingRequest && <ArrowUpRight className="w-3.5 h-3.5" />}
               </Button>
             </div>
           ))}
