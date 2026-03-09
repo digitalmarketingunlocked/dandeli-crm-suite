@@ -17,6 +17,7 @@ import {
   MessageCircle, Clock, Bell, StickyNote, Flame, Snowflake,
   PhoneCall,
 } from "lucide-react";
+import CallFlowDialog from "@/components/CallFlowDialog";
 
 type Contact = {
   id: string;
