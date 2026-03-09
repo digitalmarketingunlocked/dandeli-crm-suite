@@ -5,9 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { useIsAdmin } from "@/hooks/useIsAdmin";
 import PlanGate from "@/components/PlanGate";
 import AppLayout from "@/components/AppLayout";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import AuthPage from "@/pages/AuthPage";
 import DashboardPage from "@/pages/DashboardPage";
 import ContactsPage from "@/pages/ContactsPage";
@@ -32,9 +32,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AuthRoute() {
   const { user, loading } = useAuth();
-  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
-  if (loading || (user && adminLoading)) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="text-muted-foreground">Loading...</div></div>;
-  if (user && isAdmin) return <Navigate to="/admin" replace />;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="text-muted-foreground">Loading...</div></div>;
   if (user) return <Navigate to="/dashboard" replace />;
   return <AuthPage />;
 }
@@ -45,6 +43,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <PWAInstallPrompt />
         <BrowserRouter>
           <AuthProvider>
             <Routes>
