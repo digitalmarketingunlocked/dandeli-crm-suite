@@ -67,6 +67,7 @@ export default function MaintenanceNotice({
         {formatDeadline(deadline) && (
           <span className="text-muted-foreground"> · starts at {formatDeadline(deadline)}</span>
         )}
+        <p className="text-xs text-muted-foreground mt-0.5">{message}</p>
       </div>
     </div>
   );
