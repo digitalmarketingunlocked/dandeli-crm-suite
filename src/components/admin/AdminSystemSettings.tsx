@@ -32,6 +32,14 @@ const ALL_FEATURES: { key: FeatureKey; label: string }[] = [
 
 const PLANS = ["free", "startup", "business", "enterprise"] as const;
 
+const toLocalDateTimeInput = (isoString?: string | null) => {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return "";
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
+};
+
 export default function AdminSystemSettings() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
