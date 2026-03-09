@@ -217,7 +217,10 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
                 <Button
                   variant="outline"
                   className="flex-col h-auto py-4 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-                  onClick={() => setCallFlowOpen(true)}
+                  onClick={() => {
+                    if (localContact.phone) window.open(`tel:${localContact.phone}`);
+                    setTimeout(() => setCallFlowOpen(true), 1500);
+                  }}
                   disabled={!localContact.phone}
                 >
                   <Phone className="w-5 h-5" />
