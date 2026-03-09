@@ -17,6 +17,7 @@ import {
   MessageCircle, Clock, Bell, StickyNote, Flame, Snowflake,
   PhoneCall,
 } from "lucide-react";
+import CallFlowDialog from "@/components/CallFlowDialog";
 
 type Contact = {
   id: string;
@@ -60,6 +61,7 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
   const [newCallNote, setNewCallNote] = useState("");
   const [callSortBy, setCallSortBy] = useState<"date" | "duration">("date");
   const [localContact, setLocalContact] = useState<Contact | null>(null);
+  const [callFlowOpen, setCallFlowOpen] = useState(false);
 
   useEffect(() => {
     if (contact && open) {
@@ -214,7 +216,7 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
                 <Button
                   variant="outline"
                   className="flex-col h-auto py-4 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-                  onClick={() => window.open(`tel:${localContact.phone}`)}
+                  onClick={() => setCallFlowOpen(true)}
                   disabled={!localContact.phone}
                 >
                   <Phone className="w-5 h-5" />
@@ -397,6 +399,15 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
           </div>
         </div>
       </DialogContent>
+
+      <CallFlowDialog
+        open={callFlowOpen}
+        onOpenChange={setCallFlowOpen}
+        contactId={localContact.id}
+        contactName={localContact.name}
+        contactPhone={localContact.phone}
+        currentType={localContact.type}
+      />
     </Dialog>
   );
 }
