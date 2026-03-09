@@ -7,6 +7,8 @@ import { LayoutDashboard, Users, LogOut, Menu, X, Sparkles, Moon, Sun, Clock, Se
 import { useState } from "react";
 import { useFollowUpNotifications } from "@/hooks/useFollowUpNotifications";
 import { useTenantPlan, type FeatureKey } from "@/hooks/useTenantPlan";
+import { useMaintenanceMode } from "@/hooks/useMaintenanceMode";
+import MaintenanceNotice from "@/components/MaintenanceNotice";
 
 const navItems: { to: string; icon: any; label: string; feature?: FeatureKey }[] = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -23,7 +25,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { hasFeature, getRequiredPlan } = useTenantPlan();
   const notificationsEnabled = localStorage.getItem("followup_notifications") !== "false";
+  const { isLoading: maintenanceLoading, maintenanceActive, hasCountdown, countdownMs, message, deadline } = useMaintenanceMode();
+
   useFollowUpNotifications(notificationsEnabled);
+
+  if (!maintenanceLoading && maintenanceActive) {
+    return <MaintenanceNotice variant="active" message={message} deadline={deadline} onSignOut={signOut} />;
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -105,6 +113,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <span className="font-heading font-bold text-lg">Dandeli<span className="text-primary">CRM</span></span>
           </div>
         </header>
+        {!maintenanceLoading && hasCountdown && (
+          <div className="px-6 pt-4 lg:px-8 lg:pt-6">
+            <MaintenanceNotice
+              variant="countdown"
+              message={message}
+              deadline={deadline}
+              countdownMs={countdownMs ?? 0}
+            />
+          </div>
+        )}
         <div className="p-6 lg:p-8 animate-fade-in">
           {children}
         </div>
@@ -112,3 +130,4 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+

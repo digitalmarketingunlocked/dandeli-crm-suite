@@ -11,6 +11,8 @@ import { Trees, Mountain, Waves, Sparkles, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { lovable } from "@/integrations/lovable/index";
 import { Separator } from "@/components/ui/separator";
+import { useMaintenanceMode } from "@/hooks/useMaintenanceMode";
+import MaintenanceNotice from "@/components/MaintenanceNotice";
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -27,6 +29,8 @@ export default function AuthPage() {
   const [signupPassword, setSignupPassword] = useState("");
   const [signupName, setSignupName] = useState("");
   const [signupCompany, setSignupCompany] = useState("");
+
+  const { maintenanceActive, hasCountdown, countdownMs, message, deadline } = useMaintenanceMode();
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
@@ -99,8 +103,19 @@ export default function AuthPage() {
     </div>
   );
 
+  if (maintenanceActive) {
+    return <MaintenanceNotice variant="active" message={message} deadline={deadline} />;
+  }
+
   return (
-    <div className="min-h-screen flex relative">
+    <div className={`min-h-screen flex relative ${hasCountdown ? "pt-16" : ""}`}>
+      {hasCountdown && (
+        <div className="fixed top-0 inset-x-0 z-50 p-3">
+          <div className="mx-auto max-w-4xl">
+            <MaintenanceNotice variant="countdown" message={message} deadline={deadline} countdownMs={countdownMs ?? 0} />
+          </div>
+        </div>
+      )}
       <Button
         variant="ghost"
         size="icon"
