@@ -96,6 +96,7 @@ export default function CallFlowDialog({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call_history", contactId] });
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["reminders", contactId] });
       toast({ title: "Call logged!" });
       handleOpenChange(false);
     },
