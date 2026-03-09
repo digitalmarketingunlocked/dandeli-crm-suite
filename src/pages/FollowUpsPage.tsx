@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Clock, CheckCircle2, Phone, MessageCircle } from "lucide-react";
+import LeadProfileDialog from "@/components/LeadProfileDialog";
 
 const TYPE_BADGE: Record<string, string> = {
   lead: "bg-secondary/15 text-secondary border-secondary/30",
