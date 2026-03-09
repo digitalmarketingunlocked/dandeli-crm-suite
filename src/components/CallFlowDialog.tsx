@@ -168,15 +168,12 @@ export default function CallFlowDialog({
               <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 Schedule Next Follow-up
               </Label>
-              <div className="flex items-center gap-2 rounded-xl border border-border px-3 py-2">
-                <CalendarDays className="w-4 h-4 text-muted-foreground shrink-0" />
-                <Input
-                  type="date"
-                  value={followUpDate}
-                  onChange={(e) => setFollowUpDate(e.target.value)}
-                  className="border-0 p-0 h-auto text-sm focus-visible:ring-0 bg-transparent"
-                />
-              </div>
+              <DateInput
+                value={followUpDate}
+                onChange={setFollowUpDate}
+                placeholder="Pick follow-up date"
+                className="rounded-xl"
+              />
               <div className="flex items-center gap-2 rounded-xl border border-border px-3 py-2">
                 <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
                 <Input
