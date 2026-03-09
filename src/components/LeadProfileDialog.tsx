@@ -61,6 +61,7 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
   const [newCallNote, setNewCallNote] = useState("");
   const [callSortBy, setCallSortBy] = useState<"date" | "duration">("date");
   const [localContact, setLocalContact] = useState<Contact | null>(null);
+  const [callFlowOpen, setCallFlowOpen] = useState(false);
 
   useEffect(() => {
     if (contact && open) {
