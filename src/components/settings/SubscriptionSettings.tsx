@@ -137,10 +137,16 @@ export default function SubscriptionSettings() {
   });
 
   const resortName = tenant?.name || "Resort";
+  const currentPlan = (tenant?.current_plan || "free").toLowerCase();
   const isYearly = billing === "yearly";
+
+  const PLAN_ORDER = ["free", "startup", "business", "enterprise"];
+  const currentPlanIndex = PLAN_ORDER.indexOf(currentPlan);
 
   const getPrice = (plan: Plan) => (isYearly ? plan.yearlyPrice : plan.monthlyPrice);
   const getPeriod = () => (isYearly ? "/year" : "/month");
+  const isCurrentPlan = (plan: Plan) => plan.name.toLowerCase() === currentPlan;
+  const canUpgrade = (plan: Plan) => PLAN_ORDER.indexOf(plan.name.toLowerCase()) > currentPlanIndex;
 
   const getMonthlySaving = (plan: Plan) => {
     if (plan.monthlyPrice === 0) return 0;
