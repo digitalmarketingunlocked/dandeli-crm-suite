@@ -53,11 +53,11 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/admin" element={<AdminDashboardPage />} />
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-              <Route path="/leads" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
+              <Route path="/leads" element={<ProtectedRoute><PlanGate feature="leads" featureName="Leads & Contacts"><ContactsPage /></PlanGate></ProtectedRoute>} />
               <Route path="/contacts" element={<Navigate to="/leads" replace />} />
-              <Route path="/follow-ups" element={<ProtectedRoute><FollowUpsPage /></ProtectedRoute>} />
-              <Route path="/cold-follow-up" element={<ProtectedRoute><PlanGate requiredPlan="startup" featureName="Cold Follow-Up"><ColdFollowUpPage /></PlanGate></ProtectedRoute>} />
-              <Route path="/bookings" element={<ProtectedRoute><PlanGate requiredPlan="business" featureName="Bookings"><BookingsPage /></PlanGate></ProtectedRoute>} />
+              <Route path="/follow-ups" element={<ProtectedRoute><PlanGate feature="follow_ups" featureName="Follow-ups"><FollowUpsPage /></PlanGate></ProtectedRoute>} />
+              <Route path="/cold-follow-up" element={<ProtectedRoute><PlanGate feature="cold_follow_up" featureName="Cold Follow-Up"><ColdFollowUpPage /></PlanGate></ProtectedRoute>} />
+              <Route path="/bookings" element={<ProtectedRoute><PlanGate feature="bookings" featureName="Bookings"><BookingsPage /></PlanGate></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
