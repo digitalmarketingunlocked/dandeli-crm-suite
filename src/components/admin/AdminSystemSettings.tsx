@@ -271,36 +271,3 @@ function TeamLimitsCard({ setting, onSave }: { setting?: SystemSetting; onSave: 
   );
 }
 
-function FeatureFlagsCard({ setting, onSave }: { setting?: SystemSetting; onSave: (v: any) => void }) {
-  const [flags, setFlags] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    if (setting) setFlags(setting.value || {});
-  }, [setting]);
-
-  const toggleFlag = (key: string) => {
-    const updated = { ...flags, [key]: !flags[key] };
-    setFlags(updated);
-    onSave(updated);
-  };
-
-  return (
-    <Card className="rounded-2xl">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <ToggleLeft className="h-4 w-4 text-primary" />
-          <CardTitle className="text-sm font-semibold">Feature Flags</CardTitle>
-        </div>
-        <CardDescription className="text-xs">Enable/disable features globally</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {Object.entries(flags).map(([key, enabled]) => (
-          <div key={key} className="flex items-center justify-between">
-            <Label className="text-sm">{key.replace(/_/g, " ")}</Label>
-            <Switch checked={enabled} onCheckedChange={() => toggleFlag(key)} />
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  );
-}
