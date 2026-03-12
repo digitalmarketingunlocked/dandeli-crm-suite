@@ -64,10 +64,10 @@ export default function LeadStatusSettings() {
                 {COLOR_OPTIONS.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button className="rounded-xl gap-2" disabled={!newStatusLabel.trim() || !newStatusValue.trim()} onClick={() => { addStatus.mutate({ value: newStatusValue, label: newStatusLabel, color: newStatusColor }, { onSuccess: () => { setNewStatusLabel(""); setNewStatusValue(""); setNewStatusColor("secondary"); toast({ title: "Status added!" }); }, onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }) }); }}>
-              <Plus className="w-4 h-4" /> Add
-            </Button>
           </div>
+          <Button className="rounded-xl gap-2 w-full" disabled={!newStatusLabel.trim() || !newStatusValue.trim()} onClick={() => { addStatus.mutate({ value: newStatusValue, label: newStatusLabel, color: newStatusColor }, { onSuccess: () => { setNewStatusLabel(""); setNewStatusValue(""); setNewStatusColor("secondary"); toast({ title: "Status added!" }); }, onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }) }); }}>
+            <Plus className="w-4 h-4" /> Add
+          </Button>
         </div>
       </div>
     </div>
