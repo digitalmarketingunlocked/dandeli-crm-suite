@@ -16,7 +16,7 @@ interface DateInputProps {
   maxDate?: Date;
 }
 
-export function DateInput({ value, onChange, placeholder = "Pick a date", className, required, disabled }: DateInputProps) {
+export function DateInput({ value, onChange, placeholder = "Pick a date", className, required, disabled, maxDate }: DateInputProps) {
   const date = value ? parse(value, "yyyy-MM-dd", new Date()) : undefined;
 
   const handleSelect = (selected: Date | undefined) => {
