@@ -114,6 +114,32 @@ export default function SubscriptionSettings() {
     enabled: !!tenantId,
   });
 
+  const { data: contacts } = useQuery({
+    queryKey: ["contacts-count", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contacts")
+        .select("id")
+        .eq("tenant_id", tenantId!);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+
+  const { data: teamMembers } = useQuery({
+    queryKey: ["team-members-count", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("tenant_id", tenantId!);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenantId,
+  });
+
   const submitRequest = useMutation({
     mutationFn: async (plan: Plan) => {
       const amount = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
