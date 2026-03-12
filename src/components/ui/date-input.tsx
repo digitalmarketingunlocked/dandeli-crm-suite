@@ -13,6 +13,7 @@ interface DateInputProps {
   className?: string;
   required?: boolean;
   disabled?: boolean;
+  maxDate?: Date;
 }
 
 export function DateInput({ value, onChange, placeholder = "Pick a date", className, required, disabled }: DateInputProps) {

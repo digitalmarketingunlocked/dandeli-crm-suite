@@ -108,7 +108,21 @@ export default function AccountSettings() {
               placeholder="e.g. Dandeli, Karnataka"
             />
           </div>
-          <Button className="w-full rounded-xl">Save Profile</Button>
+          <Button className="w-full rounded-xl" onClick={async () => {
+            const updates: any = {};
+            if (resortName.trim()) updates.name = resortName.trim();
+            if (Object.keys(updates).length === 0) {
+              toast({ title: "No changes to save" });
+              return;
+            }
+            const { error } = await supabase.from("tenants").update(updates).eq("id", tenantId!);
+            if (error) {
+              toast({ title: "Error", description: error.message, variant: "destructive" });
+            } else {
+              queryClient.invalidateQueries({ queryKey: ["tenant"] });
+              toast({ title: "Resort profile updated!" });
+            }
+          }}>Save Profile</Button>
         </div>
       </div>
 

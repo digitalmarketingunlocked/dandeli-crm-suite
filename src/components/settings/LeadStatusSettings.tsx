@@ -57,7 +57,7 @@ export default function LeadStatusSettings() {
         <div className="border-t border-border/50 pt-4 space-y-3">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Add New Status</p>
           <div className="flex gap-3">
-            <Input placeholder="Label (e.g. Waitlisted)" value={newStatusLabel} onChange={(e) => { setNewStatusLabel(e.target.value); setNewStatusValue(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")); }} className="flex-1 rounded-xl" />
+            <Input placeholder="e.g. Waitlisted, VIP, Warm Lead" value={newStatusLabel} onChange={(e) => { setNewStatusLabel(e.target.value); setNewStatusValue(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")); }} className="flex-1 rounded-xl" />
             <Select value={newStatusColor} onValueChange={setNewStatusColor}>
               <SelectTrigger className="w-[120px] rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent className="glass-strong bg-card rounded-xl">
