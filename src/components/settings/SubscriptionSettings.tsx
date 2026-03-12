@@ -235,34 +235,45 @@ export default function SubscriptionSettings() {
       })()}
 
       {/* Usage */}
-      <div className="glass-card bg-card p-5 space-y-4 rounded-2xl">
-        <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
-          <Zap className="w-4 h-4" /> Usage
-        </h4>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Leads</span>
-              <span className="font-medium">12 / 50</span>
+      {(() => {
+        const PLAN_LIMITS: Record<string, { leads: number; team: number; exports: number }> = {
+          free: { leads: 50, team: 1, exports: 5 },
+          startup: { leads: Infinity, team: 1, exports: 20 },
+          business: { leads: Infinity, team: 3, exports: Infinity },
+          enterprise: { leads: Infinity, team: Infinity, exports: Infinity },
+        };
+        const limits = PLAN_LIMITS[currentPlan] || PLAN_LIMITS.free;
+        const leadsCount = contacts?.length ?? 0;
+        const teamCount = teamMembers?.length ?? 0;
+        const leadsPercent = limits.leads === Infinity ? (leadsCount > 0 ? 15 : 0) : Math.min(100, (leadsCount / limits.leads) * 100);
+        const teamPercent = limits.team === Infinity ? (teamCount > 0 ? 15 : 0) : Math.min(100, (teamCount / limits.team) * 100);
+        const leadsLabel = limits.leads === Infinity ? `${leadsCount} / Unlimited` : `${leadsCount} / ${limits.leads}`;
+        const teamLabel = limits.team === Infinity ? `${teamCount} / Unlimited` : `${teamCount} / ${limits.team}`;
+
+        return (
+          <div className="glass-card bg-card p-5 space-y-4 rounded-2xl">
+            <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
+              <Zap className="w-4 h-4" /> Usage
+            </h4>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Leads</span>
+                  <span className="font-medium">{leadsLabel}</span>
+                </div>
+                <Progress value={leadsPercent} className="h-2 rounded-full" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Team Members</span>
+                  <span className="font-medium">{teamLabel}</span>
+                </div>
+                <Progress value={teamPercent} className="h-2 rounded-full" />
+              </div>
             </div>
-            <Progress value={24} className="h-2 rounded-full" />
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Team Members</span>
-              <span className="font-medium">1 / 1</span>
-            </div>
-            <Progress value={100} className="h-2 rounded-full" />
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Data Exports</span>
-              <span className="font-medium">2 / 5</span>
-            </div>
-            <Progress value={40} className="h-2 rounded-full" />
-          </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Available Plans */}
       <div className="space-y-4">
