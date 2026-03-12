@@ -182,14 +182,14 @@ export default function TeamManagementSettings() {
               <SelectItem value="sales">Sales Member</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            className="rounded-xl gap-2"
-            disabled={!email.trim() || sendInvite.isPending}
-            onClick={() => sendInvite.mutate()}
-          >
-            <Mail className="w-4 h-4" /> Send Invite
-          </Button>
         </div>
+        <Button
+          className="rounded-xl gap-2 w-full"
+          disabled={!email.trim() || sendInvite.isPending}
+          onClick={() => sendInvite.mutate()}
+        >
+          <Mail className="w-4 h-4" /> Send Invite
+        </Button>
         <p className="text-xs text-muted-foreground">
           Invited members will receive an email with instructions to join your team.
         </p>
