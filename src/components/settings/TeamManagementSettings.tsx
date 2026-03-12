@@ -170,7 +170,7 @@ export default function TeamManagementSettings() {
         <div className="flex gap-3">
           <Input
             type="email"
-            placeholder="Email address"
+            placeholder="e.g. john@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="flex-1 rounded-xl"

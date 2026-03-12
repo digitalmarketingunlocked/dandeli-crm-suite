@@ -13,9 +13,10 @@ interface DateInputProps {
   className?: string;
   required?: boolean;
   disabled?: boolean;
+  maxDate?: Date;
 }
 
-export function DateInput({ value, onChange, placeholder = "Pick a date", className, required, disabled }: DateInputProps) {
+export function DateInput({ value, onChange, placeholder = "Pick a date", className, required, disabled, maxDate }: DateInputProps) {
   const date = value ? parse(value, "yyyy-MM-dd", new Date()) : undefined;
 
   const handleSelect = (selected: Date | undefined) => {
@@ -44,6 +45,7 @@ export function DateInput({ value, onChange, placeholder = "Pick a date", classN
           mode="single"
           selected={date}
           onSelect={handleSelect}
+          disabled={maxDate ? (d) => d > maxDate : undefined}
           initialFocus
           className={cn("p-3 pointer-events-auto")}
         />

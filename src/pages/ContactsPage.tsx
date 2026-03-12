@@ -408,6 +408,7 @@ export default function ContactsPage() {
                 onChange={setLastContactedFilter}
                 placeholder="Select date"
                 className="rounded-xl"
+                maxDate={new Date()}
               />
             </div>
           </div>

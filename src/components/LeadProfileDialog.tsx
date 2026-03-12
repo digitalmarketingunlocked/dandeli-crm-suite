@@ -289,22 +289,6 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Follow-up</Label>
-                  <Input type="date" value={editForm.follow_up_date as string || ""} onChange={(e) => setEditForm({ ...editForm, follow_up_date: e.target.value })} className="w-[150px] h-8 text-xs rounded-lg" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Recurring</Label>
-                  <Select value={editForm.recurring as string || "none"} onValueChange={(v) => setEditForm({ ...editForm, recurring: v })}>
-                    <SelectTrigger className="w-[150px] h-8 text-xs rounded-lg"><SelectValue /></SelectTrigger>
-                    <SelectContent className="glass-strong bg-card rounded-xl">
-                      <SelectItem value="none">No Repeat</SelectItem>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
               <Button className="w-full rounded-xl mt-2" size="sm" onClick={saveDetail}>
                 Save Changes
