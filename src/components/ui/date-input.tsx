@@ -45,6 +45,7 @@ export function DateInput({ value, onChange, placeholder = "Pick a date", classN
           mode="single"
           selected={date}
           onSelect={handleSelect}
+          disabled={maxDate ? (d) => d > maxDate : undefined}
           initialFocus
           className={cn("p-3 pointer-events-auto")}
         />
