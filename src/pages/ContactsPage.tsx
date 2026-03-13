@@ -511,8 +511,6 @@ export default function ContactsPage() {
                         >
                           <Phone className="w-4 h-4" />
                         </Button>
-                          <Phone className="w-4 h-4" />
-                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
