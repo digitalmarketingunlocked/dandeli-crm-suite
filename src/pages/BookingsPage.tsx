@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { format, isToday, isTomorrow, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import BookingDetailDialog from "@/components/BookingDetailDialog";
+import CallFlowDialog from "@/components/CallFlowDialog";
 
 type Contact = {
   id: string;
@@ -41,6 +42,8 @@ export default function BookingsPage() {
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const [search, setSearch] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Contact | null>(null);
+  const [callFlowOpen, setCallFlowOpen] = useState(false);
+  const [callFlowContact, setCallFlowContact] = useState<{ id: string; name: string; phone: string | null; type: string } | null>(null);
 
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ["bookings"],
@@ -281,7 +284,11 @@ export default function BookingsPage() {
                             size="icon"
                             variant="ghost"
                             className="h-8 w-8 rounded-lg"
-                            onClick={() => window.open(`tel:${booking.phone}`)}
+                            onClick={() => {
+                              window.open(`tel:${booking.phone}`);
+                              setCallFlowContact({ id: booking.id, name: booking.name, phone: booking.phone, type: booking.type });
+                              setTimeout(() => setCallFlowOpen(true), 1500);
+                            }}
                           >
                             <Phone className="w-3.5 h-3.5" />
                           </Button>
@@ -314,6 +321,17 @@ export default function BookingsPage() {
         open={!!selectedBooking}
         onOpenChange={(open) => !open && setSelectedBooking(null)}
       />
+
+      {callFlowContact && (
+        <CallFlowDialog
+          open={callFlowOpen}
+          onOpenChange={setCallFlowOpen}
+          contactId={callFlowContact.id}
+          contactName={callFlowContact.name}
+          contactPhone={callFlowContact.phone}
+          currentType={callFlowContact.type}
+        />
+      )}
     </div>
   );
 }

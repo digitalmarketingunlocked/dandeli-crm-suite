@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Clock, CheckCircle2, Phone, MessageCircle } from "lucide-react";
 import LeadProfileDialog from "@/components/LeadProfileDialog";
+import CallFlowDialog from "@/components/CallFlowDialog";
 
 const TYPE_BADGE: Record<string, string> = {
   lead: "bg-secondary/15 text-secondary border-secondary/30",
@@ -21,6 +22,8 @@ export default function FollowUpsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedContact, setSelectedContact] = useState<any>(null);
+  const [callFlowOpen, setCallFlowOpen] = useState(false);
+  const [callFlowContact, setCallFlowContact] = useState<{ id: string; name: string; phone: string | null; type: string } | null>(null);
 
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["followup-contacts", tenantId],
@@ -99,7 +102,11 @@ export default function FollowUpsPage() {
                 </Select>
                 {contact.phone && (
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10 rounded-lg" onClick={() => window.open(`tel:${contact.phone}`)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10 rounded-lg" onClick={() => {
+                      window.open(`tel:${contact.phone}`);
+                      setCallFlowContact({ id: contact.id, name: contact.name, phone: contact.phone, type: contact.type });
+                      setTimeout(() => setCallFlowOpen(true), 1500);
+                    }}>
                       <Phone className="w-4 h-4" />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10 rounded-lg" onClick={() => window.open(`https://wa.me/${contact.phone?.replace(/\D/g, "")}`)}>
@@ -124,6 +131,17 @@ export default function FollowUpsPage() {
         open={!!selectedContact}
         onOpenChange={(open) => { if (!open) setSelectedContact(null); }}
       />
+
+      {callFlowContact && (
+        <CallFlowDialog
+          open={callFlowOpen}
+          onOpenChange={setCallFlowOpen}
+          contactId={callFlowContact.id}
+          contactName={callFlowContact.name}
+          contactPhone={callFlowContact.phone}
+          currentType={callFlowContact.type}
+        />
+      )}
     </div>
   );
 }

@@ -16,6 +16,7 @@ import {
   Building2, BedDouble, IndianRupee, Sparkles, Save, MessageCircle, Car
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import CallFlowDialog from "@/components/CallFlowDialog";
 
 type Contact = {
   id: string;
@@ -55,6 +56,7 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
   const [transport, setTransport] = useState("");
   const [activities, setActivities] = useState("");
   const [notes, setNotes] = useState("");
+  const [callFlowOpen, setCallFlowOpen] = useState(false);
 
   useEffect(() => {
     if (booking) {
@@ -106,6 +108,7 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
   const nights = getNights();
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -255,7 +258,10 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
           <div className="flex gap-1.5">
             {booking.phone && (
               <>
-                <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={() => window.open(`tel:${booking.phone}`)}>
+                <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={() => {
+                  window.open(`tel:${booking.phone}`);
+                  setTimeout(() => setCallFlowOpen(true), 1500);
+                }}>
                   <Phone className="w-3.5 h-3.5 mr-1" /> Call
                 </Button>
                 <Button size="sm" variant="outline" className="rounded-xl text-xs text-green-600" onClick={() => window.open(`https://wa.me/${booking.phone?.replace(/\D/g, "")}`)}>
@@ -276,5 +282,15 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
         </div>
       </DialogContent>
     </Dialog>
+
+    <CallFlowDialog
+      open={callFlowOpen}
+      onOpenChange={setCallFlowOpen}
+      contactId={booking.id}
+      contactName={booking.name}
+      contactPhone={booking.phone}
+      currentType={booking.type}
+    />
+    </>
   );
 }

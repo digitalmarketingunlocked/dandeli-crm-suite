@@ -24,6 +24,7 @@ import { exportContactsToXls } from "@/lib/exportXls";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
+import CallFlowDialog from "@/components/CallFlowDialog";
 
 type Contact = {
   id: string;
@@ -125,7 +126,8 @@ export default function ContactsPage() {
   const [exportFromDate, setExportFromDate] = useState<Date | undefined>();
   const [exportToDate, setExportToDate] = useState<Date | undefined>();
   const [exportPreset, setExportPreset] = useState<string>("all");
-
+  const [callFlowOpen, setCallFlowOpen] = useState(false);
+  const [callFlowContact, setCallFlowContact] = useState<{ id: string; name: string; phone: string | null; type: string } | null>(null);
   const applyExportPreset = (preset: string) => {
     setExportPreset(preset);
     const now = new Date();
@@ -503,6 +505,8 @@ export default function ContactsPage() {
                           onClick={(e) => {
                             e.stopPropagation();
                             window.open(`tel:${contact.phone}`);
+                            setCallFlowContact({ id: contact.id, name: contact.name, phone: contact.phone, type: contact.type });
+                            setTimeout(() => setCallFlowOpen(true), 1500);
                           }}
                         >
                           <Phone className="w-4 h-4" />
@@ -639,7 +643,11 @@ export default function ContactsPage() {
                       <Button
                         variant="outline"
                         className="flex-col h-auto py-4 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-                        onClick={() => window.open(`tel:${selectedLead.phone}`)}
+                        onClick={() => {
+                          window.open(`tel:${selectedLead.phone}`);
+                          setCallFlowContact({ id: selectedLead.id, name: selectedLead.name, phone: selectedLead.phone, type: selectedLead.type });
+                          setTimeout(() => setCallFlowOpen(true), 1500);
+                        }}
                       >
                         <Phone className="w-5 h-5" />
                         <span className="text-xs">Call</span>
@@ -950,6 +958,17 @@ export default function ContactsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {callFlowContact && (
+        <CallFlowDialog
+          open={callFlowOpen}
+          onOpenChange={setCallFlowOpen}
+          contactId={callFlowContact.id}
+          contactName={callFlowContact.name}
+          contactPhone={callFlowContact.phone}
+          currentType={callFlowContact.type}
+        />
+      )}
     </div>
   );
 }

@@ -5,10 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Users, Phone, MessageCircle, Snowflake } from "lucide-react";
 import LeadProfileDialog from "@/components/LeadProfileDialog";
+import CallFlowDialog from "@/components/CallFlowDialog";
 
 export default function ColdFollowUpPage() {
   const { tenantId } = useAuth();
   const [selectedContact, setSelectedContact] = useState<any>(null);
+  const [callFlowOpen, setCallFlowOpen] = useState(false);
+  const [callFlowContact, setCallFlowContact] = useState<{ id: string; name: string; phone: string | null; type: string } | null>(null);
 
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["cold-contacts", tenantId],
@@ -84,7 +87,11 @@ export default function ColdFollowUpPage() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-primary hover:bg-primary/10 rounded-lg"
-                        onClick={() => window.open(`tel:${contact.phone}`)}
+                        onClick={() => {
+                          window.open(`tel:${contact.phone}`);
+                          setCallFlowContact({ id: contact.id, name: contact.name, phone: contact.phone, type: contact.type });
+                          setTimeout(() => setCallFlowOpen(true), 1500);
+                        }}
                       >
                         <Phone className="w-4 h-4" />
                       </Button>
@@ -116,6 +123,17 @@ export default function ColdFollowUpPage() {
         open={!!selectedContact}
         onOpenChange={(open) => !open && setSelectedContact(null)}
       />
+
+      {callFlowContact && (
+        <CallFlowDialog
+          open={callFlowOpen}
+          onOpenChange={setCallFlowOpen}
+          contactId={callFlowContact.id}
+          contactName={callFlowContact.name}
+          contactPhone={callFlowContact.phone}
+          currentType={callFlowContact.type}
+        />
+      )}
     </div>
   );
 }
