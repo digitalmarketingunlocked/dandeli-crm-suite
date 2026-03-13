@@ -284,7 +284,11 @@ export default function BookingsPage() {
                             size="icon"
                             variant="ghost"
                             className="h-8 w-8 rounded-lg"
-                            onClick={() => window.open(`tel:${booking.phone}`)}
+                            onClick={() => {
+                              window.open(`tel:${booking.phone}`);
+                              setCallFlowContact({ id: booking.id, name: booking.name, phone: booking.phone, type: booking.type });
+                              setTimeout(() => setCallFlowOpen(true), 1500);
+                            }}
                           >
                             <Phone className="w-3.5 h-3.5" />
                           </Button>
