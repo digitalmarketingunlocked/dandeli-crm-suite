@@ -56,6 +56,7 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
   const [transport, setTransport] = useState("");
   const [activities, setActivities] = useState("");
   const [notes, setNotes] = useState("");
+  const [callFlowOpen, setCallFlowOpen] = useState(false);
 
   useEffect(() => {
     if (booking) {

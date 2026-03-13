@@ -10,6 +10,8 @@ import CallFlowDialog from "@/components/CallFlowDialog";
 export default function ColdFollowUpPage() {
   const { tenantId } = useAuth();
   const [selectedContact, setSelectedContact] = useState<any>(null);
+  const [callFlowOpen, setCallFlowOpen] = useState(false);
+  const [callFlowContact, setCallFlowContact] = useState<{ id: string; name: string; phone: string | null; type: string } | null>(null);
 
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["cold-contacts", tenantId],

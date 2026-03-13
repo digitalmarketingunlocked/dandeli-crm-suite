@@ -42,6 +42,8 @@ export default function BookingsPage() {
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const [search, setSearch] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Contact | null>(null);
+  const [callFlowOpen, setCallFlowOpen] = useState(false);
+  const [callFlowContact, setCallFlowContact] = useState<{ id: string; name: string; phone: string | null; type: string } | null>(null);
 
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ["bookings"],

@@ -126,7 +126,8 @@ export default function ContactsPage() {
   const [exportFromDate, setExportFromDate] = useState<Date | undefined>();
   const [exportToDate, setExportToDate] = useState<Date | undefined>();
   const [exportPreset, setExportPreset] = useState<string>("all");
-
+  const [callFlowOpen, setCallFlowOpen] = useState(false);
+  const [callFlowContact, setCallFlowContact] = useState<{ id: string; name: string; phone: string | null; type: string } | null>(null);
   const applyExportPreset = (preset: string) => {
     setExportPreset(preset);
     const now = new Date();
