@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Clock, CheckCircle2, Phone, MessageCircle } from "lucide-react";
 import LeadProfileDialog from "@/components/LeadProfileDialog";
+import CallFlowDialog from "@/components/CallFlowDialog";
 
 const TYPE_BADGE: Record<string, string> = {
   lead: "bg-secondary/15 text-secondary border-secondary/30",

@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Users, Phone, MessageCircle, Snowflake } from "lucide-react";
 import LeadProfileDialog from "@/components/LeadProfileDialog";
+import CallFlowDialog from "@/components/CallFlowDialog";
 
 export default function ColdFollowUpPage() {
   const { tenantId } = useAuth();

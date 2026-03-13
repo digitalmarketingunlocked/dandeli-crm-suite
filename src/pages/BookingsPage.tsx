@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { format, isToday, isTomorrow, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import BookingDetailDialog from "@/components/BookingDetailDialog";
+import CallFlowDialog from "@/components/CallFlowDialog";
 
 type Contact = {
   id: string;
