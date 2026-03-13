@@ -257,7 +257,10 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
           <div className="flex gap-1.5">
             {booking.phone && (
               <>
-                <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={() => window.open(`tel:${booking.phone}`)}>
+                <Button size="sm" variant="outline" className="rounded-xl text-xs" onClick={() => {
+                  window.open(`tel:${booking.phone}`);
+                  setCallFlowOpen(true);
+                }}>
                   <Phone className="w-3.5 h-3.5 mr-1" /> Call
                 </Button>
                 <Button size="sm" variant="outline" className="rounded-xl text-xs text-green-600" onClick={() => window.open(`https://wa.me/${booking.phone?.replace(/\D/g, "")}`)}>
