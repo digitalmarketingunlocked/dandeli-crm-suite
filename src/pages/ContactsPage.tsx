@@ -505,8 +505,12 @@ export default function ContactsPage() {
                           onClick={(e) => {
                             e.stopPropagation();
                             window.open(`tel:${contact.phone}`);
+                            setCallFlowContact({ id: contact.id, name: contact.name, phone: contact.phone, type: contact.type });
+                            setTimeout(() => setCallFlowOpen(true), 1500);
                           }}
                         >
+                          <Phone className="w-4 h-4" />
+                        </Button>
                           <Phone className="w-4 h-4" />
                         </Button>
                         <Button
