@@ -131,6 +131,17 @@ export default function FollowUpsPage() {
         open={!!selectedContact}
         onOpenChange={(open) => { if (!open) setSelectedContact(null); }}
       />
+
+      {callFlowContact && (
+        <CallFlowDialog
+          open={callFlowOpen}
+          onOpenChange={setCallFlowOpen}
+          contactId={callFlowContact.id}
+          contactName={callFlowContact.name}
+          contactPhone={callFlowContact.phone}
+          currentType={callFlowContact.type}
+        />
+      )}
     </div>
   );
 }

@@ -958,6 +958,17 @@ export default function ContactsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {callFlowContact && (
+        <CallFlowDialog
+          open={callFlowOpen}
+          onOpenChange={setCallFlowOpen}
+          contactId={callFlowContact.id}
+          contactName={callFlowContact.name}
+          contactPhone={callFlowContact.phone}
+          currentType={callFlowContact.type}
+        />
+      )}
     </div>
   );
 }

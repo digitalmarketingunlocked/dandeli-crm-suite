@@ -281,5 +281,16 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
         </div>
       </DialogContent>
     </Dialog>
+
+    <CallFlowDialog
+      open={callFlowOpen}
+      onOpenChange={setCallFlowOpen}
+      contactId={booking.id}
+      contactName={booking.name}
+      contactPhone={booking.phone}
+      currentType={booking.type}
+    />
+    </>
   );
+}
 }

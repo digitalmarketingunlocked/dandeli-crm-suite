@@ -321,6 +321,17 @@ export default function BookingsPage() {
         open={!!selectedBooking}
         onOpenChange={(open) => !open && setSelectedBooking(null)}
       />
+
+      {callFlowContact && (
+        <CallFlowDialog
+          open={callFlowOpen}
+          onOpenChange={setCallFlowOpen}
+          contactId={callFlowContact.id}
+          contactName={callFlowContact.name}
+          contactPhone={callFlowContact.phone}
+          currentType={callFlowContact.type}
+        />
+      )}
     </div>
   );
 }

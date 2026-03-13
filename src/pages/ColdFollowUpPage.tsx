@@ -123,6 +123,17 @@ export default function ColdFollowUpPage() {
         open={!!selectedContact}
         onOpenChange={(open) => !open && setSelectedContact(null)}
       />
+
+      {callFlowContact && (
+        <CallFlowDialog
+          open={callFlowOpen}
+          onOpenChange={setCallFlowOpen}
+          contactId={callFlowContact.id}
+          contactName={callFlowContact.name}
+          contactPhone={callFlowContact.phone}
+          currentType={callFlowContact.type}
+        />
+      )}
     </div>
   );
 }
