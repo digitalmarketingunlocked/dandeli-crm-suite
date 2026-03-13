@@ -650,6 +650,11 @@ export default function ContactsPage() {
                           setCallFlowContact({ id: selectedLead.id, name: selectedLead.name, phone: selectedLead.phone, type: selectedLead.type });
                           setTimeout(() => setCallFlowOpen(true), 1500);
                         }}
+                      >
+                        <Phone className="w-5 h-5" />
+                        <span className="text-xs">Call</span>
+                      </Button>
+                      <Button
                         variant="outline"
                         className="flex-col h-auto py-4 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
                         onClick={() => window.open(`https://wa.me/${selectedLead.phone?.replace(/\D/g, "")}`)}
