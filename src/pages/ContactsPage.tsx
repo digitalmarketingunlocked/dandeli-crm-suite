@@ -108,9 +108,11 @@ export default function ContactsPage() {
 
   // Add lead dialog
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const todayStr = new Date().toISOString().slice(0, 10);
   const [leadForm, setLeadForm] = useState({
     name: "", phone: "", check_in_date: "", check_out_date: "",
     adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic",
+    lead_date: todayStr,
   });
 
   // Lead detail dialog
