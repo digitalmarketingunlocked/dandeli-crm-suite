@@ -342,29 +342,32 @@ export default function DashboardPage() {
                     placeholder="Lead Date"
                   />
                 </div>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Lead Time (e.g. 10:30 AM)"
-                    value={leadForm.lead_time}
-                    onChange={(e) => setLeadForm({ ...leadForm, lead_time: e.target.value })}
-                    maxLength={50}
-                    className="pl-10 rounded-xl"
-                  />
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Lead Time</Label>
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Lead Time (e.g. 10:30 AM)"
+                      value={leadForm.lead_time}
+                      onChange={(e) => setLeadForm({ ...leadForm, lead_time: e.target.value })}
+                      maxLength={50}
+                      className="pl-10 rounded-xl"
+                    />
+                  </div>
                 </div>
-                <div className="relative">
-                  <Share2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
-                  <Select value={leadForm.source} onValueChange={(v) => setLeadForm({ ...leadForm, source: v })}>
-                    <SelectTrigger className="pl-10 rounded-xl"><SelectValue /></SelectTrigger>
-                    <SelectContent className="glass-strong bg-card rounded-xl">
-                      <SelectItem value="organic">Organic</SelectItem>
-                      <SelectItem value="google-ads">Google Ads</SelectItem>
-                      <SelectItem value="meta-ads">Meta Ads</SelectItem>
-                      <SelectItem value="offline-marketing">Offline Marketing</SelectItem>
-                      <SelectItem value="referral">Referral</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              </div>
+              <div className="relative">
+                <Share2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+                <Select value={leadForm.source} onValueChange={(v) => setLeadForm({ ...leadForm, source: v })}>
+                  <SelectTrigger className="pl-10 rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectContent className="glass-strong bg-card rounded-xl">
+                    <SelectItem value="organic">Organic</SelectItem>
+                    <SelectItem value="google-ads">Google Ads</SelectItem>
+                    <SelectItem value="meta-ads">Meta Ads</SelectItem>
+                    <SelectItem value="offline-marketing">Offline Marketing</SelectItem>
+                    <SelectItem value="referral">Referral</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
