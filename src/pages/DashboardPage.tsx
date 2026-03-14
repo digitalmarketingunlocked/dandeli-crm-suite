@@ -24,9 +24,11 @@ export default function DashboardPage() {
   const [customTo, setCustomTo] = useState("");
   const [selectedContact, setSelectedContact] = useState<any>(null);
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
+  const todayStr = new Date().toISOString().slice(0, 10);
   const [leadForm, setLeadForm] = useState({
     name: "", phone: "", check_in_date: "", check_out_date: "",
     adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic",
+    lead_date: todayStr,
   });
 
   const createLead = useMutation({
@@ -44,13 +46,14 @@ export default function DashboardPage() {
         type: "lead",
         tenant_id: tenantId!,
         created_by: user!.id,
+        created_at: leadForm.lead_date ? new Date(leadForm.lead_date).toISOString() : new Date().toISOString(),
       });
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
       setLeadDialogOpen(false);
-      setLeadForm({ name: "", phone: "", check_in_date: "", check_out_date: "", adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic" });
+      setLeadForm({ name: "", phone: "", check_in_date: "", check_out_date: "", adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic", lead_date: new Date().toISOString().slice(0, 10) });
       toast({ title: "Lead added!" });
     },
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
@@ -230,9 +233,19 @@ export default function DashboardPage() {
             <DialogTitle className="font-heading text-xl">Add New Lead</DialogTitle>
           </DialogHeader>
           <form onSubmit={(e) => { e.preventDefault(); createLead.mutate(); }} className="space-y-6">
-            {/* Guest Information */}
+            {/* Lead Date + Guest Information */}
             <div className="space-y-3">
               <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Guest Information</Label>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Lead Date</Label>
+                <DateInput
+                  value={leadForm.lead_date}
+                  onChange={(v) => setLeadForm({ ...leadForm, lead_date: v })}
+                  maxDate={new Date()}
+                  className="rounded-xl"
+                  placeholder="Lead Date"
+                />
+              </div>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
