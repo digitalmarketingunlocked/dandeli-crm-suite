@@ -46,6 +46,7 @@ export default function DashboardPage() {
         type: "lead",
         tenant_id: tenantId!,
         created_by: user!.id,
+        created_at: leadForm.lead_date ? new Date(leadForm.lead_date).toISOString() : new Date().toISOString(),
       });
       if (error) throw error;
     },
