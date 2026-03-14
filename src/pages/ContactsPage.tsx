@@ -550,16 +550,6 @@ export default function ContactsPage() {
           <form onSubmit={(e) => { e.preventDefault(); createLead.mutate(); }} className="space-y-5">
             <div className="space-y-3">
               <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Guest Information</Label>
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Lead Date</Label>
-                <DateInput
-                  value={leadForm.lead_date}
-                  onChange={(v) => setLeadForm({ ...leadForm, lead_date: v })}
-                  maxDate={new Date()}
-                  className="rounded-xl"
-                  placeholder="Lead Date"
-                />
-              </div>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input placeholder="Guest Name *" value={leadForm.name} onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })} required className="pl-10 rounded-xl" />
@@ -595,6 +585,16 @@ export default function ContactsPage() {
             </div>
             <div className="space-y-3">
               <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Additional</Label>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Lead Date</Label>
+                <DateInput
+                  value={leadForm.lead_date}
+                  onChange={(v) => setLeadForm({ ...leadForm, lead_date: v })}
+                  maxDate={new Date()}
+                  className="rounded-xl"
+                  placeholder="Lead Date"
+                />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <Input placeholder="Lead Time" value={leadForm.lead_time} onChange={(e) => setLeadForm({ ...leadForm, lead_time: e.target.value })} className="rounded-xl" />
                 <Select value={leadForm.source} onValueChange={(v) => setLeadForm({ ...leadForm, source: v })}>
