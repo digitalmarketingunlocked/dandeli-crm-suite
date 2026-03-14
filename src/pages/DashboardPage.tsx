@@ -24,9 +24,11 @@ export default function DashboardPage() {
   const [customTo, setCustomTo] = useState("");
   const [selectedContact, setSelectedContact] = useState<any>(null);
   const [leadDialogOpen, setLeadDialogOpen] = useState(false);
+  const todayStr = new Date().toISOString().slice(0, 10);
   const [leadForm, setLeadForm] = useState({
     name: "", phone: "", check_in_date: "", check_out_date: "",
     adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic",
+    lead_date: todayStr,
   });
 
   const createLead = useMutation({
