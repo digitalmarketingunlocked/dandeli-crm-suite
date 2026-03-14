@@ -585,6 +585,16 @@ export default function ContactsPage() {
             </div>
             <div className="space-y-3">
               <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Additional</Label>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Lead Date</Label>
+                <DateInput
+                  value={leadForm.lead_date}
+                  onChange={(v) => setLeadForm({ ...leadForm, lead_date: v })}
+                  maxDate={new Date()}
+                  className="rounded-xl"
+                  placeholder="Lead Date"
+                />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <Input placeholder="Lead Time" value={leadForm.lead_time} onChange={(e) => setLeadForm({ ...leadForm, lead_time: e.target.value })} className="rounded-xl" />
                 <Select value={leadForm.source} onValueChange={(v) => setLeadForm({ ...leadForm, source: v })}>

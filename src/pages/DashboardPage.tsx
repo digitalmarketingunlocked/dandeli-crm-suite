@@ -332,6 +332,16 @@ export default function DashboardPage() {
             <div className="space-y-3">
               <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Additional Info</Label>
               <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Lead Date</Label>
+                  <DateInput
+                    value={leadForm.lead_date}
+                    onChange={(v) => setLeadForm({ ...leadForm, lead_date: v })}
+                    maxDate={new Date()}
+                    className="rounded-xl"
+                    placeholder="Lead Date"
+                  />
+                </div>
                 <div className="relative">
                   <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
