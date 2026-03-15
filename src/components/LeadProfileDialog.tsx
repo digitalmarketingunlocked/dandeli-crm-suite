@@ -168,13 +168,14 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
       type: editForm.type,
       check_in_date: editForm.check_in_date || null,
       check_out_date: editForm.check_out_date || null,
-      adults_count: editForm.adults_count,
-      kids_count: editForm.kids_count,
+      adults_count: editForm.adults_count ?? null,
+      kids_count: editForm.kids_count ?? null,
       city: editForm.city || null,
       lead_time: editForm.lead_time || null,
       source: editForm.source || null,
       follow_up_date: editForm.follow_up_date || null,
       recurring: editForm.recurring || "none",
+      created_at: editForm.created_at ? new Date(editForm.created_at).toISOString() : localContact.created_at,
     });
     onOpenChange(false);
   };
