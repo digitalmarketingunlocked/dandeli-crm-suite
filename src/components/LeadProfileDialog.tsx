@@ -57,7 +57,7 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
   const { statuses: leadStatuses } = useLeadStatuses();
   const STAGE_OPTIONS = leadStatuses.map((s) => ({ value: s.value, label: s.label }));
 
-  const [editForm, setEditForm] = useState<Partial<Contact>>({});
+  const [editForm, setEditForm] = useState<Partial<Contact> & { created_at?: string }>({});
   const [newNote, setNewNote] = useState("");
   const [newCallNote, setNewCallNote] = useState("");
   const [callSortBy, setCallSortBy] = useState<"date" | "duration">("date");
