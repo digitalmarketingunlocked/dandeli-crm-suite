@@ -68,18 +68,18 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
     if (contact && open) {
       setLocalContact(contact);
       setEditForm({
-70:         type: contact.type,
-71:         check_in_date: contact.check_in_date || "",
-72:         check_out_date: contact.check_out_date || "",
-73:         adults_count: contact.adults_count,
-74:         kids_count: contact.kids_count,
-75:         city: contact.city || "",
-76:         lead_time: contact.lead_time || "",
-77:         source: contact.source || "",
-78:         follow_up_date: contact.follow_up_date || "",
-79:         recurring: contact.recurring || "none",
-80:         created_at: contact.created_at ? contact.created_at.slice(0, 10) : "",
-81:       });
+        type: contact.type,
+        check_in_date: contact.check_in_date || "",
+        check_out_date: contact.check_out_date || "",
+        adults_count: contact.adults_count,
+        kids_count: contact.kids_count,
+        city: contact.city || "",
+        lead_time: contact.lead_time || "",
+        source: contact.source || "",
+        follow_up_date: contact.follow_up_date || "",
+        recurring: contact.recurring || "none",
+        created_at: contact.created_at ? contact.created_at.slice(0, 10) : "",
+      });
       setNewNote("");
       setNewCallNote("");
     }
