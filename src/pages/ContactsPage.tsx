@@ -547,58 +547,134 @@ export default function ContactsPage() {
           <DialogHeader>
             <DialogTitle className="font-heading text-xl">Add New Lead</DialogTitle>
           </DialogHeader>
-          <form onSubmit={(e) => { e.preventDefault(); createLead.mutate(); }} className="space-y-5">
+          <form onSubmit={(e) => { e.preventDefault(); createLead.mutate(); }} className="space-y-6">
+            {/* Guest Information */}
             <div className="space-y-3">
               <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Guest Information</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input placeholder="Guest Name *" value={leadForm.name} onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })} required className="pl-10 rounded-xl" />
+                <Input
+                  placeholder="Guest Name *"
+                  value={leadForm.name}
+                  onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
+                  required
+                  maxLength={100}
+                  className="pl-10 rounded-xl"
+                />
               </div>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input placeholder="Phone Number *" value={leadForm.phone} onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })} required className="pl-10 rounded-xl" />
+                <Input
+                  placeholder="Phone Number *"
+                  value={leadForm.phone}
+                  onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
+                  required
+                  maxLength={20}
+                  className="pl-10 rounded-xl"
+                />
               </div>
             </div>
+
+            {/* Stay Details */}
             <div className="space-y-3">
               <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Stay Details</Label>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Check-in *</Label>
-                  <DateInput value={leadForm.check_in_date} onChange={(v) => setLeadForm({ ...leadForm, check_in_date: v })} required className="rounded-xl" placeholder="Check-in" />
+                  <Label className="text-xs text-muted-foreground">Check-in Date *</Label>
+                  <DateInput
+                    value={leadForm.check_in_date}
+                    onChange={(v) => setLeadForm({ ...leadForm, check_in_date: v })}
+                    required
+                    className="rounded-xl"
+                    placeholder="Check-in"
+                  />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Check-out</Label>
-                  <DateInput value={leadForm.check_out_date} onChange={(v) => setLeadForm({ ...leadForm, check_out_date: v })} className="rounded-xl" placeholder="Check-out" />
+                  <Label className="text-xs text-muted-foreground">Check-out Date</Label>
+                  <DateInput
+                    value={leadForm.check_out_date}
+                    onChange={(v) => setLeadForm({ ...leadForm, check_out_date: v })}
+                    className="rounded-xl"
+                    placeholder="Check-out"
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Adults</Label>
-                  <Input type="number" value={leadForm.adults_count} onChange={(e) => setLeadForm({ ...leadForm, adults_count: e.target.value })} min={1} className="rounded-xl" />
+                  <div className="relative">
+                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="number"
+                      placeholder="Adults"
+                      value={leadForm.adults_count}
+                      onChange={(e) => setLeadForm({ ...leadForm, adults_count: e.target.value })}
+                      min={1}
+                      max={100}
+                      className="pl-10 rounded-xl"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs text-muted-foreground">Kids</Label>
-                  <Input type="number" value={leadForm.kids_count} onChange={(e) => setLeadForm({ ...leadForm, kids_count: e.target.value })} min={0} className="rounded-xl" />
+                  <div className="relative">
+                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="number"
+                      placeholder="Kids"
+                      value={leadForm.kids_count}
+                      onChange={(e) => setLeadForm({ ...leadForm, kids_count: e.target.value })}
+                      min={0}
+                      max={100}
+                      className="pl-10 rounded-xl"
+                    />
+                  </div>
                 </div>
               </div>
-              <Input placeholder="City" value={leadForm.city} onChange={(e) => setLeadForm({ ...leadForm, city: e.target.value })} className="rounded-xl" />
-            </div>
-            <div className="space-y-3">
-              <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Additional</Label>
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Lead Date</Label>
-                <DateInput
-                  value={leadForm.lead_date}
-                  onChange={(v) => setLeadForm({ ...leadForm, lead_date: v })}
-                  maxDate={new Date()}
-                  className="rounded-xl"
-                  placeholder="Lead Date"
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="City"
+                  value={leadForm.city}
+                  onChange={(e) => setLeadForm({ ...leadForm, city: e.target.value })}
+                  maxLength={100}
+                  className="pl-10 rounded-xl"
                 />
               </div>
+            </div>
+
+            {/* Additional Info */}
+            <div className="space-y-3">
+              <Label className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">Additional Info</Label>
               <div className="grid grid-cols-2 gap-3">
-                <Input placeholder="Lead Time" value={leadForm.lead_time} onChange={(e) => setLeadForm({ ...leadForm, lead_time: e.target.value })} className="rounded-xl" />
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Lead Date</Label>
+                  <DateInput
+                    value={leadForm.lead_date}
+                    onChange={(v) => setLeadForm({ ...leadForm, lead_date: v })}
+                    maxDate={new Date()}
+                    className="rounded-xl"
+                    placeholder="Lead Date"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Lead Time</Label>
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Lead Time (e.g. 10:30 AM)"
+                      value={leadForm.lead_time}
+                      onChange={(e) => setLeadForm({ ...leadForm, lead_time: e.target.value })}
+                      maxLength={50}
+                      className="pl-10 rounded-xl"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="relative">
+                <Share2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
                 <Select value={leadForm.source} onValueChange={(v) => setLeadForm({ ...leadForm, source: v })}>
-                  <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="pl-10 rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent className="glass-strong bg-card rounded-xl">
                     <SelectItem value="organic">Organic</SelectItem>
                     <SelectItem value="google-ads">Google Ads</SelectItem>
@@ -609,8 +685,12 @@ export default function ContactsPage() {
                 </Select>
               </div>
             </div>
+
+            {/* Actions */}
             <div className="flex gap-3 justify-end pt-2">
-              <Button type="button" variant="outline" className="rounded-xl" onClick={() => setAddDialogOpen(false)}>Cancel</Button>
+              <Button type="button" variant="outline" className="rounded-xl" onClick={() => setAddDialogOpen(false)}>
+                Cancel
+              </Button>
               <Button type="submit" className="rounded-xl" disabled={createLead.isPending}>
                 {createLead.isPending ? "Adding..." : "Add Lead"}
               </Button>
