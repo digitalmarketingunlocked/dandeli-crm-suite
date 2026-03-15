@@ -141,7 +141,7 @@ export default function DashboardPage() {
   const recentHotLeads = filteredContacts.filter((c) => {
     const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
     return days <= 3;
-  }).slice(0, 5);
+  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
 
   // Lead funnel data
   const LEAD_STAGES = [
