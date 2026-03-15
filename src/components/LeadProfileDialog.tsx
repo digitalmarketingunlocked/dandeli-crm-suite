@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Phone, MapPin, CalendarDays, Users, Mail,
   MessageCircle, Clock, Bell, StickyNote, Flame, Snowflake,
-  PhoneCall,
+  PhoneCall, Check,
 } from "lucide-react";
 import CallFlowDialog from "@/components/CallFlowDialog";
 
