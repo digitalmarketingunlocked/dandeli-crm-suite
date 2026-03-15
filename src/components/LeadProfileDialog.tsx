@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DateInput } from "@/components/ui/date-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -56,7 +57,7 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
   const { statuses: leadStatuses } = useLeadStatuses();
   const STAGE_OPTIONS = leadStatuses.map((s) => ({ value: s.value, label: s.label }));
 
-  const [editForm, setEditForm] = useState<Partial<Contact>>({});
+  const [editForm, setEditForm] = useState<Partial<Contact> & { created_at?: string }>({});
   const [newNote, setNewNote] = useState("");
   const [newCallNote, setNewCallNote] = useState("");
   const [callSortBy, setCallSortBy] = useState<"date" | "duration">("date");
@@ -77,6 +78,7 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
         source: contact.source || "",
         follow_up_date: contact.follow_up_date || "",
         recurring: contact.recurring || "none",
+        created_at: contact.created_at ? contact.created_at.slice(0, 10) : "",
       });
       setNewNote("");
       setNewCallNote("");
@@ -166,13 +168,14 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
       type: editForm.type,
       check_in_date: editForm.check_in_date || null,
       check_out_date: editForm.check_out_date || null,
-      adults_count: editForm.adults_count,
-      kids_count: editForm.kids_count,
+      adults_count: editForm.adults_count ?? null,
+      kids_count: editForm.kids_count ?? null,
       city: editForm.city || null,
       lead_time: editForm.lead_time || null,
       source: editForm.source || null,
       follow_up_date: editForm.follow_up_date || null,
       recurring: editForm.recurring || "none",
+      created_at: editForm.created_at ? new Date(editForm.created_at).toISOString() : localContact.created_at,
     });
     onOpenChange(false);
   };
@@ -287,6 +290,15 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
                 <div className="flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider">Lead Time</Label>
                   <Input value={editForm.lead_time as string || ""} onChange={(e) => setEditForm({ ...editForm, lead_time: e.target.value })} className="w-[150px] h-8 text-xs rounded-lg" placeholder="e.g. 10:30 AM" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Lead Date</Label>
+                  <DateInput
+                    value={editForm.created_at as string || ""}
+                    onChange={(v) => setEditForm({ ...editForm, created_at: v })}
+                    maxDate={new Date()}
+                    className="w-[150px] h-8 text-xs rounded-lg"
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider">Source</Label>
