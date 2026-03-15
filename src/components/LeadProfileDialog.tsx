@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Phone, MapPin, CalendarDays, Users, Mail,
   MessageCircle, Clock, Bell, StickyNote, Flame, Snowflake,
-  PhoneCall,
+  PhoneCall, Check,
 } from "lucide-react";
 import CallFlowDialog from "@/components/CallFlowDialog";
 
@@ -105,6 +105,18 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
       return data;
     },
     enabled: !!contact?.id && open,
+  });
+
+  const markReminderDone = useMutation({
+    mutationFn: async (reminderId: string) => {
+      const { error } = await supabase.from("reminders").update({ is_active: false }).eq("id", reminderId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reminders", localContact?.id] });
+      toast({ title: "Reminder marked as done!" });
+    },
+    onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
   const updateContact = useMutation({
@@ -332,9 +344,22 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
               <div className="space-y-2 max-h-[150px] overflow-y-auto">
                 {reminders.length > 0 ? (
                   reminders.map((r) => (
-                    <div key={r.id} className="text-sm p-2 rounded-lg bg-muted/30 flex items-center justify-between">
-                      <span>{r.message || "Reminder"}</span>
-                      <span className="text-xs text-muted-foreground">{new Date(r.reminder_date).toLocaleDateString()}</span>
+                    <div
+                      key={r.id}
+                      className={`text-sm p-2 rounded-lg flex items-center justify-between gap-2 cursor-pointer transition-colors ${r.is_active === false ? 'bg-muted/20 opacity-60 line-through' : 'bg-muted/30 hover:bg-muted/50'}`}
+                      onClick={() => {
+                        if (r.is_active !== false) {
+                          markReminderDone.mutate(r.id);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${r.is_active === false ? 'bg-primary border-primary' : 'border-muted-foreground/40'}`}>
+                          {r.is_active === false && <Check className="w-2.5 h-2.5 text-primary-foreground" />}
+                        </div>
+                        <span className="truncate">{r.message || "Reminder"}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground shrink-0">{new Date(r.reminder_date).toLocaleDateString()}</span>
                     </div>
                   ))
                 ) : (
