@@ -292,6 +292,15 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
                   <Input value={editForm.lead_time as string || ""} onChange={(e) => setEditForm({ ...editForm, lead_time: e.target.value })} className="w-[150px] h-8 text-xs rounded-lg" placeholder="e.g. 10:30 AM" />
                 </div>
                 <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider">Lead Date</Label>
+                  <DateInput
+                    value={editForm.created_at as string || ""}
+                    onChange={(v) => setEditForm({ ...editForm, created_at: v })}
+                    maxDate={new Date()}
+                    className="w-[150px] h-8 text-xs rounded-lg"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider">Source</Label>
                   <Select value={editForm.source as string || "organic"} onValueChange={(v) => setEditForm({ ...editForm, source: v })}>
                     <SelectTrigger className="w-[150px] h-8 text-xs rounded-lg"><SelectValue /></SelectTrigger>
