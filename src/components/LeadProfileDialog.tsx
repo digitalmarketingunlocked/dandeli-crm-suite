@@ -107,6 +107,18 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
     enabled: !!contact?.id && open,
   });
 
+  const markReminderDone = useMutation({
+    mutationFn: async (reminderId: string) => {
+      const { error } = await supabase.from("reminders").update({ is_active: false }).eq("id", reminderId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reminders", localContact?.id] });
+      toast({ title: "Reminder marked as done!" });
+    },
+    onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
   const updateContact = useMutation({
     mutationFn: async (updates: Partial<Contact> & { id: string }) => {
       const { id, ...rest } = updates;
