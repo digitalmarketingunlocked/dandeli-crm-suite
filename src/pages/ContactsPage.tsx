@@ -16,8 +16,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Plus, Search, Phone, CalendarDays, Users, MapPin, Clock, User,
-  Filter, FileSpreadsheet, MessageCircle, Flame, Snowflake, ChevronRight,
+  Plus, Search, Phone, CalendarDays, Users, MapPin, Clock, Share2, User,
+  Filter, FileSpreadsheet, MessageCircle, Flame, Snowflake, ChevronRight, Bell,
   CalendarIcon, Download
 } from "lucide-react";
 import { exportContactsToXls } from "@/lib/exportXls";
