@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Phone, MapPin, CalendarDays, Users, Mail,
   MessageCircle, Clock, Bell, StickyNote, Flame, Snowflake,
-  PhoneCall, Check,
+  PhoneCall, Check, Pencil, X,
 } from "lucide-react";
 import CallFlowDialog from "@/components/CallFlowDialog";
 
@@ -63,6 +63,10 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
   const [callSortBy, setCallSortBy] = useState<"date" | "duration">("date");
   const [localContact, setLocalContact] = useState<Contact | null>(null);
   const [callFlowOpen, setCallFlowOpen] = useState(false);
+  const [editingHeader, setEditingHeader] = useState(false);
+  const [headerName, setHeaderName] = useState("");
+  const [headerPhone, setHeaderPhone] = useState("");
+  const [selectedReminder, setSelectedReminder] = useState<any>(null);
 
   useEffect(() => {
     if (contact && open) {
@@ -82,6 +86,8 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
       });
       setNewNote("");
       setNewCallNote("");
+      setEditingHeader(false);
+      setSelectedReminder(null);
     }
   }, [contact, open]);
 
@@ -200,25 +206,67 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
           <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg shrink-0">
             {localContact.name.charAt(0).toUpperCase()}
           </div>
-          <div>
-            <h2 className="text-xl font-heading font-bold">{localContact.name}</h2>
-            <div className="flex items-center gap-2 text-sm">
-              {isHot ? (
-                <span className="flex items-center gap-1 text-accent font-semibold text-xs">
-                  <Flame className="w-3 h-3" /> HOT LEAD
-                </span>
-              ) : (
-                <span className="flex items-center gap-1 text-secondary font-semibold text-xs">
-                  <Snowflake className="w-3 h-3" /> COLD
-                </span>
-              )}
-              {localContact.phone && <span className="text-muted-foreground">{localContact.phone}</span>}
-              {localContact.email && (
-                <span className="flex items-center gap-1 text-muted-foreground text-xs">
-                  <Mail className="w-3 h-3" /> {localContact.email}
-                </span>
-              )}
-            </div>
+          <div className="flex-1 min-w-0">
+            {editingHeader ? (
+              <div className="space-y-2">
+                <Input
+                  value={headerName}
+                  onChange={(e) => setHeaderName(e.target.value)}
+                  className="h-8 text-sm rounded-lg"
+                  placeholder="Name"
+                  autoFocus
+                />
+                <Input
+                  value={headerPhone}
+                  onChange={(e) => setHeaderPhone(e.target.value)}
+                  className="h-8 text-sm rounded-lg"
+                  placeholder="Phone"
+                  inputMode="tel"
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" className="rounded-lg h-7 text-xs" onClick={() => {
+                    if (headerName.trim()) {
+                      updateContact.mutate({ id: localContact.id, name: headerName.trim(), phone: headerPhone.trim() || null });
+                      setLocalContact({ ...localContact, name: headerName.trim(), phone: headerPhone.trim() || null });
+                    }
+                    setEditingHeader(false);
+                  }}>Save</Button>
+                  <Button size="sm" variant="ghost" className="rounded-lg h-7 text-xs" onClick={() => setEditingHeader(false)}>
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-heading font-bold">{localContact.name}</h2>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => {
+                    setHeaderName(localContact.name);
+                    setHeaderPhone(localContact.phone || "");
+                    setEditingHeader(true);
+                  }}>
+                    <Pencil className="w-3 h-3 text-muted-foreground" />
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  {isHot ? (
+                    <span className="flex items-center gap-1 text-accent font-semibold text-xs">
+                      <Flame className="w-3 h-3" /> HOT LEAD
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-secondary font-semibold text-xs">
+                      <Snowflake className="w-3 h-3" /> COLD
+                    </span>
+                  )}
+                  {localContact.phone && <span className="text-muted-foreground">{localContact.phone}</span>}
+                  {localContact.email && (
+                    <span className="flex items-center gap-1 text-muted-foreground text-xs">
+                      <Mail className="w-3 h-3" /> {localContact.email}
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -279,8 +327,8 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
                 <div className="flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider">People</Label>
                   <div className="flex gap-2">
-                    <Input type="number" value={editForm.adults_count ?? 2} onChange={(e) => setEditForm({ ...editForm, adults_count: parseInt(e.target.value) || 0 })} className="w-[65px] h-8 text-xs rounded-lg" placeholder="Adults" />
-                    <Input type="number" value={editForm.kids_count ?? 0} onChange={(e) => setEditForm({ ...editForm, kids_count: parseInt(e.target.value) || 0 })} className="w-[65px] h-8 text-xs rounded-lg" placeholder="Kids" />
+                    <Input type="number" inputMode="numeric" pattern="[0-9]*" value={editForm.adults_count ?? 2} onChange={(e) => setEditForm({ ...editForm, adults_count: parseInt(e.target.value) || 0 })} className="w-[65px] h-8 text-xs rounded-lg" placeholder="Adults" />
+                    <Input type="number" inputMode="numeric" pattern="[0-9]*" value={editForm.kids_count ?? 0} onChange={(e) => setEditForm({ ...editForm, kids_count: parseInt(e.target.value) || 0 })} className="w-[65px] h-8 text-xs rounded-lg" placeholder="Kids" />
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
@@ -289,7 +337,7 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
                 </div>
                 <div className="flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider">Lead Time</Label>
-                  <Input value={editForm.lead_time as string || ""} onChange={(e) => setEditForm({ ...editForm, lead_time: e.target.value })} className="w-[150px] h-8 text-xs rounded-lg" placeholder="e.g. 10:30 AM" />
+                  <Input type="time" value={editForm.lead_time as string || ""} onChange={(e) => setEditForm({ ...editForm, lead_time: e.target.value })} className="w-[150px] h-8 text-xs rounded-lg" />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider">Lead Date</Label>
@@ -358,18 +406,14 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
                   reminders.map((r) => (
                     <div
                       key={r.id}
-                      className={`text-sm p-2 rounded-lg flex items-center justify-between gap-2 cursor-pointer transition-colors ${r.is_active === false ? 'bg-muted/20 opacity-60 line-through' : 'bg-muted/30 hover:bg-muted/50'}`}
-                      onClick={() => {
-                        if (r.is_active !== false) {
-                          markReminderDone.mutate(r.id);
-                        }
-                      }}
+                      className={`text-sm p-2 rounded-lg flex items-center justify-between gap-2 cursor-pointer transition-colors ${r.is_active === false ? 'bg-muted/20 opacity-60' : 'bg-muted/30 hover:bg-muted/50'}`}
+                      onClick={() => setSelectedReminder(r)}
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${r.is_active === false ? 'bg-primary border-primary' : 'border-muted-foreground/40'}`}>
                           {r.is_active === false && <Check className="w-2.5 h-2.5 text-primary-foreground" />}
                         </div>
-                        <span className="truncate">{r.message || "Reminder"}</span>
+                        <span className={`truncate ${r.is_active === false ? 'line-through' : ''}`}>{r.message || "Reminder"}</span>
                       </div>
                       <span className="text-xs text-muted-foreground shrink-0">{new Date(r.reminder_date).toLocaleDateString()}</span>
                     </div>
@@ -423,6 +467,46 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
       contactPhone={localContact.phone}
       currentType={localContact.type}
     />
+
+    {/* Reminder Detail Popup */}
+    <Dialog open={!!selectedReminder} onOpenChange={(open) => { if (!open) setSelectedReminder(null); }}>
+      <DialogContent className="glass-strong bg-card rounded-2xl sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <Bell className="w-4 h-4" /> Reminder Details
+          </DialogTitle>
+        </DialogHeader>
+        {selectedReminder && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Message</Label>
+              <p className="text-sm bg-muted/30 p-3 rounded-lg">{selectedReminder.message || "No message"}</p>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Date</Label>
+              <p className="text-sm bg-muted/30 p-3 rounded-lg">{new Date(selectedReminder.reminder_date).toLocaleString()}</p>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Status</Label>
+              <Badge variant={selectedReminder.is_active === false ? "secondary" : "default"} className="rounded-lg">
+                {selectedReminder.is_active === false ? "Completed" : "Active"}
+              </Badge>
+            </div>
+            {selectedReminder.is_active !== false && (
+              <Button
+                className="w-full rounded-xl"
+                onClick={() => {
+                  markReminderDone.mutate(selectedReminder.id);
+                  setSelectedReminder(null);
+                }}
+              >
+                <Check className="w-4 h-4 mr-2" /> Mark as Done
+              </Button>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
     </>
   );
 }

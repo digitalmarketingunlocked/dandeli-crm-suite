@@ -290,7 +290,7 @@ export default function DashboardPage() {
                   <div className="relative">
                     <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      type="number"
+                      type="number" inputMode="numeric" pattern="[0-9]*"
                       placeholder="Adults"
                       value={leadForm.adults_count}
                       onChange={(e) => setLeadForm({ ...leadForm, adults_count: e.target.value })}
@@ -305,7 +305,7 @@ export default function DashboardPage() {
                   <div className="relative">
                     <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      type="number"
+                      type="number" inputMode="numeric" pattern="[0-9]*"
                       placeholder="Kids"
                       value={leadForm.kids_count}
                       onChange={(e) => setLeadForm({ ...leadForm, kids_count: e.target.value })}
