@@ -209,7 +209,7 @@ export default function ContactsPage() {
 
   const totalPeople = (c: Contact) => (c.adults_count || 0) + (c.kids_count || 0);
 
-  const noteLines = selectedLead?.notes?.split("\n").filter(Boolean) || [];
+  
 
   return (
     <div className="space-y-6">
