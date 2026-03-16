@@ -206,25 +206,67 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
           <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg shrink-0">
             {localContact.name.charAt(0).toUpperCase()}
           </div>
-          <div>
-            <h2 className="text-xl font-heading font-bold">{localContact.name}</h2>
-            <div className="flex items-center gap-2 text-sm">
-              {isHot ? (
-                <span className="flex items-center gap-1 text-accent font-semibold text-xs">
-                  <Flame className="w-3 h-3" /> HOT LEAD
-                </span>
-              ) : (
-                <span className="flex items-center gap-1 text-secondary font-semibold text-xs">
-                  <Snowflake className="w-3 h-3" /> COLD
-                </span>
-              )}
-              {localContact.phone && <span className="text-muted-foreground">{localContact.phone}</span>}
-              {localContact.email && (
-                <span className="flex items-center gap-1 text-muted-foreground text-xs">
-                  <Mail className="w-3 h-3" /> {localContact.email}
-                </span>
-              )}
-            </div>
+          <div className="flex-1 min-w-0">
+            {editingHeader ? (
+              <div className="space-y-2">
+                <Input
+                  value={headerName}
+                  onChange={(e) => setHeaderName(e.target.value)}
+                  className="h-8 text-sm rounded-lg"
+                  placeholder="Name"
+                  autoFocus
+                />
+                <Input
+                  value={headerPhone}
+                  onChange={(e) => setHeaderPhone(e.target.value)}
+                  className="h-8 text-sm rounded-lg"
+                  placeholder="Phone"
+                  inputMode="tel"
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" className="rounded-lg h-7 text-xs" onClick={() => {
+                    if (headerName.trim()) {
+                      updateContact.mutate({ id: localContact.id, name: headerName.trim(), phone: headerPhone.trim() || null });
+                      setLocalContact({ ...localContact, name: headerName.trim(), phone: headerPhone.trim() || null });
+                    }
+                    setEditingHeader(false);
+                  }}>Save</Button>
+                  <Button size="sm" variant="ghost" className="rounded-lg h-7 text-xs" onClick={() => setEditingHeader(false)}>
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-heading font-bold">{localContact.name}</h2>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => {
+                    setHeaderName(localContact.name);
+                    setHeaderPhone(localContact.phone || "");
+                    setEditingHeader(true);
+                  }}>
+                    <Pencil className="w-3 h-3 text-muted-foreground" />
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  {isHot ? (
+                    <span className="flex items-center gap-1 text-accent font-semibold text-xs">
+                      <Flame className="w-3 h-3" /> HOT LEAD
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-secondary font-semibold text-xs">
+                      <Snowflake className="w-3 h-3" /> COLD
+                    </span>
+                  )}
+                  {localContact.phone && <span className="text-muted-foreground">{localContact.phone}</span>}
+                  {localContact.email && (
+                    <span className="flex items-center gap-1 text-muted-foreground text-xs">
+                      <Mail className="w-3 h-3" /> {localContact.email}
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
