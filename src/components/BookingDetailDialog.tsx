@@ -197,7 +197,7 @@ export default function BookingDetailDialog({ booking, open, onOpenChange }: Boo
                 <IndianRupee className="w-3.5 h-3.5 text-muted-foreground" /> Pricing / Head
               </Label>
               <Input
-                type="number"
+                type="number" inputMode="numeric" pattern="[0-9]*"
                 placeholder="e.g. 5000"
                 value={pricing}
                 onChange={(e) => setPricing(e.target.value)}
