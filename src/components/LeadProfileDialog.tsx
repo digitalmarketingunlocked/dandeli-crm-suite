@@ -279,8 +279,8 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
                 <div className="flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider">People</Label>
                   <div className="flex gap-2">
-                    <Input type="number" value={editForm.adults_count ?? 2} onChange={(e) => setEditForm({ ...editForm, adults_count: parseInt(e.target.value) || 0 })} className="w-[65px] h-8 text-xs rounded-lg" placeholder="Adults" />
-                    <Input type="number" value={editForm.kids_count ?? 0} onChange={(e) => setEditForm({ ...editForm, kids_count: parseInt(e.target.value) || 0 })} className="w-[65px] h-8 text-xs rounded-lg" placeholder="Kids" />
+                    <Input type="number" inputMode="numeric" pattern="[0-9]*" value={editForm.adults_count ?? 2} onChange={(e) => setEditForm({ ...editForm, adults_count: parseInt(e.target.value) || 0 })} className="w-[65px] h-8 text-xs rounded-lg" placeholder="Adults" />
+                    <Input type="number" inputMode="numeric" pattern="[0-9]*" value={editForm.kids_count ?? 0} onChange={(e) => setEditForm({ ...editForm, kids_count: parseInt(e.target.value) || 0 })} className="w-[65px] h-8 text-xs rounded-lg" placeholder="Kids" />
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
