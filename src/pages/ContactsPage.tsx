@@ -118,11 +118,6 @@ export default function ContactsPage() {
 
   // Lead detail dialog
   const [selectedLead, setSelectedLead] = useState<Contact | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [editForm, setEditForm] = useState<Partial<Contact>>({});
-  const [newNote, setNewNote] = useState("");
-  const [newCallNote, setNewCallNote] = useState("");
-  const [callSortBy, setCallSortBy] = useState<"date" | "duration">("date");
 
   // Export dialog
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
