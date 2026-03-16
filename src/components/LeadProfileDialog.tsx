@@ -289,7 +289,7 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
                 </div>
                 <div className="flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider">Lead Time</Label>
-                  <Input value={editForm.lead_time as string || ""} onChange={(e) => setEditForm({ ...editForm, lead_time: e.target.value })} className="w-[150px] h-8 text-xs rounded-lg" placeholder="e.g. 10:30 AM" />
+                  <Input type="time" value={editForm.lead_time as string || ""} onChange={(e) => setEditForm({ ...editForm, lead_time: e.target.value })} className="w-[150px] h-8 text-xs rounded-lg" />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider">Lead Date</Label>
