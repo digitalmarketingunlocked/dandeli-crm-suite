@@ -86,6 +86,8 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
       });
       setNewNote("");
       setNewCallNote("");
+      setEditingHeader(false);
+      setSelectedReminder(null);
     }
   }, [contact, open]);
 
