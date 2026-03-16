@@ -467,6 +467,46 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
       contactPhone={localContact.phone}
       currentType={localContact.type}
     />
+
+    {/* Reminder Detail Popup */}
+    <Dialog open={!!selectedReminder} onOpenChange={(open) => { if (!open) setSelectedReminder(null); }}>
+      <DialogContent className="glass-strong bg-card rounded-2xl sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <Bell className="w-4 h-4" /> Reminder Details
+          </DialogTitle>
+        </DialogHeader>
+        {selectedReminder && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Message</Label>
+              <p className="text-sm bg-muted/30 p-3 rounded-lg">{selectedReminder.message || "No message"}</p>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Date</Label>
+              <p className="text-sm bg-muted/30 p-3 rounded-lg">{new Date(selectedReminder.reminder_date).toLocaleString()}</p>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Status</Label>
+              <Badge variant={selectedReminder.is_active === false ? "secondary" : "default"} className="rounded-lg">
+                {selectedReminder.is_active === false ? "Completed" : "Active"}
+              </Badge>
+            </div>
+            {selectedReminder.is_active !== false && (
+              <Button
+                className="w-full rounded-xl"
+                onClick={() => {
+                  markReminderDone.mutate(selectedReminder.id);
+                  setSelectedReminder(null);
+                }}
+              >
+                <Check className="w-4 h-4 mr-2" /> Mark as Done
+              </Button>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
     </>
   );
 }
