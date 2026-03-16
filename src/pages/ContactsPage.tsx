@@ -183,6 +183,34 @@ export default function ContactsPage() {
     enabled: !!tenantId,
   });
 
+  const createLead = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("contacts").insert({
+        name: leadForm.name.trim(),
+        phone: normalizePhone(leadForm.phone),
+        check_in_date: leadForm.check_in_date || null,
+        check_out_date: leadForm.check_out_date || null,
+        adults_count: parseInt(leadForm.adults_count) || 2,
+        kids_count: parseInt(leadForm.kids_count) || 0,
+        city: leadForm.city.trim() || null,
+        lead_time: leadForm.lead_time.trim() || null,
+        source: leadForm.source,
+        type: "lead",
+        tenant_id: tenantId!,
+        created_by: user!.id,
+        created_at: leadForm.lead_date ? new Date(leadForm.lead_date).toISOString() : new Date().toISOString(),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      setAddDialogOpen(false);
+      setLeadForm({ name: "", phone: "", check_in_date: "", check_out_date: "", adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic", lead_date: new Date().toISOString().slice(0, 10) });
+      toast({ title: "Lead added!" });
+    },
+    onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
   const openDetail = (contact: Contact) => {
     setSelectedLead(contact);
   };
