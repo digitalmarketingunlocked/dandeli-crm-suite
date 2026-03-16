@@ -17,14 +17,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
   Plus, Search, Phone, CalendarDays, Users, MapPin, Clock, Share2, User,
-  Filter, FileSpreadsheet, MessageCircle, Flame, Snowflake, ChevronRight, StickyNote,
-  Bell, Repeat, History, PhoneCall, CalendarIcon, Download
+  Filter, FileSpreadsheet, MessageCircle, Flame, Snowflake, ChevronRight, Bell,
+  CalendarIcon, Download
 } from "lucide-react";
 import { exportContactsToXls } from "@/lib/exportXls";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from "date-fns";
 import CallFlowDialog from "@/components/CallFlowDialog";
+import LeadProfileDialog from "@/components/LeadProfileDialog";
 
 type Contact = {
   id: string;
@@ -48,27 +49,6 @@ type Contact = {
   updated_at: string;
   follow_up_date: string | null;
   recurring: string | null;
-};
-
-type CallHistory = {
-  id: string;
-  contact_id: string;
-  tenant_id: string;
-  called_at: string;
-  duration: string | null;
-  notes: string | null;
-  created_by: string | null;
-};
-
-type Reminder = {
-  id: string;
-  contact_id: string;
-  tenant_id: string;
-  reminder_date: string;
-  message: string | null;
-  is_active: boolean;
-  created_at: string;
-  created_by: string | null;
 };
 
 // Removed hardcoded STAGE_OPTIONS and STAGE_STYLES - now using useLeadStatuses hook
@@ -117,11 +97,6 @@ export default function ContactsPage() {
 
   // Lead detail dialog
   const [selectedLead, setSelectedLead] = useState<Contact | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [editForm, setEditForm] = useState<Partial<Contact>>({});
-  const [newNote, setNewNote] = useState("");
-  const [newCallNote, setNewCallNote] = useState("");
-  const [callSortBy, setCallSortBy] = useState<"date" | "duration">("date");
 
   // Export dialog
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -187,28 +162,6 @@ export default function ContactsPage() {
     enabled: !!tenantId,
   });
 
-  // Call history for selected lead
-  const { data: callHistory } = useQuery({
-    queryKey: ["call_history", selectedLead?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("call_history").select("*").eq("contact_id", selectedLead!.id).order("called_at", { ascending: false });
-      if (error) throw error;
-      return data as CallHistory[];
-    },
-    enabled: !!selectedLead?.id && detailOpen,
-  });
-
-  // Reminders for selected lead
-  const { data: reminders } = useQuery({
-    queryKey: ["reminders", selectedLead?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("reminders").select("*").eq("contact_id", selectedLead!.id).order("reminder_date", { ascending: false });
-      if (error) throw error;
-      return data as Reminder[];
-    },
-    enabled: !!selectedLead?.id && detailOpen,
-  });
-
   const createLead = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("contacts").insert({
@@ -237,79 +190,8 @@ export default function ContactsPage() {
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
-  const updateContact = useMutation({
-    mutationFn: async (updates: Partial<Contact> & { id: string }) => {
-      const { id, ...rest } = updates;
-      const { error } = await supabase.from("contacts").update(rest).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["contacts"] });
-      toast({ title: "Lead updated!" });
-    },
-    onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
-  });
-
-  const addNote = () => {
-    if (!selectedLead || !newNote.trim()) return;
-    const existingNotes = selectedLead.notes || "";
-    const timestamp = new Date().toLocaleString();
-    const updatedNotes = existingNotes ? `${existingNotes}\n[${timestamp}] ${newNote.trim()}` : `[${timestamp}] ${newNote.trim()}`;
-    updateContact.mutate({ id: selectedLead.id, notes: updatedNotes });
-    setSelectedLead({ ...selectedLead, notes: updatedNotes });
-    setNewNote("");
-  };
-
-  const logCall = () => {
-    if (!selectedLead || !tenantId) return;
-    const insertCall = async () => {
-      const { error } = await supabase.from("call_history").insert({
-        contact_id: selectedLead.id,
-        tenant_id: tenantId,
-        notes: newCallNote.trim() || null,
-        created_by: user?.id || null,
-      });
-      if (error) throw error;
-      queryClient.invalidateQueries({ queryKey: ["call_history", selectedLead.id] });
-      setNewCallNote("");
-      toast({ title: "Call logged!" });
-    };
-    insertCall();
-  };
-
   const openDetail = (contact: Contact) => {
     setSelectedLead(contact);
-    setEditForm({
-      type: contact.type,
-      check_in_date: contact.check_in_date || "",
-      check_out_date: contact.check_out_date || "",
-      adults_count: contact.adults_count,
-      kids_count: contact.kids_count,
-      city: contact.city || "",
-      lead_time: contact.lead_time || "",
-      source: contact.source || "",
-      follow_up_date: contact.follow_up_date || "",
-      recurring: contact.recurring || "none",
-    });
-    setDetailOpen(true);
-  };
-
-  const saveDetail = () => {
-    if (!selectedLead) return;
-    updateContact.mutate({
-      id: selectedLead.id,
-      type: editForm.type,
-      check_in_date: editForm.check_in_date || null,
-      check_out_date: editForm.check_out_date || null,
-      adults_count: editForm.adults_count,
-      kids_count: editForm.kids_count,
-      city: editForm.city || null,
-      lead_time: editForm.lead_time || null,
-      source: editForm.source || null,
-      follow_up_date: editForm.follow_up_date || null,
-      recurring: editForm.recurring || "none",
-    });
-    setDetailOpen(false);
   };
 
   const getLeadAge = (createdAt: string) => {
@@ -334,7 +216,7 @@ export default function ContactsPage() {
 
   const totalPeople = (c: Contact) => (c.adults_count || 0) + (c.kids_count || 0);
 
-  const noteLines = selectedLead?.notes?.split("\n").filter(Boolean) || [];
+  
 
   return (
     <div className="space-y-6">
@@ -699,247 +581,12 @@ export default function ContactsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Lead Detail Dialog */}
-      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="glass-strong bg-card rounded-2xl sm:max-w-3xl max-h-[85vh] overflow-y-auto">
-          {selectedLead && (
-            <>
-              {/* Header */}
-              <div className="flex items-center gap-4 mb-2">
-                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg shrink-0">
-                  {selectedLead.name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h2 className="text-xl font-heading font-bold">{selectedLead.name}</h2>
-                  <div className="flex items-center gap-2 text-sm">
-                    {isHot(selectedLead) ? (
-                      <span className="flex items-center gap-1 text-accent font-semibold text-xs">
-                        <Flame className="w-3 h-3" /> HOT LEAD
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-secondary font-semibold text-xs">
-                        <Snowflake className="w-3 h-3" /> COLD
-                      </span>
-                    )}
-                    <span className="text-muted-foreground">{selectedLead.phone}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column */}
-                <div className="space-y-5">
-                  {/* Quick Actions */}
-                  <div className="glass-card bg-card/50 p-4">
-                    <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-3">Quick Actions</h4>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Button
-                        variant="outline"
-                        className="flex-col h-auto py-4 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-                        onClick={() => {
-                          window.open(`tel:${selectedLead.phone}`);
-                          setCallFlowContact({ id: selectedLead.id, name: selectedLead.name, phone: selectedLead.phone, type: selectedLead.type });
-                          setTimeout(() => setCallFlowOpen(true), 1500);
-                        }}
-                      >
-                        <Phone className="w-5 h-5" />
-                        <span className="text-xs">Call</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="flex-col h-auto py-4 rounded-xl gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-                        onClick={() => window.open(`https://wa.me/${selectedLead.phone?.replace(/\D/g, "")}`)}
-                      >
-                        <MessageCircle className="w-5 h-5" />
-                        <span className="text-xs">WhatsApp</span>
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Lead Details */}
-                  <div className="glass-card bg-card/50 p-4 space-y-3">
-                    <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Lead Details</h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">Status</Label>
-                        <Select value={editForm.type || "lead"} onValueChange={(v) => setEditForm({ ...editForm, type: v })}>
-                          <SelectTrigger className="w-[150px] h-8 text-xs rounded-lg"><SelectValue /></SelectTrigger>
-                          <SelectContent className="glass-strong bg-card rounded-xl">
-                            {STAGE_OPTIONS.map((s) => (
-                              <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">Check-in</Label>
-                        <DateInput
-                          value={editForm.check_in_date as string || ""}
-                          onChange={(v) => setEditForm({ ...editForm, check_in_date: v })}
-                          className="w-[160px] h-8 text-xs rounded-lg"
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">Check-out</Label>
-                        <DateInput
-                          value={editForm.check_out_date as string || ""}
-                          onChange={(v) => setEditForm({ ...editForm, check_out_date: v })}
-                          className="w-[160px] h-8 text-xs rounded-lg"
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">People</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            type="number"
-                            value={editForm.adults_count ?? 2}
-                            onChange={(e) => setEditForm({ ...editForm, adults_count: parseInt(e.target.value) || 0 })}
-                            className="w-[65px] h-8 text-xs rounded-lg"
-                            placeholder="Adults"
-                          />
-                          <Input
-                            type="number"
-                            value={editForm.kids_count ?? 0}
-                            onChange={(e) => setEditForm({ ...editForm, kids_count: parseInt(e.target.value) || 0 })}
-                            className="w-[65px] h-8 text-xs rounded-lg"
-                            placeholder="Kids"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">City</Label>
-                        <Input
-                          value={editForm.city as string || ""}
-                          onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
-                          className="w-[150px] h-8 text-xs rounded-lg"
-                          placeholder="City"
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">Lead Time</Label>
-                        <Input
-                          value={editForm.lead_time as string || ""}
-                          onChange={(e) => setEditForm({ ...editForm, lead_time: e.target.value })}
-                          className="w-[150px] h-8 text-xs rounded-lg"
-                          placeholder="e.g. 10:30 AM"
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">Source</Label>
-                        <Select value={editForm.source as string || "organic"} onValueChange={(v) => setEditForm({ ...editForm, source: v })}>
-                          <SelectTrigger className="w-[150px] h-8 text-xs rounded-lg"><SelectValue /></SelectTrigger>
-                          <SelectContent className="glass-strong bg-card rounded-xl">
-                            <SelectItem value="organic">Organic</SelectItem>
-                            <SelectItem value="google-ads">Google Ads</SelectItem>
-                            <SelectItem value="meta-ads">Meta Ads</SelectItem>
-                            <SelectItem value="offline-marketing">Offline Marketing</SelectItem>
-                            <SelectItem value="referral">Referral</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <Button className="w-full rounded-xl mt-2" size="sm" onClick={saveDetail}>
-                      Save Changes
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Right Column */}
-                <div className="space-y-5">
-                  {/* Notes */}
-                  <div className="glass-card bg-card/50 p-4 space-y-3">
-                    <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
-                      <StickyNote className="w-3.5 h-3.5" /> Lead Notes
-                    </h4>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add a note..."
-                        value={newNote}
-                        onChange={(e) => setNewNote(e.target.value)}
-                        className="rounded-xl text-sm"
-                        onKeyDown={(e) => e.key === "Enter" && addNote()}
-                      />
-                      <Button size="sm" className="rounded-xl shrink-0" onClick={addNote}>Add</Button>
-                    </div>
-                    <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                      {noteLines.length > 0 ? (
-                        noteLines.map((note, i) => (
-                          <div key={i} className="text-sm p-2 rounded-lg bg-muted/30">
-                            {note}
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground text-center py-4">No notes added yet.</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Reminder History */}
-                  <div className="glass-card bg-card/50 p-4 space-y-3">
-                    <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
-                      <Bell className="w-3.5 h-3.5" /> Reminder History
-                    </h4>
-                    <div className="space-y-2 max-h-[150px] overflow-y-auto">
-                      {reminders && reminders.length > 0 ? (
-                        reminders.map((r) => (
-                          <div key={r.id} className="text-sm p-2 rounded-lg bg-muted/30 flex items-center justify-between">
-                            <span>{r.message || "Reminder"}</span>
-                            <span className="text-xs text-muted-foreground">{new Date(r.reminder_date).toLocaleDateString()}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground text-center py-4 italic">No active reminder.</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Call History */}
-                  <div className="glass-card bg-card/50 p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase flex items-center gap-2">
-                        <PhoneCall className="w-3.5 h-3.5" /> Call History
-                      </h4>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span className="uppercase tracking-wider font-semibold">Sort by:</span>
-                        <Select value={callSortBy} onValueChange={(v: "date" | "duration") => setCallSortBy(v)}>
-                          <SelectTrigger className="w-[80px] h-7 text-xs rounded-lg"><SelectValue /></SelectTrigger>
-                          <SelectContent className="glass-strong bg-card rounded-xl">
-                            <SelectItem value="date">Date</SelectItem>
-                            <SelectItem value="duration">Duration</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Call note (optional)"
-                        value={newCallNote}
-                        onChange={(e) => setNewCallNote(e.target.value)}
-                        className="rounded-xl text-sm"
-                      />
-                      <Button size="sm" className="rounded-xl shrink-0 gap-1" onClick={logCall}>
-                        <PhoneCall className="w-3 h-3" /> Log
-                      </Button>
-                    </div>
-                    <div className="space-y-2 max-h-[150px] overflow-y-auto">
-                      {callHistory && callHistory.length > 0 ? (
-                        callHistory.map((c) => (
-                          <div key={c.id} className="text-sm p-2 rounded-lg bg-muted/30 flex items-center justify-between">
-                            <span>{c.notes || "Call"}</span>
-                            <span className="text-xs text-muted-foreground">{new Date(c.called_at).toLocaleString()}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground text-center py-4 italic">No calls logged yet.</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Lead Profile Dialog */}
+      <LeadProfileDialog
+        contact={selectedLead}
+        open={!!selectedLead}
+        onOpenChange={(open) => { if (!open) setSelectedLead(null); }}
+      />
 
       {/* Export Dialog */}
       <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
