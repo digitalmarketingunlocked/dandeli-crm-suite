@@ -51,27 +51,6 @@ type Contact = {
   recurring: string | null;
 };
 
-type CallHistory = {
-  id: string;
-  contact_id: string;
-  tenant_id: string;
-  called_at: string;
-  duration: string | null;
-  notes: string | null;
-  created_by: string | null;
-};
-
-type Reminder = {
-  id: string;
-  contact_id: string;
-  tenant_id: string;
-  reminder_date: string;
-  message: string | null;
-  is_active: boolean;
-  created_at: string;
-  created_by: string | null;
-};
-
 // Removed hardcoded STAGE_OPTIONS and STAGE_STYLES - now using useLeadStatuses hook
 
 const SOURCE_LABELS: Record<string, string> = {
