@@ -28,23 +28,36 @@ export default function FollowUpsPage() {
   const { data: contacts, isLoading } = useQuery({
     queryKey: ["followup-contacts", tenantId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("contacts")
-        .select("*")
-        .in("type", ["follow-up", "lead", "interested", "negotiation"])
-        .order("updated_at", { ascending: true });
-      if (error) throw error;
-      const todayStr = new Date().toISOString().slice(0, 10);
-      // Exclude cold leads: no interaction in 3+ days AND check-in is not today/past AND not cancelled
-      return data.filter((c) => {
-        const lastTouchDays = Math.floor(
-          (Date.now() - new Date(c.updated_at).getTime()) / (1000 * 60 * 60 * 24)
-        );
-        const checkInDueOrPast = c.check_in_date && c.check_in_date <= todayStr;
-        const isCancelled = c.type === "cancelled" || c.type === "lost";
-        const isCold = lastTouchDays > 3 && !checkInDueOrPast && !isCancelled;
-        return !isCold;
+      const [contactsRes, callsRes, remindersRes] = await Promise.all([
+        supabase.from("contacts").select("*").not("type", "in", "(booked,lost,cancelled)"),
+        supabase.from("call_history").select("contact_id, called_at"),
+        supabase.from("reminders").select("contact_id, reminder_date").eq("is_active", true),
+      ]);
+      if (contactsRes.error) throw contactsRes.error;
+
+      // Build a map of contact_id -> last activity timestamp (ms)
+      const lastActivityMap = new Map<string, number>();
+      const bump = (id: string, t: number) => {
+        const cur = lastActivityMap.get(id) ?? 0;
+        if (t > cur) lastActivityMap.set(id, t);
+      };
+      (callsRes.data || []).forEach((c: any) => bump(c.contact_id, new Date(c.called_at).getTime()));
+      (remindersRes.data || []).forEach((r: any) => bump(r.contact_id, new Date(r.reminder_date).getTime()));
+
+      const now = Date.now();
+      const THREE_HOURS = 3 * 60 * 60 * 1000;
+      const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+
+      const enriched = (contactsRes.data || []).map((c: any) => {
+        const createdMs = new Date(c.created_at).getTime();
+        const lastActivity = Math.max(createdMs, lastActivityMap.get(c.id) ?? 0);
+        return { ...c, _lastActivity: lastActivity, _createdMs: createdMs };
       });
+
+      // Show in follow-ups: lead is at least 3 hours old AND last activity within 3 days
+      return enriched
+        .filter((c) => now - c._createdMs >= THREE_HOURS && now - c._lastActivity <= THREE_DAYS)
+        .sort((a, b) => a._lastActivity - b._lastActivity);
     },
     enabled: !!tenantId,
   });
