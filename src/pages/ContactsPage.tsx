@@ -165,7 +165,7 @@ export default function ContactsPage() {
 
   const createLead = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("contacts").insert({
+      const { data: inserted, error } = await supabase.from("contacts").insert({
         name: leadForm.name.trim(),
         phone: normalizePhone(leadForm.phone),
         check_in_date: leadForm.check_in_date || null,
@@ -179,14 +179,28 @@ export default function ContactsPage() {
         tenant_id: tenantId!,
         created_by: user!.id,
         created_at: leadForm.lead_date ? new Date(leadForm.lead_date).toISOString() : new Date().toISOString(),
-      });
+      }).select("id, name").single();
       if (error) throw error;
+
+      // Auto-create a follow-up reminder 3 hours from now
+      if (inserted) {
+        const reminderDate = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
+        await supabase.from("reminders").insert({
+          contact_id: inserted.id,
+          tenant_id: tenantId!,
+          created_by: user!.id,
+          reminder_date: reminderDate,
+          message: `Follow up with new lead: ${inserted.name}`,
+          is_active: true,
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["reminders"] });
       setAddDialogOpen(false);
       setLeadForm({ name: "", phone: "", check_in_date: "", check_out_date: "", adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic", lead_date: new Date().toISOString().slice(0, 10) });
-      toast({ title: "Lead added!" });
+      toast({ title: "Lead added!", description: "Reminder set for 3 hours from now." });
     },
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
