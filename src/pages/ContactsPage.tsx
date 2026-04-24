@@ -229,6 +229,13 @@ export default function ContactsPage() {
     return matchesSearch && matchesType && matchesCheckIn && matchesLastContacted && matchesHot;
   });
 
+  const filteredSorted = filtered ? [...filtered].sort((a, b) => {
+    if (sortBy === "last_contacted") {
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    }
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  }) : filtered;
+
   const totalPeople = (c: Contact) => (c.adults_count || 0) + (c.kids_count || 0);
 
   
