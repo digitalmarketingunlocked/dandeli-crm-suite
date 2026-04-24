@@ -34,7 +34,17 @@ export default function FollowUpsPage() {
         .in("type", ["follow-up", "lead", "interested", "negotiation"])
         .order("updated_at", { ascending: true });
       if (error) throw error;
-      return data;
+      const todayStr = new Date().toISOString().slice(0, 10);
+      // Exclude cold leads: no interaction in 3+ days AND check-in is not today/past AND not cancelled
+      return data.filter((c) => {
+        const lastTouchDays = Math.floor(
+          (Date.now() - new Date(c.updated_at).getTime()) / (1000 * 60 * 60 * 24)
+        );
+        const checkInDueOrPast = c.check_in_date && c.check_in_date <= todayStr;
+        const isCancelled = c.type === "cancelled" || c.type === "lost";
+        const isCold = lastTouchDays > 3 && !checkInDueOrPast && !isCancelled;
+        return !isCold;
+      });
     },
     enabled: !!tenantId,
   });

@@ -19,11 +19,17 @@ export default function ColdFollowUpPage() {
       const { data, error } = await supabase
         .from("contacts")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("updated_at", { ascending: false });
       if (error) throw error;
+      const todayStr = new Date().toISOString().slice(0, 10);
+      // Cold: no interaction in 3+ days, check-in not today/past, status not cancelled/lost/booked
       return data.filter((c) => {
-        const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
-        return days > 3;
+        const lastTouchDays = Math.floor(
+          (Date.now() - new Date(c.updated_at).getTime()) / (1000 * 60 * 60 * 24)
+        );
+        const checkInDueOrPast = c.check_in_date && c.check_in_date <= todayStr;
+        const isClosed = c.type === "cancelled" || c.type === "lost" || c.type === "booked";
+        return lastTouchDays > 3 && !checkInDueOrPast && !isClosed;
       });
     },
     enabled: !!tenantId,
