@@ -85,6 +85,7 @@ export default function ContactsPage() {
   const [lastContactedFilter, setLastContactedFilter] = useState("");
   const [followUpOnly, setFollowUpOnly] = useState(false);
   const [hotOnly, setHotOnly] = useState(() => urlFilter === "hot");
+  const [sortBy, setSortBy] = useState<"latest" | "last_contacted">("latest");
 
   // Add lead dialog
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -164,7 +165,7 @@ export default function ContactsPage() {
 
   const createLead = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("contacts").insert({
+      const { data: inserted, error } = await supabase.from("contacts").insert({
         name: leadForm.name.trim(),
         phone: normalizePhone(leadForm.phone),
         check_in_date: leadForm.check_in_date || null,
@@ -178,14 +179,28 @@ export default function ContactsPage() {
         tenant_id: tenantId!,
         created_by: user!.id,
         created_at: leadForm.lead_date ? new Date(leadForm.lead_date).toISOString() : new Date().toISOString(),
-      });
+      }).select("id, name").single();
       if (error) throw error;
+
+      // Auto-create a follow-up reminder 3 hours from now
+      if (inserted) {
+        const reminderDate = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
+        await supabase.from("reminders").insert({
+          contact_id: inserted.id,
+          tenant_id: tenantId!,
+          created_by: user!.id,
+          reminder_date: reminderDate,
+          message: `Follow up with new lead: ${inserted.name}`,
+          is_active: true,
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["reminders"] });
       setAddDialogOpen(false);
       setLeadForm({ name: "", phone: "", check_in_date: "", check_out_date: "", adults_count: "2", kids_count: "0", city: "", lead_time: "", source: "organic", lead_date: new Date().toISOString().slice(0, 10) });
-      toast({ title: "Lead added!" });
+      toast({ title: "Lead added!", description: "Reminder set for 3 hours from now." });
     },
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
@@ -213,6 +228,13 @@ export default function ContactsPage() {
     // followUpOnly: placeholder filter (no follow-up field yet, shows all for now)
     return matchesSearch && matchesType && matchesCheckIn && matchesLastContacted && matchesHot;
   });
+
+  const filteredSorted = filtered ? [...filtered].sort((a, b) => {
+    if (sortBy === "last_contacted") {
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    }
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  }) : filtered;
 
   const totalPeople = (c: Contact) => (c.adults_count || 0) + (c.kids_count || 0);
 
@@ -266,7 +288,17 @@ export default function ContactsPage() {
 
       {showFilters && (
         <div className="glass-card bg-card p-5 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Sort By</Label>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as "latest" | "last_contacted")}>
+                <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent className="glass-strong bg-card rounded-xl">
+                  <SelectItem value="latest">Latest Added</SelectItem>
+                  <SelectItem value="last_contacted">Last Contacted</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Filter by Status</Label>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
@@ -315,9 +347,9 @@ export default function ContactsPage() {
       {/* Lead Cards Grid */}
       {isLoading ? (
         <div className="glass-card bg-card p-12 text-center text-muted-foreground">Loading leads...</div>
-      ) : filtered && filtered.length > 0 ? (
+      ) : filteredSorted && filteredSorted.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map((contact) => {
+          {filteredSorted.map((contact) => {
             const days = getLeadAge(contact.created_at);
             const hot = isHot(contact);
             return (
