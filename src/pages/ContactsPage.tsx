@@ -337,9 +337,9 @@ export default function ContactsPage() {
       {/* Lead Cards Grid */}
       {isLoading ? (
         <div className="glass-card bg-card p-12 text-center text-muted-foreground">Loading leads...</div>
-      ) : filtered && filtered.length > 0 ? (
+      ) : filteredSorted && filteredSorted.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map((contact) => {
+          {filteredSorted.map((contact) => {
             const days = getLeadAge(contact.created_at);
             const hot = isHot(contact);
             return (
