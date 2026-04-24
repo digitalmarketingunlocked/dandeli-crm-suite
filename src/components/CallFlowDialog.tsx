@@ -190,13 +190,27 @@ export default function CallFlowDialog({
                 onChange={setFollowUpDate}
                 placeholder="Pick follow-up date"
                 className="rounded-xl"
+                disablePast
               />
               <div className="flex items-center gap-2 rounded-xl border border-border px-3 py-2">
                 <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
                 <Input
                   type="time"
                   value={followUpTime}
-                  onChange={(e) => setFollowUpTime(e.target.value)}
+                  min={followUpDate === new Date().toISOString().slice(0, 10)
+                    ? new Date().toTimeString().slice(0, 5)
+                    : undefined}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (followUpDate === new Date().toISOString().slice(0, 10)) {
+                      const nowMin = new Date().toTimeString().slice(0, 5);
+                      if (v && v < nowMin) {
+                        setFollowUpTime(nowMin);
+                        return;
+                      }
+                    }
+                    setFollowUpTime(v);
+                  }}
                   className="border-0 p-0 h-auto text-sm focus-visible:ring-0 bg-transparent"
                 />
               </div>
