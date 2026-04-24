@@ -231,7 +231,12 @@ export default function ContactsPage() {
     return days;
   };
 
-  const isHot = (contact: Contact) => getLeadAge(contact.created_at) <= 3;
+  const isHot = (contact: Contact) => {
+    const createdMs = new Date(contact.created_at).getTime();
+    const lastCallMs = callMap?.get(contact.id) ?? 0;
+    const lastActivityMs = Math.max(createdMs, lastCallMs);
+    return Date.now() - lastActivityMs <= 3 * 60 * 60 * 1000;
+  };
 
   const filtered = contacts?.filter((c) => {
     const matchesSearch =
