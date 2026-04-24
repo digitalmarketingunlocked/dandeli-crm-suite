@@ -163,6 +163,22 @@ export default function ContactsPage() {
     enabled: !!tenantId,
   });
 
+  const { data: callMap } = useQuery({
+    queryKey: ["call-history-map", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("call_history").select("contact_id, called_at");
+      if (error) throw error;
+      const map = new Map<string, number>();
+      (data || []).forEach((c: any) => {
+        const t = new Date(c.called_at).getTime();
+        const cur = map.get(c.contact_id) ?? 0;
+        if (t > cur) map.set(c.contact_id, t);
+      });
+      return map;
+    },
+    enabled: !!tenantId,
+  });
+
   const createLead = useMutation({
     mutationFn: async () => {
       const { data: inserted, error } = await supabase.from("contacts").insert({
