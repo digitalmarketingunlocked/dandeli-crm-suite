@@ -85,6 +85,7 @@ export default function ContactsPage() {
   const [lastContactedFilter, setLastContactedFilter] = useState("");
   const [followUpOnly, setFollowUpOnly] = useState(false);
   const [hotOnly, setHotOnly] = useState(() => urlFilter === "hot");
+  const [sortBy, setSortBy] = useState<"latest" | "last_contacted">("latest");
 
   // Add lead dialog
   const [addDialogOpen, setAddDialogOpen] = useState(false);
