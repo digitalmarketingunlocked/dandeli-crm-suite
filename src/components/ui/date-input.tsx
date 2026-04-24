@@ -14,13 +14,25 @@ interface DateInputProps {
   required?: boolean;
   disabled?: boolean;
   maxDate?: Date;
+  minDate?: Date;
+  disablePast?: boolean;
 }
 
-export function DateInput({ value, onChange, placeholder = "Pick a date", className, required, disabled, maxDate }: DateInputProps) {
+export function DateInput({ value, onChange, placeholder = "Pick a date", className, required, disabled, maxDate, minDate, disablePast }: DateInputProps) {
   const date = value ? parse(value, "yyyy-MM-dd", new Date()) : undefined;
 
   const handleSelect = (selected: Date | undefined) => {
     onChange(selected ? format(selected, "yyyy-MM-dd") : "");
+  };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const effectiveMin = disablePast ? (minDate && minDate > today ? minDate : today) : minDate;
+
+  const isDisabled = (d: Date) => {
+    if (maxDate && d > maxDate) return true;
+    if (effectiveMin && d < effectiveMin) return true;
+    return false;
   };
 
   return (
@@ -45,7 +57,7 @@ export function DateInput({ value, onChange, placeholder = "Pick a date", classN
           mode="single"
           selected={date}
           onSelect={handleSelect}
-          disabled={maxDate ? (d) => d > maxDate : undefined}
+          disabled={(maxDate || effectiveMin) ? isDisabled : undefined}
           initialFocus
           className={cn("p-3 pointer-events-auto")}
         />
