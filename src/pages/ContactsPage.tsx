@@ -288,7 +288,17 @@ export default function ContactsPage() {
 
       {showFilters && (
         <div className="glass-card bg-card p-5 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Sort By</Label>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as "latest" | "last_contacted")}>
+                <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent className="glass-strong bg-card rounded-xl">
+                  <SelectItem value="latest">Latest Added</SelectItem>
+                  <SelectItem value="last_contacted">Last Contacted</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">Filter by Status</Label>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
