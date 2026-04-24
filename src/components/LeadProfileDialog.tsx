@@ -189,7 +189,11 @@ export default function LeadProfileDialog({ contact, open, onOpenChange }: LeadP
   if (!localContact) return null;
 
   const daysSinceCreation = Math.floor((Date.now() - new Date(localContact.created_at).getTime()) / (1000 * 60 * 60 * 24));
-  const isHot = daysSinceCreation <= 3;
+  const lastCallMs = callHistory.length
+    ? Math.max(...callHistory.map((c: any) => new Date(c.called_at).getTime()))
+    : 0;
+  const lastActivityMs = Math.max(new Date(localContact.created_at).getTime(), lastCallMs);
+  const isHot = Date.now() - lastActivityMs <= 3 * 60 * 60 * 1000;
   const noteLines = (localContact.notes || "").split("\n").filter(Boolean);
 
   const sortedCalls = [...callHistory].sort((a, b) => {

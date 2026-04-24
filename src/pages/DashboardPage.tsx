@@ -89,6 +89,22 @@ export default function DashboardPage() {
     enabled: !!tenantId,
   });
 
+  const { data: callMap } = useQuery({
+    queryKey: ["call-history-map", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("call_history").select("contact_id, called_at");
+      if (error) throw error;
+      const map = new Map<string, number>();
+      (data || []).forEach((c: any) => {
+        const t = new Date(c.called_at).getTime();
+        const cur = map.get(c.contact_id) ?? 0;
+        if (t > cur) map.set(c.contact_id, t);
+      });
+      return map;
+    },
+    enabled: !!tenantId,
+  });
+
 
 
   const filteredContacts = useMemo(() => {
@@ -130,18 +146,21 @@ export default function DashboardPage() {
   }, [contacts, period, customFrom, customTo]);
 
   const totalContacts = filteredContacts.length;
-  const hotLeads = filteredContacts.filter((c) => {
-    const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
-    return days <= 3;
-  }).length;
+  const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
+  const isHot = (c: any) => {
+    const createdMs = new Date(c.created_at).getTime();
+    const lastCallMs = callMap?.get(c.id) ?? 0;
+    return Date.now() - Math.max(createdMs, lastCallMs) <= THREE_HOURS_MS;
+  };
+  const hotLeads = filteredContacts.filter(isHot).length;
   const bookedLeads = filteredContacts.filter((c) => c.type === "booked").length;
   const conversionRate = totalContacts > 0 ? Math.round((bookedLeads / totalContacts) * 100) : 0;
   const pendingFollowups = filteredContacts.filter((c) => ["follow-up", "lead", "interested", "negotiation"].includes(c.type)).length;
 
-  const recentHotLeads = filteredContacts.filter((c) => {
-    const days = Math.floor((Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24));
-    return days <= 3;
-  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
+  const recentHotLeads = filteredContacts
+    .filter(isHot)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 5);
 
   // Lead funnel data
   const LEAD_STAGES = [

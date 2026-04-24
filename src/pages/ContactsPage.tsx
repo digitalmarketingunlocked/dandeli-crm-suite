@@ -163,6 +163,22 @@ export default function ContactsPage() {
     enabled: !!tenantId,
   });
 
+  const { data: callMap } = useQuery({
+    queryKey: ["call-history-map", tenantId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("call_history").select("contact_id, called_at");
+      if (error) throw error;
+      const map = new Map<string, number>();
+      (data || []).forEach((c: any) => {
+        const t = new Date(c.called_at).getTime();
+        const cur = map.get(c.contact_id) ?? 0;
+        if (t > cur) map.set(c.contact_id, t);
+      });
+      return map;
+    },
+    enabled: !!tenantId,
+  });
+
   const createLead = useMutation({
     mutationFn: async () => {
       const { data: inserted, error } = await supabase.from("contacts").insert({
@@ -215,7 +231,12 @@ export default function ContactsPage() {
     return days;
   };
 
-  const isHot = (contact: Contact) => getLeadAge(contact.created_at) <= 3;
+  const isHot = (contact: Contact) => {
+    const createdMs = new Date(contact.created_at).getTime();
+    const lastCallMs = callMap?.get(contact.id) ?? 0;
+    const lastActivityMs = Math.max(createdMs, lastCallMs);
+    return Date.now() - lastActivityMs <= 3 * 60 * 60 * 1000;
+  };
 
   const filtered = contacts?.filter((c) => {
     const matchesSearch =
