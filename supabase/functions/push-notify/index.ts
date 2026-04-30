@@ -17,6 +17,18 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Shared-secret guard: this function should only be invoked by the pg_cron scheduler
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const providedSecret =
+    req.headers.get("x-cron-secret") ??
+    new URL(req.url).searchParams.get("cron_secret");
+  if (!cronSecret || providedSecret !== cronSecret) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
