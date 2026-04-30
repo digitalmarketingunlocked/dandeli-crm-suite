@@ -201,6 +201,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <DueReminderPopup />
       {/* Header with Filter */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="min-w-0">
