@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DateInput } from "@/components/ui/date-input";
-import { MessageCircle, Save, Clock, CalendarDays } from "lucide-react";
+import { MessageCircle, Save, Clock } from "lucide-react";
 
 interface CallFlowDialogProps {
   open: boolean;
@@ -33,10 +33,12 @@ export default function CallFlowDialog({
   const { statuses: leadStatuses } = useLeadStatuses();
   const STAGE_OPTIONS = leadStatuses.map((s) => ({ value: s.value, label: s.label }));
 
-  const [step, setStep] = useState<1 | 2>(1);
+  // step 1: did you speak? | 2: spoke details | 3: ask reminder? | 4: reminder details
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [callNotes, setCallNotes] = useState("");
   const [followUpDate, setFollowUpDate] = useState("");
   const [followUpTime, setFollowUpTime] = useState("");
+  const [reminderReason, setReminderReason] = useState("");
   const [newStatus, setNewStatus] = useState(currentType);
 
   const resetState = () => {
@@ -44,6 +46,7 @@ export default function CallFlowDialog({
     setCallNotes("");
     setFollowUpDate("");
     setFollowUpTime("");
+    setReminderReason("");
     setNewStatus(currentType);
   };
 
@@ -53,7 +56,7 @@ export default function CallFlowDialog({
   };
 
   const logCallMutation = useMutation({
-    mutationFn: async ({ notes, spoke }: { notes: string; spoke: boolean }) => {
+    mutationFn: async ({ notes, spoke, reminder }: { notes: string; spoke: boolean; reminder?: { date: string; time: string; reason: string } }) => {
       if (!tenantId) throw new Error("No tenant");
 
       // Insert call history
@@ -76,7 +79,6 @@ export default function CallFlowDialog({
           .from("contacts").update(updates).eq("id", contactId);
         if (updateErr) throw updateErr;
 
-        // Create a reminder if follow-up date is set
         if (followUpDate) {
           const reminderDateTime = followUpTime
             ? `${followUpDate}T${followUpTime}:00`
@@ -92,6 +94,22 @@ export default function CallFlowDialog({
           if (reminderErr) throw reminderErr;
         }
       }
+
+      // No-answer reminder
+      if (!spoke && reminder) {
+        const dt = reminder.time
+          ? `${reminder.date}T${reminder.time}:00`
+          : `${reminder.date}T09:00:00`;
+        const { error: remErr } = await supabase.from("reminders").insert({
+          contact_id: contactId,
+          tenant_id: tenantId,
+          created_by: user?.id || null,
+          reminder_date: dt,
+          message: `Call back ${contactName}${reminder.reason.trim() ? `: ${reminder.reason.trim()}` : ""}`,
+          is_active: true,
+        });
+        if (remErr) throw remErr;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["call_history", contactId] });
@@ -103,17 +121,34 @@ export default function CallFlowDialog({
     onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
-  const handleSpoke = () => {
-    setStep(2);
+  const handleSpoke = () => setStep(2);
+  const handleNotSpoke = () => setStep(3);
+
+  const handleSkipReminder = () => {
+    logCallMutation.mutate({ notes: "No Answer / Busy", spoke: false });
   };
 
-  const handleNotSpoke = () => {
-    logCallMutation.mutate({ notes: "No Answer / Busy", spoke: false });
+  const handleSaveReminder = () => {
+    if (!followUpDate) {
+      toast({ title: "Pick a date", variant: "destructive" });
+      return;
+    }
+    logCallMutation.mutate({
+      notes: "No Answer / Busy",
+      spoke: false,
+      reminder: { date: followUpDate, time: followUpTime, reason: reminderReason },
+    });
   };
 
   const handleSaveAndClose = () => {
     logCallMutation.mutate({ notes: callNotes, spoke: true });
   };
+
+  const headerSubtitle =
+    step === 1 ? "Confirm interaction"
+    : step === 2 ? "Log your interaction details"
+    : step === 3 ? "Set a reminder?"
+    : "Schedule callback reminder";
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -123,13 +158,10 @@ export default function CallFlowDialog({
           <h2 className="text-lg font-heading font-bold text-foreground">
             Call with {contactName}
           </h2>
-          <p className="text-sm font-medium text-primary">
-            {step === 1 ? "Confirm interaction" : "Log your interaction details"}
-          </p>
+          <p className="text-sm font-medium text-primary">{headerSubtitle}</p>
         </div>
 
-        {step === 1 ? (
-          /* Step 1: Did you speak? */
+        {step === 1 && (
           <div className="px-6 pb-6 pt-4 space-y-6">
             <p className="text-center text-base font-semibold text-foreground">
               Did you speak to {contactName}?
@@ -151,10 +183,10 @@ export default function CallFlowDialog({
               </Button>
             </div>
           </div>
-        ) : (
-          /* Step 2: Log details */
+        )}
+
+        {step === 2 && (
           <div className="px-6 pb-6 pt-4 space-y-5">
-            {/* Call Outcome / Notes */}
             <div className="space-y-2">
               <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 Call Outcome / Notes
@@ -180,7 +212,6 @@ export default function CallFlowDialog({
               </div>
             </div>
 
-            {/* Schedule Next Follow-up */}
             <div className="space-y-2">
               <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 Schedule Next Follow-up
@@ -216,7 +247,6 @@ export default function CallFlowDialog({
               </div>
             </div>
 
-            {/* Update Status */}
             <div className="space-y-2">
               <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 Update Status
@@ -233,7 +263,6 @@ export default function CallFlowDialog({
               </Select>
             </div>
 
-            {/* Save */}
             <Button
               className="w-full h-12 rounded-xl text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground gap-2"
               onClick={handleSaveAndClose}
@@ -241,6 +270,99 @@ export default function CallFlowDialog({
             >
               <Save className="w-4 h-4" /> Save & Close
             </Button>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="px-6 pb-6 pt-4 space-y-6">
+            <p className="text-center text-base font-semibold text-foreground">
+              Set a reminder to call {contactName} later?
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                className="h-16 rounded-xl text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
+                onClick={() => setStep(4)}
+              >
+                Yes, remind me
+              </Button>
+              <Button
+                variant="outline"
+                className="h-16 rounded-xl text-sm font-semibold"
+                onClick={handleSkipReminder}
+                disabled={logCallMutation.isPending}
+              >
+                No, skip
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div className="px-6 pb-6 pt-4 space-y-5">
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                Reminder Date
+              </Label>
+              <DateInput
+                value={followUpDate}
+                onChange={setFollowUpDate}
+                placeholder="Pick reminder date"
+                className="rounded-xl"
+                disablePast
+              />
+              <div className="flex items-center gap-2 rounded-xl border border-border px-3 py-2">
+                <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+                <Input
+                  type="time"
+                  value={followUpTime}
+                  min={followUpDate === new Date().toISOString().slice(0, 10)
+                    ? new Date().toTimeString().slice(0, 5)
+                    : undefined}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (followUpDate === new Date().toISOString().slice(0, 10)) {
+                      const nowMin = new Date().toTimeString().slice(0, 5);
+                      if (v && v < nowMin) {
+                        setFollowUpTime(nowMin);
+                        return;
+                      }
+                    }
+                    setFollowUpTime(v);
+                  }}
+                  className="border-0 p-0 h-auto text-sm focus-visible:ring-0 bg-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                Reason to Call
+              </Label>
+              <Textarea
+                placeholder="Why do you want to call them back?"
+                value={reminderReason}
+                onChange={(e) => setReminderReason(e.target.value)}
+                className="rounded-xl min-h-[90px] border-primary/30 focus:border-primary"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1 h-12 rounded-xl text-sm font-semibold"
+                onClick={() => setStep(3)}
+                disabled={logCallMutation.isPending}
+              >
+                Back
+              </Button>
+              <Button
+                className="flex-1 h-12 rounded-xl text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground gap-2"
+                onClick={handleSaveReminder}
+                disabled={logCallMutation.isPending}
+              >
+                <Save className="w-4 h-4" /> Save Reminder
+              </Button>
+            </div>
           </div>
         )}
       </DialogContent>
