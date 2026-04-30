@@ -13,6 +13,7 @@ import { Users, Target, Clock, Plus, CalendarDays, Phone, ChevronRight, User, Ma
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import LeadProfileDialog from "@/components/LeadProfileDialog";
+import DueReminderPopup from "@/components/DueReminderPopup";
 
 export default function DashboardPage() {
   const { tenantId, user } = useAuth();
