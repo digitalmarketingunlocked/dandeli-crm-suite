@@ -13,6 +13,7 @@ import { Users, Target, Clock, Plus, CalendarDays, Phone, ChevronRight, User, Ma
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import LeadProfileDialog from "@/components/LeadProfileDialog";
+import DueReminderPopup from "@/components/DueReminderPopup";
 
 export default function DashboardPage() {
   const { tenantId, user } = useAuth();
@@ -200,6 +201,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <DueReminderPopup />
       {/* Header with Filter */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="min-w-0">
