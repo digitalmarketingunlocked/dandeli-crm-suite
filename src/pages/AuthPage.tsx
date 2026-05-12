@@ -80,6 +80,22 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
+      // Enforce admin "Allow Registrations" toggle
+      const { data: regSetting } = await supabase
+        .from("system_settings")
+        .select("value")
+        .eq("key", "registration_enabled")
+        .maybeSingle();
+      const regEnabled = (regSetting?.value as { enabled?: boolean } | null)?.enabled ?? true;
+      if (!regEnabled) {
+        toast({
+          title: "Registrations disabled",
+          description: "New sign-ups are currently turned off. Please contact your administrator.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
       await signUp(signupEmail, signupPassword, signupName, signupCompany);
       toast({ title: "Account created!", description: "Check your email to confirm." });
     } catch (err: any) {
