@@ -75,6 +75,7 @@ Deno.serve(async (req) => {
       .from("reminders")
       .select("id, message, reminder_date, contact_id, tenant_id, created_by")
       .eq("is_active", true)
+      .is("push_sent_at", null)
       .lte("reminder_date", now)
       .order("reminder_date", { ascending: true })
       .limit(50);
