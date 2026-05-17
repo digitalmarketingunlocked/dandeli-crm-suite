@@ -138,7 +138,11 @@ Deno.serve(async (req) => {
         }
       }
 
-      await supabaseAdmin.from("reminders").update({ is_active: false }).eq("id", reminder.id);
+      // Mark push as sent (keep reminder active so the in-app popup can still surface it)
+      await supabaseAdmin
+        .from("reminders")
+        .update({ push_sent_at: new Date().toISOString() })
+        .eq("id", reminder.id);
     }
 
     return new Response(
