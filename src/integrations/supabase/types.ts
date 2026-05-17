@@ -375,6 +375,8 @@ export type Database = {
           id: string
           is_active: boolean | null
           message: string | null
+          notified_at: string | null
+          push_sent_at: string | null
           reminder_date: string
           tenant_id: string
         }
@@ -385,6 +387,8 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           message?: string | null
+          notified_at?: string | null
+          push_sent_at?: string | null
           reminder_date: string
           tenant_id: string
         }
@@ -395,6 +399,8 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           message?: string | null
+          notified_at?: string | null
+          push_sent_at?: string | null
           reminder_date?: string
           tenant_id?: string
         }
