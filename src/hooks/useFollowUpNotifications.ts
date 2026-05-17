@@ -72,10 +72,10 @@ export function useFollowUpNotifications(enabled: boolean) {
 
       addNotifiedId(reminder.id);
 
-      // Mark reminder as inactive after firing
+      // Mark as notified (NOT inactive) so the popup can still surface it
       await supabase
         .from("reminders")
-        .update({ is_active: false })
+        .update({ notified_at: new Date().toISOString() })
         .eq("id", reminder.id);
     }
   }, [tenantId]);
