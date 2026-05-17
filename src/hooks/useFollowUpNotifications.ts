@@ -40,8 +40,9 @@ export function useFollowUpNotifications(enabled: boolean) {
     const now = new Date().toISOString();
     const { data: dueReminders } = await supabase
       .from("reminders")
-      .select("id, message, reminder_date, contact_id")
+      .select("id, message, reminder_date, contact_id, notified_at")
       .eq("is_active", true)
+      .is("notified_at", null)
       .lte("reminder_date", now)
       .order("reminder_date", { ascending: true })
       .limit(20);
