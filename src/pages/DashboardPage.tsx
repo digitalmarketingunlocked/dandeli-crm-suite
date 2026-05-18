@@ -506,6 +506,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Reminders Diagnostics */}
+      <RemindersDiagnostics />
+
       {/* Lead Profile Dialog */}
       <LeadProfileDialog
         contact={selectedContact}
