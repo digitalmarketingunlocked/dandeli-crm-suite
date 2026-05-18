@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import LeadProfileDialog from "@/components/LeadProfileDialog";
 import DueReminderPopup from "@/components/DueReminderPopup";
+import RemindersDiagnostics from "@/components/RemindersDiagnostics";
 
 export default function DashboardPage() {
   const { tenantId, user } = useAuth();
