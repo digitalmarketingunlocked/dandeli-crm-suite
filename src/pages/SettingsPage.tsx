@@ -8,6 +8,7 @@ import LeadStatusSettings from "@/components/settings/LeadStatusSettings";
 import CRMSettings from "@/components/settings/CRMSettings";
 import TeamManagementSettings from "@/components/settings/TeamManagementSettings";
 import SubscriptionSettings from "@/components/settings/SubscriptionSettings";
+import RemindersDiagnostics from "@/components/RemindersDiagnostics";
 
 export default function SettingsPage() {
   return (
