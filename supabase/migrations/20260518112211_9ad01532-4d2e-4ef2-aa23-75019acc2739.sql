@@ -1,0 +1,1 @@
+ALTER TABLE public.reminders ADD COLUMN IF NOT EXISTS last_error text;

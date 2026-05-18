@@ -374,6 +374,7 @@ export type Database = {
           created_by: string | null
           id: string
           is_active: boolean | null
+          last_error: string | null
           message: string | null
           notified_at: string | null
           push_sent_at: string | null
@@ -386,6 +387,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           is_active?: boolean | null
+          last_error?: string | null
           message?: string | null
           notified_at?: string | null
           push_sent_at?: string | null
@@ -398,6 +400,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           is_active?: boolean | null
+          last_error?: string | null
           message?: string | null
           notified_at?: string | null
           push_sent_at?: string | null
