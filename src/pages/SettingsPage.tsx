@@ -8,6 +8,7 @@ import LeadStatusSettings from "@/components/settings/LeadStatusSettings";
 import CRMSettings from "@/components/settings/CRMSettings";
 import TeamManagementSettings from "@/components/settings/TeamManagementSettings";
 import SubscriptionSettings from "@/components/settings/SubscriptionSettings";
+import RemindersDiagnostics from "@/components/RemindersDiagnostics";
 
 export default function SettingsPage() {
   return (
@@ -49,8 +50,9 @@ export default function SettingsPage() {
           <TabsContent value="appearance">
             <AppearanceSettings />
           </TabsContent>
-          <TabsContent value="notifications">
+          <TabsContent value="notifications" className="space-y-6">
             <NotificationSettings />
+            <RemindersDiagnostics />
           </TabsContent>
           <TabsContent value="account">
             <AccountSettings />
