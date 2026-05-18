@@ -50,8 +50,9 @@ export default function SettingsPage() {
           <TabsContent value="appearance">
             <AppearanceSettings />
           </TabsContent>
-          <TabsContent value="notifications">
+          <TabsContent value="notifications" className="space-y-6">
             <NotificationSettings />
+            <RemindersDiagnostics />
           </TabsContent>
           <TabsContent value="account">
             <AccountSettings />
